@@ -1,0 +1,74 @@
+
+> luyenthichungchixd@1.0.0 build
+> next build
+
+node.exe : ??? `eslint` configuration in 
+next.config.ts is no longer supported. See 
+more info here: https://nextjs.org/docs/app/a
+pi-reference/cli/next#next-lint-options
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" 
+"C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified:  
+   (??? `eslint` co...xt-lint-options:Strin  
+  g) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandE 
+   rror
+ 
+??? Invalid next.config.ts options detected: 
+???     Unrecognized key(s) in object: 
+'eslint'
+??? See more info here: https://nextjs.org/do
+cs/messages/invalid-next-config
+??? Next.js 16.1.4 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./app/globals.css
+Error evaluating Node.js code
+Error: Cannot find module 'tailwindcss'
+Require stack:
+- E:\2026\Webapp\15. S??t hach CCHN\luyenthic
+hungchixd\.next\build\chunks\[root-of-the-ser
+ver]__6d51cb5d._.js
+- E:\2026\Webapp\15. S??t hach CCHN\luyenthic
+hungchixd\.next\build\chunks\[turbopack]_runt
+ime.js
+- E:\2026\Webapp\15. S??t hach CCHN\luyenthic
+hungchixd\.next\build\postcss.js
+    [at Function._resolveFilename 
+(node:internal/modules/cjs/loader:1383:15)]
+    [at defaultResolveImpl 
+(node:internal/modules/cjs/loader:1025:19)]
+    [at resolveForCJSWithHooks 
+(node:internal/modules/cjs/loader:1030:22)]
+    [at Function._load 
+(node:internal/modules/cjs/loader:1192:37)]
+    [at TracingChannel.traceSync 
+(node:diagnostics_channel:328:14)]
+    [at wrapModuleLoad 
+(node:internal/modules/cjs/loader:237:24)]
+    [at Module.require 
+(node:internal/modules/cjs/loader:1463:12)]
+    [at require 
+(node:internal/modules/helpers:147:16)]
+    at turbopack:///[turbopack-node]/transfor
+ms/postcss.ts:49:25 [E:\2026\Webapp\15. S??t 
+hach CCHN\luyenthichungchixd\.next\build\chun
+ks\[root-of-the-server]__6d51cb5d._.js:160:33
+]
+    [at <anonymous>]
+
+Import trace:
+  Client Component Browser:
+    ./app/globals.css [Client Component 
+Browser]
+    ./app/layout.tsx [Server Component]
+
+
+    at ignore-listed frames
