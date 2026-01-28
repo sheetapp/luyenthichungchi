@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, BookOpen, CheckCircle, XCircle } from 'lucid
 
 interface Question {
     id: string
+    id_cauhoi?: string // From database schema
     stt: number
     hang: string
     chuyen_nganh: string
@@ -31,6 +32,7 @@ interface PracticeHistory {
 const PHAN_THI_OPTIONS = ['Pháp luật chung', 'Pháp luật riêng', 'Chuyên môn']
 
 function QuizContent() {
+    console.log('🚀 QUIZ CONTENT RENDERED - Version: 1.1 (Supabase Sync Ready)')
     const router = useRouter()
     const searchParams = useSearchParams()
 
@@ -44,31 +46,37 @@ function QuizContent() {
     const [feedback, setFeedback] = useState<{ isCorrect: boolean; message: string } | null>(null)
     const [loading, setLoading] = useState(true)
     const [practiceHistory, setPracticeHistory] = useState<PracticeHistory>({})
+    const [user, setUser] = useState<any>(null)
 
-    // Load practice history from localStorage
+    // Check auth status
     useEffect(() => {
-        const storageKey = `practice_${selectedHang}_${selectedChuyenNganh}_${selectedPhanThi}`
-        const saved = localStorage.getItem(storageKey)
-        if (saved) {
-            setPracticeHistory(JSON.parse(saved))
+        console.log('👤 Checking Auth Status...')
+        async function getAuth() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser()
+                console.log('👤 Auth Result:', user ? `Logged in as ${user.email}` : 'Not logged in')
+                setUser(user)
+                // For manual debug in console
+                if (typeof window !== 'undefined') {
+                    (window as any).__QUIZ_USER = user
+                }
+            } catch (err) {
+                console.error('👤 Auth Check Error:', err)
+            }
         }
-    }, [selectedHang, selectedChuyenNganh, selectedPhanThi])
+        getAuth()
+    }, [])
 
-    // Save practice history to localStorage
+    // Fetch questions and practice history (Merge Supabase + LocalStorage)
     useEffect(() => {
-        if (Object.keys(practiceHistory).length > 0) {
-            const storageKey = `practice_${selectedHang}_${selectedChuyenNganh}_${selectedPhanThi}`
-            localStorage.setItem(storageKey, JSON.stringify(practiceHistory))
-        }
-    }, [practiceHistory, selectedHang, selectedChuyenNganh, selectedPhanThi])
-
-    // Fetch questions
-    useEffect(() => {
-        async function fetchQuestions() {
+        async function fetchData() {
             if (!selectedChuyenNganh) return
 
+            console.log('📥 Fetching Questions & History for:', { selectedHang, selectedChuyenNganh, selectedPhanThi })
             setLoading(true)
-            const { data, error } = await supabase
+
+            // 1. Fetch Questions
+            const { data: questionData, error: qError } = await supabase
                 .from('questions')
                 .select('*')
                 .eq('hang', selectedHang)
@@ -76,14 +84,104 @@ function QuizContent() {
                 .eq('phan_thi', selectedPhanThi)
                 .order('stt', { ascending: true })
 
-            if (!error && data) {
-                setQuestions(data)
+            if (qError) {
+                console.error('❌ Questions Fetch Error:', qError)
+            } else if (questionData) {
+                console.log('✅ Questions Fetched:', questionData.length)
+                setQuestions(questionData)
             }
+
+            // 2. Fetch Practice History from Supabase
+            let cloudHistory: PracticeHistory = {}
+            if (user) {
+                console.log('☁️ Fetching History from Cloud...')
+                const { data: statsData, error: sError } = await supabase
+                    .from('user_practice_stats')
+                    .select('history')
+                    .eq('user_id', user.id)
+                    .single()
+
+                if (sError) {
+                    if (sError.code === 'PGRST116') {
+                        console.log('☁️ First time user: No cloud history found yet')
+                    } else {
+                        console.error('☁️ Cloud History Fetch Error:', sError)
+                    }
+                } else if (statsData?.history) {
+                    cloudHistory = statsData.history as PracticeHistory
+                    console.log('☁️ Cloud History Loaded:', Object.keys(cloudHistory).length, 'items')
+                }
+            }
+
+            // 3. Get Local History
+            const storageKey = `practice_${selectedHang}_${selectedChuyenNganh}_${selectedPhanThi}`
+            const localSaved = localStorage.getItem(storageKey)
+            const localHistory: PracticeHistory = localSaved ? JSON.parse(localSaved) : {}
+            console.log('🏠 Local History Loaded:', Object.keys(localHistory).length, 'items')
+
+            // 4. Merge (Cloud takes priority for conflicted keys, or combine)
+            const mergedHistory = { ...localHistory, ...cloudHistory }
+            setPracticeHistory(mergedHistory)
+
             setLoading(false)
         }
 
-        fetchQuestions()
-    }, [selectedHang, selectedChuyenNganh, selectedPhanThi])
+        fetchData()
+    }, [selectedHang, selectedChuyenNganh, selectedPhanThi, user])
+
+    // Sync practice history to Supabase (Debounced)
+    useEffect(() => {
+        console.log('🔄 Sync Effect Triggered:', { hasUser: !!user, historySize: Object.keys(practiceHistory).length })
+
+        if (!user) {
+            console.log('⚠️ Sync skipped: No user logged in')
+            return
+        }
+
+        if (Object.keys(practiceHistory).length === 0) {
+            console.log('ℹ️ Sync skipped: History is empty')
+            return
+        }
+
+        console.log('⏱️ Starting 1s sync timer...')
+
+        const syncTimeout = setTimeout(async () => {
+            try {
+                console.log('🚀 Syncing to Supabase...', practiceHistory)
+                // Upsert history to Supabase
+                const { error, data } = await supabase
+                    .from('user_practice_stats')
+                    .upsert({
+                        user_id: user.id,
+                        history: practiceHistory,
+                        updated_at: new Date().toISOString()
+                    }, {
+                        onConflict: 'user_id'
+                    })
+                    .select()
+
+                if (error) {
+                    console.error('❌ Supabase Sync Error:', error.message, error.details)
+                } else {
+                    console.log('✅ Sync successful!', data)
+                }
+            } catch (err) {
+                console.error('❌ Failed to sync history (Exception):', err)
+            }
+        }, 1000) // Reduced to 1s for better responsiveness
+
+        return () => {
+            clearTimeout(syncTimeout)
+        }
+    }, [practiceHistory, user])
+
+    // Backup to localStorage (Always do this as safety)
+    useEffect(() => {
+        if (Object.keys(practiceHistory).length > 0) {
+            const storageKey = `practice_${selectedHang}_${selectedChuyenNganh}_${selectedPhanThi}`
+            localStorage.setItem(storageKey, JSON.stringify(practiceHistory))
+        }
+    }, [practiceHistory, selectedHang, selectedChuyenNganh, selectedPhanThi])
 
     const currentQuestion = questions[currentIndex]
 
@@ -91,15 +189,19 @@ function QuizContent() {
     function handleAnswerSelect(answer: string) {
         if (!currentQuestion) return
 
+        console.log('🖱️ Answer Selected:', answer, 'for question:', currentQuestion.id_cauhoi || currentQuestion.id)
         setSelectedAnswer(answer)
         const isCorrect = answer === currentQuestion.correct_answer
 
         // Update practice history
         setPracticeHistory(prev => {
-            const existing = prev[currentQuestion.id] || { attempts: 0, wrongAttempts: 0, lastAnswer: '', isCorrect: false }
+            const questionId = currentQuestion.id_cauhoi || currentQuestion.id // Supports both legacy and new schema
+            const existing = prev[questionId] || { attempts: 0, wrongAttempts: 0, lastAnswer: '', isCorrect: false }
+
+            console.log('📊 Updating History for:', questionId)
             return {
                 ...prev,
-                [currentQuestion.id]: {
+                [questionId]: {
                     attempts: existing.attempts + 1,
                     wrongAttempts: isCorrect ? existing.wrongAttempts : existing.wrongAttempts + 1,
                     lastAnswer: answer,
@@ -113,6 +215,8 @@ function QuizContent() {
             isCorrect,
             message: isCorrect ? '✓ Đã trả lời đúng!' : '✗ Đã trả lời sai!'
         })
+
+        // Auto-advance after 1.5 seconds
 
         // Auto-advance after 1.5 seconds
         setTimeout(() => {
@@ -151,7 +255,10 @@ function QuizContent() {
             return `${baseClass} bg-blue-600 text-white ring-4 ring-blue-300 scale-110`
         }
 
-        const history = practiceHistory[question.id]
+        // Use consistent ID key
+        const questionId = question.id_cauhoi || question.id
+        const history = practiceHistory[questionId]
+
         if (!history || history.attempts === 0) {
             return `${baseClass} bg-slate-200 text-slate-600 hover:bg-slate-300`
         }

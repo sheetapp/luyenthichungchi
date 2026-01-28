@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import {
     Clock, ChevronLeft, ChevronRight, Send,
     ArrowLeft, AlertCircle, CheckCircle2, XCircle, FileText
@@ -29,6 +29,12 @@ export default function ExamSessionPage() {
     const params = useParams()
     const router = useRouter()
     const { selectedHang } = useAppStore()
+    const searchParams = useSearchParams()
+
+    const retakeId = searchParams.get('retake')
+    const queryHang = searchParams.get('hang') // Backup if selectedHang is lost
+
+    const effectiveHang = selectedHang || queryHang
 
     const examId = decodeURIComponent(params.examId as string)
 
@@ -60,52 +66,87 @@ export default function ExamSessionPage() {
             try {
                 // Fetch questions: 10 law (5 common + 5 specific) + 20 specialty
 
-                // 1. Get 5 common law questions
-                const { data: lawCommon } = await supabase
-                    .from('questions')
-                    .select('*')
-                    .eq('hang', selectedHang)
-                    .eq('chuyen_nganh', examId)
-                    .eq('phan_thi', 'Câu hỏi Pháp luật chung')
-                    .limit(50)
+                let allQuestions: Question[] = []
 
-                // 2. Get 5 specific law questions
-                const { data: lawSpecific } = await supabase
-                    .from('questions')
-                    .select('*')
-                    .eq('hang', selectedHang)
-                    .eq('chuyen_nganh', examId)
-                    .eq('phan_thi', 'Câu hỏi Pháp luật riêng')
-                    .limit(50)
+                if (retakeId) {
+                    console.log('🔄 Retaking exam from ID:', retakeId)
+                    // Fetch original result
+                    const { data: resultData, error: resultError } = await supabase
+                        .from('exam_results')
+                        .select('answers')
+                        .eq('id', retakeId)
+                        .single()
 
-                // 3. Get 20 specialty questions
-                const { data: specialty } = await supabase
-                    .from('questions')
-                    .select('*')
-                    .eq('hang', selectedHang)
-                    .eq('chuyen_nganh', examId)
-                    .eq('phan_thi', 'Câu hỏi Chuyên môn')
-                    .limit(100)
+                    if (resultError || !resultData?.answers) {
+                        throw new Error('Không tìm thấy dữ liệu bài thi cũ để thi lại.')
+                    }
 
-                // Randomly select questions
-                const selectedLawCommon = (lawCommon || [])
-                    .sort(() => 0.5 - Math.random())
-                    .slice(0, 5)
+                    const originalAnswers = resultData.answers as any[]
+                    const qIds = originalAnswers.map(a => a.q_id)
 
-                const selectedLawSpecific = (lawSpecific || [])
-                    .sort(() => 0.5 - Math.random())
-                    .slice(0, 5)
+                    // Fetch those specific questions
+                    const { data: retakeQuestions, error: fetchError } = await supabase
+                        .from('questions')
+                        .select('*')
+                        .in('id', qIds)
 
-                const selectedSpecialty = (specialty || [])
-                    .sort(() => 0.5 - Math.random())
-                    .slice(0, 20)
+                    if (fetchError || !retakeQuestions) {
+                        throw new Error('Không thể tải bộ câu hỏi cũ.')
+                    }
 
-                // Combine: 10 law questions first, then 20 specialty
-                const allQuestions = [
-                    ...selectedLawCommon,
-                    ...selectedLawSpecific,
-                    ...selectedSpecialty
-                ]
+                    // Sort to match original order if possible, or at least structure (Law first)
+                    // We'll trust the database IDs or the original order from the result
+                    const sortedQuestions = qIds.map(id => retakeQuestions.find(q => q.id === id)).filter(Boolean) as Question[]
+                    allQuestions = sortedQuestions
+                } else {
+                    // Standard Random Exam Logic
+                    // 1. Get 5 common law questions
+                    const { data: lawCommon } = await supabase
+                        .from('questions')
+                        .select('*')
+                        .eq('hang', effectiveHang)
+                        .eq('chuyen_nganh', examId)
+                        .eq('phan_thi', 'Câu hỏi Pháp luật chung')
+                        .limit(50)
+
+                    // 2. Get 5 specific law questions
+                    const { data: lawSpecific } = await supabase
+                        .from('questions')
+                        .select('*')
+                        .eq('hang', effectiveHang)
+                        .eq('chuyen_nganh', examId)
+                        .eq('phan_thi', 'Câu hỏi Pháp luật riêng')
+                        .limit(50)
+
+                    // 3. Get 20 specialty questions
+                    const { data: specialty } = await supabase
+                        .from('questions')
+                        .select('*')
+                        .eq('hang', effectiveHang)
+                        .eq('chuyen_nganh', examId)
+                        .eq('phan_thi', 'Câu hỏi Chuyên môn')
+                        .limit(100)
+
+                    // Randomly select questions
+                    const selectedLawCommon = (lawCommon || [])
+                        .sort(() => 0.5 - Math.random())
+                        .slice(0, 5)
+
+                    const selectedLawSpecific = (lawSpecific || [])
+                        .sort(() => 0.5 - Math.random())
+                        .slice(0, 5)
+
+                    const selectedSpecialty = (specialty || [])
+                        .sort(() => 0.5 - Math.random())
+                        .slice(0, 20)
+
+                    // Combine: 10 law questions first, then 20 specialty
+                    allQuestions = [
+                        ...selectedLawCommon,
+                        ...selectedLawSpecific,
+                        ...selectedSpecialty
+                    ]
+                }
 
                 if (allQuestions.length < 30) {
                     alert(`Không đủ câu hỏi cho đề thi này. Hiện có ${allQuestions.length}/30 câu.`)
@@ -122,10 +163,10 @@ export default function ExamSessionPage() {
             setLoading(false)
         }
 
-        if (selectedHang && examId) {
+        if (effectiveHang && examId) {
             startExam()
         }
-    }, [examId, selectedHang, router])
+    }, [examId, effectiveHang, router, retakeId])
 
     // Timer Logic
     useEffect(() => {

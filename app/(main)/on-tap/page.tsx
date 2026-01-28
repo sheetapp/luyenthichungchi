@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { AuthWall } from '@/components/auth/AuthWall'
 import {
@@ -59,6 +60,10 @@ const CHUYEN_NGANH_OPTIONS = [
 ]
 
 export default function OnTapPage() {
+    const searchParams = useSearchParams()
+    const reviewMode = searchParams.get('mode') === 'exam_review'
+    const resultId = searchParams.get('resultId')
+
     const [user, setUser] = useState<any>(null)
     const [authLoading, setAuthLoading] = useState(true)
 
@@ -74,6 +79,7 @@ export default function OnTapPage() {
     const [feedback, setFeedback] = useState<{ isCorrect: boolean; message: string } | null>(null)
     const [loading, setLoading] = useState(false)
     const [practiceHistory, setPracticeHistory] = useState<PracticeHistory>({})
+    const [phanThiCounts, setPhanThiCounts] = useState<Record<string, number>>({})
 
     // Check authentication
     useEffect(() => {
@@ -85,58 +91,160 @@ export default function OnTapPage() {
         checkAuth()
     }, [])
 
-    // Load practice history from localStorage
+    // Fetch counts for all phan thi in current category
     useEffect(() => {
-        if (!selectedChuyenNganh) return
-        const storageKey = `practice_${selectedHang}_${selectedChuyenNganh}_${selectedPhanThi}`
-        const saved = localStorage.getItem(storageKey)
-        if (saved) {
-            setPracticeHistory(JSON.parse(saved))
-        }
-    }, [selectedHang, selectedChuyenNganh, selectedPhanThi])
+        async function fetchCounts() {
+            if (!selectedChuyenNganh || reviewMode) return
 
-    // Save practice history to localStorage
+            const { data, error } = await supabase
+                .from('questions')
+                .select('phan_thi')
+                .eq('hang', selectedHang)
+                .eq('chuyen_nganh', selectedChuyenNganh)
+
+            if (data && !error) {
+                const counts: Record<string, number> = {}
+                data.forEach((q: any) => {
+                    counts[q.phan_thi] = (counts[q.phan_thi] || 0) + 1
+                })
+                setPhanThiCounts(counts)
+            }
+        }
+        fetchCounts()
+    }, [selectedHang, selectedChuyenNganh, reviewMode])
+
+    // Fetch questions and practice history (Merge Supabase + LocalStorage)
+    useEffect(() => {
+        async function fetchData() {
+            setLoading(true)
+
+            if (reviewMode && resultId) {
+                // SPECIAL MODE: Review mistakes from a specific exam
+                try {
+                    const { data: resultData, error: resultError } = await supabase
+                        .from('exam_results')
+                        .select('answers, hang, chuyen_nganh')
+                        .eq('id', resultId)
+                        .single()
+
+                    if (resultError || !resultData) throw new Error('Không tìm thấy kết quả thi.')
+
+                    const mistakes = (resultData.answers as any[]).filter(a => a.correct === false)
+                    const qIds = mistakes.map(m => m.q_id)
+
+                    if (qIds.length === 0) {
+                        alert('Bài thi này không có câu hỏi sai nào!')
+                        return
+                    }
+
+                    // Fetch those questions
+                    const { data: wrongQs, error: qError } = await supabase
+                        .from('questions')
+                        .select('*')
+                        .in('id', qIds)
+
+                    if (qError || !wrongQs) throw qError
+
+                    // Sort to maintain consistency if needed
+                    setQuestions(wrongQs)
+                    setAllQuestions(wrongQs)
+
+                    // Update selectors to match the exam context (optional but helpful)
+                    if (resultData.hang) setSelectedHang(resultData.hang)
+                    if (resultData.chuyen_nganh) setSelectedChuyenNganh(resultData.chuyen_nganh)
+                } catch (error) {
+                    console.error('Error loading review session:', error)
+                    alert('Có lỗi xảy ra khi tải dữ liệu ôn tập.')
+                }
+            } else {
+                // NORMAL MODE: Practice by category
+                if (!selectedChuyenNganh) return
+
+                // 1. Fetch Questions
+                const { data, error } = await supabase
+                    .from('questions')
+                    .select('*')
+                    .eq('hang', selectedHang)
+                    .eq('chuyen_nganh', selectedChuyenNganh)
+                    .eq('phan_thi', selectedPhanThi)
+                    .order('stt', { ascending: true })
+
+                if (data && !error) {
+                    setAllQuestions(data)
+
+                    // Apply search filter (if any)
+                    let filteredData = data
+                    if (searchQuery.trim()) {
+                        const searchNormalized = removeVietnameseTones(searchQuery.trim().toLowerCase())
+                        filteredData = data.filter(q =>
+                            removeVietnameseTones(q.cau_hoi.toLowerCase()).includes(searchNormalized)
+                        )
+                    }
+                    setQuestions(filteredData)
+                }
+            }
+
+            // Common: Fetch Practice History (Always helpful)
+            let cloudHistory: PracticeHistory = {}
+            const { data: { user: currentUser } } = await supabase.auth.getUser()
+            if (currentUser) {
+                const { data: statsData, error: sError } = await supabase
+                    .from('user_practice_stats')
+                    .select('history')
+                    .eq('user_id', currentUser.id)
+                    .single()
+
+                if (!sError && statsData?.history) {
+                    cloudHistory = statsData.history as PracticeHistory
+                }
+            }
+
+            const storageKey = `practice_${selectedHang}_${selectedChuyenNganh}_${selectedPhanThi}`
+            const localSaved = localStorage.getItem(storageKey)
+            const localHistory: PracticeHistory = localSaved ? JSON.parse(localSaved) : {}
+            setPracticeHistory({ ...localHistory, ...cloudHistory })
+
+            setLoading(false)
+        }
+
+        fetchData()
+        setCurrentIndex(0)
+        setSelectedAnswer('')
+        setFeedback(null)
+    }, [selectedHang, selectedChuyenNganh, selectedPhanThi, searchQuery, user, reviewMode, resultId])
+
+    // Sync practice history to Supabase (Debounced)
+    useEffect(() => {
+        if (!user || Object.keys(practiceHistory).length === 0) return
+
+        const syncTimeout = setTimeout(async () => {
+            try {
+                const { error } = await supabase
+                    .from('user_practice_stats')
+                    .upsert({
+                        user_id: user.id,
+                        history: practiceHistory,
+                        updated_at: new Date().toISOString()
+                    }, {
+                        onConflict: 'user_id'
+                    })
+
+                if (error) console.error('Error syncing practice history:', error.message)
+            } catch (err) {
+                console.error('Failed to sync history:', err)
+            }
+        }, 3000) // 3s debounce
+
+        return () => clearTimeout(syncTimeout)
+    }, [practiceHistory, user])
+
+    // LocalStorage Backup
     useEffect(() => {
         if (Object.keys(practiceHistory).length > 0 && selectedChuyenNganh) {
             const storageKey = `practice_${selectedHang}_${selectedChuyenNganh}_${selectedPhanThi}`
             localStorage.setItem(storageKey, JSON.stringify(practiceHistory))
         }
     }, [practiceHistory, selectedHang, selectedChuyenNganh, selectedPhanThi])
-
-    // Fetch questions
-    useEffect(() => {
-        async function fetchQuestions() {
-            if (!selectedChuyenNganh) return
-
-            setLoading(true)
-            const { data, error } = await supabase
-                .from('questions')
-                .select('*')
-                .eq('hang', selectedHang)
-                .eq('chuyen_nganh', selectedChuyenNganh)
-                .eq('phan_thi', selectedPhanThi)
-                .order('stt', { ascending: true })
-
-            if (!error && data) {
-                setAllQuestions(data)
-                // Apply search filter
-                let filteredData = data
-                if (searchQuery.trim()) {
-                    const searchNormalized = removeVietnameseTones(searchQuery.trim().toLowerCase())
-                    filteredData = data.filter(q =>
-                        removeVietnameseTones(q.cau_hoi.toLowerCase()).includes(searchNormalized)
-                    )
-                }
-                setQuestions(filteredData)
-            }
-            setLoading(false)
-        }
-
-        fetchQuestions()
-        setCurrentIndex(0)
-        setSelectedAnswer('')
-        setFeedback(null)
-    }, [selectedHang, selectedChuyenNganh, selectedPhanThi, searchQuery])
 
     const currentQuestion = questions[currentIndex]
 
@@ -297,19 +405,28 @@ export default function OnTapPage() {
 
             {/* Tabs */}
             <div className="flex gap-1 border-b-2 border-slate-200 flex-shrink-0 px-6">
-                {PHAN_THI_OPTIONS.map((phan) => (
-                    <button
-                        key={phan}
-                        onClick={() => setSelectedPhanThi(phan)}
-                        className={`px-6 py-3 text-sm font-bold transition-all relative ${selectedPhanThi === phan ? 'text-blue-600' : 'text-slate-600 hover:text-slate-900'
-                            }`}
-                    >
-                        {phan.replace('Câu hỏi ', '')}
-                        {selectedPhanThi === phan && (
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
-                        )}
-                    </button>
-                ))}
+                {PHAN_THI_OPTIONS.map((phan) => {
+                    const count = phanThiCounts[phan] || 0
+                    return (
+                        <button
+                            key={phan}
+                            onClick={() => setSelectedPhanThi(phan)}
+                            className={`px-6 py-3 text-sm font-bold transition-all relative flex items-center gap-2 ${selectedPhanThi === phan ? 'text-blue-600' : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                        >
+                            <span>{phan.replace('Câu hỏi ', '')}</span>
+                            {count > 0 && (
+                                <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-black shadow-sm ${selectedPhanThi === phan ? 'bg-orange-500 text-white' : 'bg-slate-200 text-slate-600'
+                                    }`}>
+                                    {count}
+                                </span>
+                            )}
+                            {selectedPhanThi === phan && (
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                            )}
+                        </button>
+                    )
+                })}
             </div>
 
             {/* Navigation & Statistics */}

@@ -416,38 +416,47 @@ Khi tạo Pull Request:
 
 ---
 
-## 🔧 PHẦN 8: Custom Domain (Tùy Chọn)
+## 🔧 PHẦN 8: Custom Domain (Tên Miền Riêng)
 
-### Bước 8.1: Thêm Domain
+### Bước 8.1: Thêm Domain vào Vercel
 
-1. Vercel Dashboard → Project → **Settings** → **Domains**
-2. Click **Add**
-3. Nhập domain: `luyenthixaydung.com`
-4. Click **Add**
+1. **Vercel Dashboard** -> Project -> **Settings** -> **Domains**.
+2. Click **Add**.
+3. Nhập domain bạn đã mua (ví dụ: `luyenthixaydung.vn`).
+4. Click **Add**.
 
-### Bước 8.2: Cấu Hình DNS
+### Bước 8.2: Cấu Hình DNS (Quan Trọng)
 
-Vercel sẽ hiển thị DNS records cần thêm:
+Vercel sẽ hiển thị các bản ghi DNS cần cấu hình tại trang quản lý tên miền của bạn (như Mat Bao, Pavietnam, Tenten...):
 
-**Tại nhà cung cấp domain (GoDaddy, Namecheap, etc.):**
+**1. Cho Root Domain (luyenthixaydung.vn):**
+- **Type**: `A`
+- **Name**: `@`
+- **Value**: `76.76.21.21`
 
-| Type | Name | Value |
-|------|------|-------|
-| A | @ | `76.76.21.21` |
-| CNAME | www | `cname.vercel-dns.com` |
+**2. Cho Subdomain (www.luyenthixaydung.vn):**
+- **Type**: `CNAME`
+- **Name**: `www`
+- **Value**: `cname.vercel-dns.com`
 
-### Bước 8.3: Đợi DNS Propagate
+> [!NOTE]
+> Sau khi cấu hình, có thể mất từ 1-24 giờ để DNS có hiệu lực trên toàn thế giới.
 
-- Thời gian: 5 phút - 48 giờ
-- Kiểm tra: https://dnschecker.org
+### Bước 8.3: Cập Nhật Sau Khi Có Domain Mới
 
-### Bước 8.4: Update Environment Variables
+Khi tên miền chính thức đã hoạt động, bạn **BẮT BUỘC** phải cập nhật lại các nơi sau để không bị lỗi đăng nhập:
 
-```
-NEXT_PUBLIC_SITE_URL=https://luyenthixaydung.com
-```
+**1. Trên Vercel:**
+- Cập nhật `NEXT_PUBLIC_SITE_URL` thành domain mới: `https://luyenthixaydung.vn`.
+- Thực hiện **Redeploy** lại bản mới nhất.
 
-Và cập nhật lại Supabase Redirect URLs, PayOS Webhook với domain mới.
+**2. Trên Supabase (Authentication -> URL Configuration):**
+- **Site URL**: Đổi thành domain mới.
+- **Redirect URLs**: Thêm domain mới vào danh sách (ví dụ: `https://luyenthixaydung.vn/**`).
+
+**3. Trên Google Cloud Console (Nếu dùng Google Login nâng cao):**
+- Thêm domain mới vào mục **Authorized JavaScript origins**.
+- Thêm domain mới vào mục **Authorized redirect URIs**.
 
 ---
 
@@ -547,6 +556,61 @@ eslint: {
 
 ---
 
+### ❌ Lỗi: supabaseUrl is required (VERCEL BUILD)
+
+**Triệu chứng:**
+```
+Error occurred prerendering page "/on-tap/quiz"
+Error: supabaseUrl is required.
+    at <unknown> (.next/server/chunks/ssr/lib_supabase_client_ts...)
+Export encountered an error, exiting the build.
+⨯ Next.js build worker exited with code: 1
+```
+
+**Nguyên nhân:** 
+Environment variables **CHƯA ĐƯỢC CÀI ĐẶT** trên Vercel!
+
+**Fix:**
+
+> [!CAUTION]
+> Đây là lỗi **CỰC KỲ PHỔ BIẾN** khi deploy lần đầu!
+
+**Bước 1: Kiểm tra Environment Variables**
+1. Vào Vercel Dashboard → Project → **Settings** → **Environment Variables**
+2. Kiểm tra có đủ 3 biến Supabase:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+
+**Bước 2: Nếu thiếu, thêm ngay:**
+```
+Key:   NEXT_PUBLIC_SUPABASE_URL
+Value: https://your-project-id.supabase.co
+Env:   Production, Preview, Development (chọn tất cả)
+
+Key:   NEXT_PUBLIC_SUPABASE_ANON_KEY
+Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Env:   Production, Preview, Development (chọn tất cả)
+
+Key:   SUPABASE_SERVICE_ROLE_KEY
+Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Env:   Production, Preview, Development (chọn tất cả)
+```
+
+**Bước 3: Redeploy**
+1. Vào **Deployments** tab
+2. Click **...** bên cạnh deployment failed
+3. Click **Redeploy**
+
+**Bước 4: Verify**
+- Build sẽ thành công lần này
+- Kiểm tra logs không còn lỗi `supabaseUrl is required`
+
+> [!TIP]
+> **Luôn nhớ**: Environment variables phải được set **TRƯỚC KHI** deploy. Nếu thêm sau, phải **Redeploy**!
+
+---
+
 ### ❌ Lỗi: Missing Suspense Boundary
 
 **Triệu chứng:**
@@ -590,19 +654,33 @@ export default function Page() {
 
 ---
 
-### ❌ Lỗi: Authentication Redirect Failed
+### ❌ Lỗi: Google Login / OAuth Không Hoạt Động
 
 **Triệu chứng:**
-- Sau login, redirect về `localhost` thay vì Vercel URL
+- Khi click "Đăng nhập với Google", app báo lỗi hoặc redirect không đúng.
+- Làm việc bình thường ở `localhost` nhưng lỗi trên `vercel.app`.
 
-**Fix:**
-1. Kiểm tra Supabase → **Authentication** → **URL Configuration**
-2. Đảm bảo có:
-   ```
-   Site URL: https://your-app.vercel.app
-   Redirect URLs: https://your-app.vercel.app/auth/callback
-   ```
-3. Kiểm tra `NEXT_PUBLIC_SITE_URL` trong Vercel env vars
+**Nguyên nhân:**
+Supabase chưa biết URL chính thức của website bạn trên production, nên nó không cho phép redirect về đó sau khi xác thực xong.
+
+**Fix (3 bước cực kỳ quan trọng):**
+
+**1. Cập nhật Site URL trong Supabase:**
+- Vào [Supabase Dashboard](https://supabase.com/dashboard) -> **Authentication** -> **URL Configuration**.
+- **Site URL**: Thay `http://localhost:3000` thành URL Vercel của bạn (ví dụ: `https://luyenthichungchi-xxx.vercel.app`).
+
+**2. Thêm Redirect URLs:**
+- Cũng trong trang đó, mục **Redirect URLs**, thêm:
+  - `https://your-app.vercel.app/**` (để hỗ trợ tất cả các sub-paths).
+  - `https://your-app.vercel.app/auth/callback` (đường dẫn xử lý xác thực).
+
+**3. Cấu hình NEXT_PUBLIC_SITE_URL trên Vercel:**
+- Vào **Vercel Dashboard** -> **Settings** -> **Environment Variables**.
+- Đảm bảo `NEXT_PUBLIC_SITE_URL` trùng khớp với URL website của bạn.
+- **Quan trọng**: Sau khi sửa Env Var, bạn phải **Redeploy** lại bản build mới nhất!
+
+> [!TIP]
+> Nếu bạn sử dụng Google Cloud Console để cấu hình Client ID riêng cho Google Login, hãy nhớ thêm URL Vercel vào danh sách **Authorized redirect URIs** trong Google Cloud Console nữa nhé.
 
 ---
 

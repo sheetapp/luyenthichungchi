@@ -5,7 +5,8 @@ import {
     User, Mail, Phone, Briefcase, UserCircle, Edit2, Save, X,
     History, TrendingUp, Award, AlertTriangle, MessageSquare,
     LogOut, ChevronRight, Calendar, CheckCircle, XCircle,
-    FileText, Send, Target, LayoutDashboard, ShieldCheck
+    FileText, Send, Target, LayoutDashboard, ShieldCheck,
+    Share2, Loader2, RotateCcw, ChevronDown, Clock
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -39,6 +40,7 @@ export default function AccountPage() {
     })
     const [examHistory, setExamHistory] = useState<any[]>([])
     const [wrongQuestions, setWrongQuestions] = useState<any[]>([])
+    const [groupedWrongQuestions, setGroupedWrongQuestions] = useState<any[]>([])
     const [feedbackForm, setFeedbackForm] = useState({ category: 'suggestion', message: '' })
     const [submitting, setSubmitting] = useState(false)
     const [submitSuccess, setSubmitSuccess] = useState(false)
@@ -46,6 +48,8 @@ export default function AccountPage() {
     const [profileSaveSuccess, setProfileSaveSuccess] = useState(false)
     const [profileError, setProfileError] = useState<string | null>(null)
     const [greeting, setGreeting] = useState('')
+    const [sharingId, setSharingId] = useState<string | null>(null)
+    const [expandedExam, setExpandedExam] = useState<string | null>(null)
 
     useEffect(() => {
         setMounted(true)
@@ -119,12 +123,12 @@ export default function AccountPage() {
                         passRate: Math.round((passed / total) * 100)
                     })
 
-                    const wrongAnswers: any[] = []
+                    const allMistakes: any[] = []
                     results.forEach(result => {
                         if (result.answers) {
                             Object.entries(result.answers).forEach(([qId, answer]: [string, any]) => {
                                 if (answer && answer.correct === false) {
-                                    wrongAnswers.push({
+                                    allMistakes.push({
                                         questionId: qId,
                                         userAnswer: answer.selected,
                                         correctAnswer: answer.correctAnswer,
@@ -135,7 +139,21 @@ export default function AccountPage() {
                             })
                         }
                     })
-                    setWrongQuestions(wrongAnswers)
+                    setWrongQuestions(allMistakes)
+
+                    // Group wrong answers by exam session
+                    const groups: any[] = results.map(result => {
+                        const mistakes = result.answers ? Object.values(result.answers).filter((a: any) => a.correct === false) : []
+                        if (mistakes.length === 0) return null
+                        return {
+                            resultId: result.id,
+                            examName: result.chuyen_nganh || 'Bài thi sát hạch',
+                            date: result.created_at,
+                            count: mistakes.length,
+                            hang: result.hang
+                        }
+                    }).filter(Boolean)
+                    setGroupedWrongQuestions(groups)
                 }
             }
             setLoading(false)
@@ -222,6 +240,30 @@ export default function AccountPage() {
             setSubmitSuccess(true)
             setFeedbackForm({ category: 'suggestion', message: '' })
             setTimeout(() => setSubmitSuccess(false), 3000)
+        }
+    }
+
+    const handleShareResult = async (resultId: any) => {
+        setSharingId(resultId)
+        try {
+            const { error } = await supabase
+                .from('exam_results')
+                .update({ is_public: true })
+                .eq('id', resultId)
+
+            if (error) throw error
+
+            // Update local state
+            setExamHistory(prev => prev.map(exam =>
+                exam.id === resultId ? { ...exam, is_public: true } : exam
+            ))
+
+            alert('✅ Kết quả đã được chia sẻ lên bảng xếp hạng!')
+        } catch (error: any) {
+            console.error('Error sharing result:', error)
+            alert('❌ Có lỗi khi chia sẻ kết quả: ' + error.message)
+        } finally {
+            setSharingId(null)
         }
     }
 
@@ -554,37 +596,99 @@ export default function AccountPage() {
                                             </div>
                                         ) : (
                                             <div className="space-y-3">
-                                                {examHistory.slice(0, 10).map((exam, idx) => (
-                                                    <div key={idx} className="flex items-center justify-between p-5 bg-slate-50/50 rounded-2xl hover:bg-white border border-transparent hover:border-slate-100 hover:shadow-lg hover:shadow-slate-100/30 transition-all group">
-                                                        <div className="flex items-center gap-5">
-                                                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${exam.passed ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                                                                {exam.passed ? <CheckCircle className="w-6 h-6" /> : <XCircle className="w-6 h-6" />}
-                                                            </div>
-                                                            <div className="space-y-0.5">
-                                                                <div className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                                                                    Kết quả bài thi #{examHistory.length - idx}
-                                                                    {idx === 0 && <span className="px-1.5 py-0.5 bg-green-500 text-[8px] text-white rounded font-black uppercase tracking-widest">Mới nhất</span>}
+                                                {examHistory.slice(0, 10).map((exam, idx) => {
+                                                    const isExpanded = expandedExam === exam.id
+                                                    return (
+                                                        <div key={idx} className="flex flex-col p-4 bg-slate-50/50 rounded-2xl border border-transparent hover:border-slate-200 transition-all">
+                                                            <div
+                                                                className="flex items-center justify-between cursor-pointer group"
+                                                                onClick={() => setExpandedExam(isExpanded ? null : exam.id)}
+                                                            >
+                                                                <div className="flex items-center gap-5">
+                                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${exam.passed ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                                                                        {exam.passed ? <CheckCircle className="w-6 h-6" /> : <XCircle className="w-6 h-6" />}
+                                                                    </div>
+                                                                    <div className="space-y-0.5">
+                                                                        <div className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                                                                            {exam.chuyen_nganh || 'Bài thi sát hạch'}
+                                                                            {idx === 0 && <span className="px-1.5 py-0.5 bg-green-500 text-[8px] text-white rounded font-black uppercase tracking-widest">Mới nhất</span>}
+                                                                        </div>
+                                                                        <div className="text-[10px] text-slate-400 font-bold flex items-center gap-3">
+                                                                            <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-blue-400" /> {new Date(exam.created_at).toLocaleDateString('vi-VN')}</span>
+                                                                            <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                                                                            <span className="uppercase tracking-tighter">{exam.hang || 'Hạng III'}</span>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                                <div className="text-[10px] text-slate-400 font-bold flex items-center gap-3">
-                                                                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-blue-400" /> {new Date(exam.created_at).toLocaleDateString('vi-VN')}</span>
-                                                                    <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                                                                    <span className="uppercase tracking-tighter">Hạng {exam.category_id || 'III'}</span>
+                                                                <div className="flex items-center gap-6">
+                                                                    <div className="text-right hidden sm:block">
+                                                                        <div className={`text-xl font-black ${exam.passed ? 'text-green-600' : 'text-red-600'}`}>
+                                                                            {exam.score}/30
+                                                                        </div>
+                                                                        <div className={`text-[8px] font-black uppercase tracking-widest ${exam.passed ? 'text-green-500/50' : 'text-red-400/50'}`}>
+                                                                            {exam.passed ? 'Đã vượt qua' : 'Chưa đạt'}
+                                                                        </div>
+                                                                    </div>
+                                                                    <ChevronDown className={`w-5 h-5 text-slate-300 transition-transform ${isExpanded ? 'rotate-180 text-blue-600' : ''}`} />
                                                                 </div>
                                                             </div>
+
+                                                            {/* Detailed Breakdown */}
+                                                            {isExpanded && (
+                                                                <div className="mt-4 pt-4 border-t border-slate-100 grid md:grid-cols-3 gap-4 animate-in slide-in-from-top-2 duration-300">
+                                                                    <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Cấu trúc điểm</p>
+                                                                        <div className="flex flex-col gap-2">
+                                                                            <div className="flex justify-between items-center text-xs">
+                                                                                <span className="text-slate-500 font-medium">Pháp luật:</span>
+                                                                                <span className={`font-bold ${exam.law_correct >= 7 ? 'text-green-600' : 'text-red-600'}`}>{exam.law_correct}/10</span>
+                                                                            </div>
+                                                                            <div className="flex justify-between items-center text-xs">
+                                                                                <span className="text-slate-500 font-medium">Chuyên môn:</span>
+                                                                                <span className="font-bold text-blue-600">{exam.specialist_correct}/20</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Thời gian làm</p>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <Clock className="w-4 h-4 text-orange-400" />
+                                                                            <span className="text-lg font-black text-slate-700">
+                                                                                {Math.floor(exam.time_taken / 60)}:{String(exam.time_taken % 60).padStart(2, '0')}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="flex flex-col gap-2">
+                                                                        <Link
+                                                                            href={`/thi-thu/${encodeURIComponent(exam.chuyen_nganh)}?retake=${exam.id}&hang=${encodeURIComponent(exam.hang)}`}
+                                                                            className="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-xs uppercase transition-all shadow-sm"
+                                                                        >
+                                                                            <RotateCcw className="w-3.5 h-3.5" />
+                                                                            Thi lại đề này
+                                                                        </Link>
+                                                                        {exam.passed && (
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    if (!exam.is_public) handleShareResult(exam.id)
+                                                                                }}
+                                                                                disabled={sharingId === exam.id || exam.is_public}
+                                                                                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs transition-all ${exam.is_public
+                                                                                    ? 'bg-blue-50 text-blue-600 border border-blue-100'
+                                                                                    : 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 shadow-sm'
+                                                                                    }`}
+                                                                            >
+                                                                                {sharingId === exam.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Share2 className="w-3.5 h-3.5" />}
+                                                                                {exam.is_public ? 'Đã công khai' : 'Chia sẻ hạng'}
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                        <div className="flex items-center gap-6">
-                                                            <div className="text-right hidden sm:block">
-                                                                <div className={`text-xl font-black ${exam.passed ? 'text-green-600' : 'text-red-600'}`}>
-                                                                    {exam.score}/30
-                                                                </div>
-                                                                <div className={`text-[8px] font-black uppercase tracking-widest ${exam.passed ? 'text-green-500/50' : 'text-red-400/50'}`}>
-                                                                    {exam.passed ? 'Đã vượt qua' : 'Chưa đạt yêu cầu'}
-                                                                </div>
-                                                            </div>
-                                                            <ChevronRight className="w-5 h-5 text-slate-200 group-hover:text-blue-600 transition-colors" />
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                                    )
+                                                })}
                                             </div>
                                         )}
                                     </div>
@@ -630,15 +734,32 @@ export default function AccountPage() {
                                                     </Link>
                                                 </div>
 
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col gap-1">
-                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tiến độ củng cố</span>
-                                                        <span className="font-black text-slate-700">Cần cải thiện</span>
-                                                    </div>
-                                                    <div className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col gap-1 text-red-600">
-                                                        <span className="text-[10px] font-bold text-red-400/70 uppercase tracking-widest">Đánh giá chung</span>
-                                                        <span className="font-black">Trung bình</span>
-                                                    </div>
+                                                <div className="space-y-3">
+                                                    {groupedWrongQuestions.map((group, idx) => (
+                                                        <div key={idx} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-red-100 transition-all group">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-red-500 font-bold text-xs shadow-sm">
+                                                                    {group.count}
+                                                                </div>
+                                                                <div className="space-y-0.5">
+                                                                    <div className="font-bold text-slate-900 text-sm whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px] sm:max-w-md">
+                                                                        {group.examName}
+                                                                    </div>
+                                                                    <div className="text-[10px] text-slate-400 font-bold flex items-center gap-2">
+                                                                        <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(group.date).toLocaleDateString('vi-VN')}</span>
+                                                                        <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                                                                        <span>{group.hang}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <Link
+                                                                href={`/on-tap?mode=exam_review&resultId=${group.resultId}`}
+                                                                className="px-4 py-2 bg-slate-900 text-white rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-red-600 transition-all whitespace-nowrap"
+                                                            >
+                                                                Ôn tập ngay
+                                                            </Link>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </div>
                                         )}
