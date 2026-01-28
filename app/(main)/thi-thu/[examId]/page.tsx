@@ -51,6 +51,7 @@ export default function ExamSessionPage() {
     const [sharing, setSharing] = useState(false)
     const [showWrongAnswers, setShowWrongAnswers] = useState(false)
     const [showSubmitDialog, setShowSubmitDialog] = useState(false)
+    const [activeModalTab, setActiveModalTab] = useState('Câu hỏi Pháp luật chung')
 
     const timerRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -463,94 +464,116 @@ export default function ExamSessionPage() {
                                 </div>
 
                                 {/* Modal Content */}
-                                <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                                    {questions
-                                        .filter(q => userAnswers[q.id] !== q.dap_an_dung)
-                                        .map((q, idx) => {
-                                            const userAnswer = userAnswers[q.id]
-                                            const correctAnswer = q.dap_an_dung
-                                            const questionType = q.phan_thi
+                                <div className="flex-1 overflow-y-auto flex flex-col min-h-0">
+                                    {/* Tabs inside Modal */}
+                                    <div className="flex border-b-2 border-slate-100 bg-slate-50 px-6 shrink-0">
+                                        {['Câu hỏi Pháp luật chung', 'Câu hỏi Pháp luật riêng', 'Câu hỏi Chuyên môn'].map((tab) => {
+                                            const wrongInTab = questions.filter(q =>
+                                                q.phan_thi === tab &&
+                                                userAnswers[q.id] !== q.dap_an_dung
+                                            ).length
 
                                             return (
-                                                <div key={q.id} className="bg-slate-50 rounded-xl p-6 border-2 border-slate-200">
-                                                    {/* Question Header */}
-                                                    <div className="flex items-start gap-3 mb-4">
-                                                        <div className="w-8 h-8 rounded-lg bg-red-500 text-white font-bold flex items-center justify-center shrink-0">
-                                                            {q.stt}
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <div className="text-xs text-slate-500 mb-1">{questionType}</div>
-                                                            <div className="text-slate-900 font-medium leading-relaxed">{q.cau_hoi}</div>
-                                                        </div>
-                                                    </div>
+                                                <button
+                                                    key={tab}
+                                                    onClick={() => setActiveModalTab(tab)}
+                                                    className={`px-4 py-3 text-sm font-bold transition-all relative flex items-center gap-2 ${activeModalTab === tab ? 'text-blue-600' : 'text-slate-500 hover:text-slate-700'
+                                                        }`}
+                                                >
+                                                    <span>{tab.replace('Câu hỏi ', '')}</span>
+                                                    {wrongInTab > 0 && (
+                                                        <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-black ${activeModalTab === tab ? 'bg-blue-100 text-blue-600' : 'bg-slate-200 text-slate-500'
+                                                            }`}>
+                                                            {wrongInTab}
+                                                        </span>
+                                                    )}
+                                                    {activeModalTab === tab && (
+                                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                                                    )}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
 
-                                                    {/* Answer Options */}
-                                                    <div className="space-y-2">
-                                                        {['A', 'B', 'C', 'D'].map(option => {
-                                                            const answerText = q[`dap_an_${option.toLowerCase()}` as keyof Question] as string
-                                                            const isUserAnswer = userAnswer === option
-                                                            const isCorrectAnswer = correctAnswer === option
+                                    <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                                        {questions
+                                            .filter(q => q.phan_thi === activeModalTab && userAnswers[q.id] !== q.dap_an_dung)
+                                            .map((q, idx) => {
+                                                const userAnswer = userAnswers[q.id]
+                                                const correctAnswer = q.dap_an_dung
+                                                const questionType = q.phan_thi
 
-                                                            return (
-                                                                <div
-                                                                    key={option}
-                                                                    className={`p-4 rounded-lg border-2 ${isCorrectAnswer
-                                                                        ? 'bg-green-50 border-green-500'
-                                                                        : isUserAnswer
-                                                                            ? 'bg-orange-50 border-orange-500'
-                                                                            : 'bg-white border-slate-200'
-                                                                        }`}
-                                                                >
-                                                                    <div className="flex items-start gap-3">
-                                                                        <div
-                                                                            className={`w-8 h-8 rounded-lg font-bold flex items-center justify-center text-sm shrink-0 ${isCorrectAnswer
-                                                                                ? 'bg-green-500 text-white'
-                                                                                : isUserAnswer
-                                                                                    ? 'bg-orange-500 text-white'
-                                                                                    : 'bg-slate-200 text-slate-600'
-                                                                                }`}
-                                                                        >
-                                                                            {option}
-                                                                        </div>
-                                                                        <div className="flex-1">
-                                                                            <div className={`${isCorrectAnswer
-                                                                                ? 'text-green-900 font-semibold'
-                                                                                : isUserAnswer
-                                                                                    ? 'text-orange-900'
-                                                                                    : 'text-slate-700'
-                                                                                }`}>
-                                                                                {answerText}
+                                                return (
+                                                    <div key={q.id} className="bg-slate-50 rounded-xl p-6 border-2 border-slate-200">
+                                                        {/* Question Header */}
+                                                        <div className="flex items-start gap-3 mb-4">
+                                                            <div className="w-8 h-8 rounded-lg bg-red-500 text-white font-bold flex items-center justify-center shrink-0">
+                                                                {q.stt}
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <div className="text-xs text-slate-500 mb-1">{questionType}</div>
+                                                                <div className="text-slate-900 font-medium leading-relaxed">{q.cau_hoi}</div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Answer Options */}
+                                                        <div className="space-y-2">
+                                                            {['a', 'b', 'c', 'd'].map(option => {
+                                                                const answerText = q[`dap_an_${option}` as keyof Question] as string
+                                                                const isUserAnswer = userAnswer === option
+                                                                const isCorrectAnswer = correctAnswer === option
+
+                                                                return (
+                                                                    <div
+                                                                        key={option}
+                                                                        className={`p-4 rounded-xl border-2 transition-all ${isCorrectAnswer
+                                                                            ? 'bg-emerald-50 border-emerald-200 shadow-sm'
+                                                                            : isUserAnswer
+                                                                                ? 'bg-rose-50 border-rose-200'
+                                                                                : 'bg-white border-slate-100'
+                                                                            }`}
+                                                                    >
+                                                                        <div className="flex items-start gap-4">
+                                                                            <div
+                                                                                className={`w-9 h-9 rounded-lg font-black flex items-center justify-center text-sm shrink-0 shadow-sm ${isCorrectAnswer
+                                                                                    ? 'bg-emerald-600 text-white'
+                                                                                    : isUserAnswer
+                                                                                        ? 'bg-rose-600 text-white'
+                                                                                        : 'bg-slate-100 text-slate-500'
+                                                                                    }`}
+                                                                            >
+                                                                                {option.toUpperCase()}
                                                                             </div>
-                                                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                                                {isCorrectAnswer && (
-                                                                                    <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
-                                                                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                                                        </svg>
-                                                                                        ĐÁP ÁN ĐÚNG
-                                                                                    </div>
-                                                                                )}
-                                                                                {isUserAnswer && (
-                                                                                    <div className={`inline-flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-full ${isCorrectAnswer
-                                                                                        ? 'bg-blue-500 text-white'
-                                                                                        : 'bg-orange-500 text-white'
-                                                                                        }`}>
-                                                                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                                                                        </svg>
-                                                                                        ĐÁP ÁN CỦA BẠN
-                                                                                    </div>
-                                                                                )}
+                                                                            <div className="flex-1 pt-1.5">
+                                                                                <div className={`text-sm leading-relaxed ${isCorrectAnswer
+                                                                                    ? 'text-emerald-900 font-semibold'
+                                                                                    : isUserAnswer
+                                                                                        ? 'text-rose-900 font-semibold'
+                                                                                        : 'text-slate-600'
+                                                                                    }`}>
+                                                                                    {answerText}
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                </div>
-                                                            )
-                                                        })}
+                                                                )
+                                                            })}
+                                                        </div>
                                                     </div>
+                                                )
+                                            })}
+
+                                        {/* Empty state if no wrong answers in this category */}
+                                        {questions.filter(q => q.phan_thi === activeModalTab && userAnswers[q.id] !== q.dap_an_dung).length === 0 && (
+                                            <div className="flex flex-col items-center justify-center h-full py-20 text-slate-400">
+                                                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                                                    <CheckCircle2 className="w-8 h-8 text-slate-300" />
                                                 </div>
-                                            )
-                                        })}
+                                                <p className="font-bold text-slate-500">Tuyệt vời!</p>
+                                                <p className="text-sm">Bạn không có câu sai nào trong phần này.</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Modal Footer */}
@@ -803,15 +826,7 @@ export default function ExamSessionPage() {
 
                     {/* Submit Button */}
                     <button
-                        onClick={() => {
-                            const unanswered = questions.filter(q => !userAnswers[q.id]).length
-                            if (unanswered > 0) {
-                                if (!confirm(`Bạn còn ${unanswered} câu chưa trả lời. Bạn có chắc muốn nộp bài?`)) {
-                                    return
-                                }
-                            }
-                            handleSubmit()
-                        }}
+                        onClick={() => setShowSubmitDialog(true)}
                         className="mt-4 w-full px-6 py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-500/30 flex items-center justify-center gap-2 flex-shrink-0"
                     >
                         <Send className="w-5 h-5" />
@@ -891,13 +906,23 @@ export default function ExamSessionPage() {
                         </span>
 
                         {currentIndex === questions.length - 1 ? (
-                            <button
-                                onClick={() => setShowSubmitDialog(true)}
-                                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg shadow-green-500/30"
-                            >
-                                <CheckCircle2 className="w-5 h-5" />
-                                Nộp bài
-                            </button>
+                            Object.keys(userAnswers).length === questions.length ? (
+                                <button
+                                    onClick={() => setShowSubmitDialog(true)}
+                                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg shadow-green-500/30"
+                                >
+                                    <CheckCircle2 className="w-5 h-5" />
+                                    Nộp bài
+                                </button>
+                            ) : (
+                                <button
+                                    disabled
+                                    className="flex items-center gap-2 px-6 py-3 bg-slate-100 text-slate-400 font-bold rounded-xl cursor-not-allowed transition-all"
+                                >
+                                    Câu tiếp
+                                    <ChevronRight className="w-5 h-5" />
+                                </button>
+                            )
                         ) : (
                             <button
                                 onClick={goNext}

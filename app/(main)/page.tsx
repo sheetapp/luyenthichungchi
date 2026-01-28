@@ -6,25 +6,25 @@ import { ChevronRight, BookOpen, Search, Filter, Award, Sparkles } from 'lucide-
 import { removeVietnameseTones } from '@/lib/utils/vietnamese'
 
 const CATEGORIES = [
-    'Thiết kế cơ - điện công trình - Hệ thống điện',
-    'Giám sát công tác lắp đặt thiết bị công trình',
-    'Giám sát công tác xây dựng công trình',
-    'Khảo sát địa chất công trình',
     'Khảo sát địa hình',
-    'Quản lý dự án đầu tư xây dựng',
+    'Khảo sát địa chất công trình',
+    'Thiết kế quy hoạch xây dựng',
+    'Thiết kế xây dựng công trình - Kết cấu công trình',
+    'Thiết kế xây dựng công trình - Công trình Khai thác mỏ',
+    'Thiết kế xây dựng công trình - Công trình Đường bộ',
+    'Thiết kế xây dựng công trình - Công trình Đường sắt',
+    'Thiết kế xây dựng công trình - Công trình Cầu - Hầm',
+    'Thiết kế xây dựng công trình - Công trình Đường thủy nội địa - Hàng hải',
+    'Thiết kế xây dựng công trình - Công trình Thủy lợi, đê điều',
+    'Thiết kế xây dựng công trình - Công trình Cấp nước - thoát nước',
+    'Thiết kế xây dựng công trình - Công trình Xử lý chất thải rắn',
+    'Thiết kế cơ - điện công trình - Hệ thống điện',
     'Thiết kế cơ - điện công trình - Hệ thống cấp - thoát nước công trình',
     'Thiết kế cơ - điện công trình - Hệ thống thông gió - cấp thoát nhiệt',
-    'Thiết kế quy hoạch xây dựng',
-    'Thiết kế xây dựng công trình - Công trình Cầu - Hầm',
-    'Thiết kế xây dựng công trình - Công trình Khai thác mỏ',
-    'Thiết kế xây dựng công trình - Công trình đường sắt',
-    'Thiết kế xây dựng công trình - Kết cấu công trình',
-    'TK XD công trình - Công trình Thủy lợi, đê điều',
-    'TK XD công trình - Công trình Xử lý chất thải rắn',
-    'TK XD công trình - Công trình đường bộ',
-    'TK XD công trình - Công trình đường thủy nội địa - Hàng hải',
-    'TKXD công trình - Công trình Cấp nước-thoát nước-hạng I',
-    'Định giá Xây dựng',
+    'Giám sát công tác xây dựng công trình',
+    'Giám sát công tác lắp đặt thiết bị công trình',
+    'Định giá xây dựng',
+    'Quản lý dự án đầu tư xây dựng'
 ]
 
 const HANG_OPTIONS = ['Hạng I', 'Hạng II', 'Hạng III']
@@ -80,8 +80,8 @@ export default function MainHomePage() {
                             key={hang}
                             onClick={() => setSelectedHang(hang)}
                             className={`px-8 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${selectedHang === hang
-                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
-                                    : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-100'
+                                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
                                 }`}
                         >
                             {hang}

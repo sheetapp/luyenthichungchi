@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { AuthWall } from '@/components/auth/AuthWall'
@@ -9,6 +9,7 @@ import {
     BookOpen, Target, CheckCircle, TrendingUp
 } from 'lucide-react'
 import { removeVietnameseTones } from '@/lib/utils/vietnamese'
+import { useAppStore } from '@/lib/store/useAppStore'
 
 interface Question {
     id: number
@@ -38,28 +39,28 @@ const PHAN_THI_OPTIONS = ['Câu hỏi Pháp luật chung', 'Câu hỏi Pháp lu�
 
 const CHUYEN_NGANH_OPTIONS = [
     'Tất cả',
-    'Thiết kế cơ - điện công trình - Hệ thống điện',
-    'Giám sát công tác lắp đặt thiết bị công trình',
-    'Giám sát công tác xây dựng công trình',
-    'Khảo sát địa chất công trình',
     'Khảo sát địa hình',
-    'Quản lý dự án đầu tư xây dựng',
+    'Khảo sát địa chất công trình',
+    'Thiết kế quy hoạch xây dựng',
+    'Thiết kế xây dựng công trình - Kết cấu công trình',
+    'Thiết kế xây dựng công trình - Công trình Khai thác mỏ',
+    'Thiết kế xây dựng công trình - Công trình Đường bộ',
+    'Thiết kế xây dựng công trình - Công trình Đường sắt',
+    'Thiết kế xây dựng công trình - Công trình Cầu - Hầm',
+    'Thiết kế xây dựng công trình - Công trình Đường thủy nội địa - Hàng hải',
+    'Thiết kế xây dựng công trình - Công trình Thủy lợi, đê điều',
+    'Thiết kế xây dựng công trình - Công trình Cấp nước - thoát nước',
+    'Thiết kế xây dựng công trình - Công trình Xử lý chất thải rắn',
+    'Thiết kế cơ - điện công trình - Hệ thống điện',
     'Thiết kế cơ - điện công trình - Hệ thống cấp - thoát nước công trình',
     'Thiết kế cơ - điện công trình - Hệ thống thông gió - cấp thoát nhiệt',
-    'Thiết kế quy hoạch xây dựng',
-    'Thiết kế xây dựng công trình - Công trình Cầu - Hầm',
-    'Thiết kế xây dựng công trình - Công trình Khai thác mỏ',
-    'Thiết kế xây dựng công trình - Công trình đường sắt',
-    'Thiết kế xây dựng công trình - Kết cấu công trình',
-    'TK XD công trình - Công trình Thủy lợi, đê điều',
-    'TK XD công trình - Công trình Xử lý chất thải rắn',
-    'TK XD công trình - Công trình đường bộ',
-    'TK XD công trình - Công trình đường thủy nội địa - Hàng hải',
-    'TKXD công trình - Công trình Cấp nước-thoát nước-hạng I',
-    'Định giá Xây dựng',
+    'Giám sát công tác xây dựng công trình',
+    'Giám sát công tác lắp đặt thiết bị công trình',
+    'Định giá xây dựng',
+    'Quản lý dự án đầu tư xây dựng'
 ]
 
-export default function OnTapPage() {
+function OnTapContent() {
     const searchParams = useSearchParams()
     const reviewMode = searchParams.get('mode') === 'exam_review'
     const resultId = searchParams.get('resultId')
@@ -81,15 +82,51 @@ export default function OnTapPage() {
     const [practiceHistory, setPracticeHistory] = useState<PracticeHistory>({})
     const [phanThiCounts, setPhanThiCounts] = useState<Record<string, number>>({})
 
-    // Check authentication
+    // Check authentication and load preferences
     useEffect(() => {
         const checkAuth = async () => {
             const { data: { user } } = await supabase.auth.getUser()
             setUser(user)
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('preferences')
+                    .eq('id', user.id)
+                    .single()
+
+                if (profile?.preferences) {
+                    if (profile.preferences.rank) setSelectedHang(profile.preferences.rank)
+                    if (profile.preferences.specialty) setSelectedChuyenNganh(profile.preferences.specialty)
+                }
+            }
             setAuthLoading(false)
         }
         checkAuth()
     }, [])
+
+    // Sync preferences back to profile and global store when changed
+    useEffect(() => {
+        if (!user || authLoading) return
+
+        const syncPrefs = async () => {
+            // Update Supabase
+            await supabase
+                .from('profiles')
+                .update({
+                    preferences: {
+                        rank: selectedHang,
+                        specialty: selectedChuyenNganh
+                    }
+                })
+                .eq('id', user.id)
+
+            // Update Global Store
+            useAppStore.getState().setSelectedHang(selectedHang)
+            useAppStore.getState().setSelectedCategory(selectedChuyenNganh)
+        }
+
+        syncPrefs()
+    }, [selectedHang, selectedChuyenNganh, user, authLoading])
 
     // Fetch counts for all phan thi in current category
     useEffect(() => {
@@ -209,9 +246,31 @@ export default function OnTapPage() {
 
         fetchData()
         setCurrentIndex(0)
-        setSelectedAnswer('')
-        setFeedback(null)
     }, [selectedHang, selectedChuyenNganh, selectedPhanThi, searchQuery, user, reviewMode, resultId])
+
+    // Sync state when current question changes or history is updated
+    useEffect(() => {
+        const q = questions[currentIndex]
+        if (!q) return
+
+        const history = practiceHistory[q.id]
+        if (history && history.attempts > 0) {
+            // Only update if different to avoid redundant re-renders during active answering
+            if (selectedAnswer !== history.lastAnswer) {
+                setSelectedAnswer(history.lastAnswer)
+                setFeedback({
+                    isCorrect: history.isCorrect,
+                    message: history.isCorrect ? 'Đã trả lời đúng!' : 'Đã trả lời sai!'
+                })
+            }
+        } else {
+            // Reset if no history exists for this question (prevents carrying over previous question's state)
+            if (selectedAnswer !== '') {
+                setSelectedAnswer('')
+                setFeedback(null)
+            }
+        }
+    }, [currentIndex, questions, practiceHistory])
 
     // Sync practice history to Supabase (Debounced)
     useEffect(() => {
@@ -277,23 +336,17 @@ export default function OnTapPage() {
     function handleNext() {
         if (currentIndex < questions.length - 1) {
             setCurrentIndex(prev => prev + 1)
-            setSelectedAnswer('')
-            setFeedback(null)
         }
     }
 
     function handlePrevious() {
         if (currentIndex > 0) {
             setCurrentIndex(prev => prev - 1)
-            setSelectedAnswer('')
-            setFeedback(null)
         }
     }
 
     function jumpToQuestion(index: number) {
         setCurrentIndex(index)
-        setSelectedAnswer('')
-        setFeedback(null)
     }
 
     function getQuestionButtonClass(index: number, question: Question) {
@@ -626,5 +679,20 @@ export default function OnTapPage() {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function OnTapPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+                <div className="text-center space-y-4">
+                    <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
+                    <p className="text-slate-500 font-bold animate-pulse uppercase tracking-widest text-xs">Đang tải dữ liệu ôn tập...</p>
+                </div>
+            </div>
+        }>
+            <OnTapContent />
+        </Suspense>
     )
 }
