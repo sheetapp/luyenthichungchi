@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase/client'
 import { AuthWall } from '@/components/auth/AuthWall'
 import {
     ChevronLeft, ChevronRight, Search,
-    BookOpen, Target, CheckCircle, TrendingUp
+    BookOpen, Target, CheckCircle, TrendingUp, RotateCcw
 } from 'lucide-react'
 import { removeVietnameseTones } from '@/lib/utils/vietnamese'
 import { useAppStore } from '@/lib/store/useAppStore'
@@ -81,6 +81,7 @@ function OnTapContent() {
     const [loading, setLoading] = useState(false)
     const [practiceHistory, setPracticeHistory] = useState<PracticeHistory>({})
     const [phanThiCounts, setPhanThiCounts] = useState<Record<string, number>>({})
+    const [isShuffled, setIsShuffled] = useState(false)
 
     // Check authentication and load preferences
     useEffect(() => {
@@ -247,6 +248,63 @@ function OnTapContent() {
         fetchData()
         setCurrentIndex(0)
     }, [selectedHang, selectedChuyenNganh, selectedPhanThi, searchQuery, user, reviewMode, resultId])
+
+    // Handle Shuffling
+    useEffect(() => {
+        if (questions.length === 0) return
+
+        if (isShuffled) {
+            const shuffled = [...questions].sort(() => Math.random() - 0.5)
+            setQuestions(shuffled)
+            setCurrentIndex(0)
+        } else {
+            // Re-apply original sorting (already handled by the fetch effect normally, 
+            // but we need to re-fetch/re-filter from allQuestions to restore order)
+            let filteredData = allQuestions
+            if (searchQuery.trim()) {
+                const searchNormalized = removeVietnameseTones(searchQuery.trim().toLowerCase())
+                filteredData = allQuestions.filter(q =>
+                    removeVietnameseTones(q.cau_hoi.toLowerCase()).includes(searchNormalized)
+                )
+            }
+            setQuestions(filteredData)
+            setCurrentIndex(0)
+        }
+    }, [isShuffled])
+
+    // Keyboard Shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Disable when typing in search
+            if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') {
+                return
+            }
+
+            const q = questions[currentIndex]
+            if (!q) return
+
+            // 1-4 for a-d
+            if (['1', '2', '3', '4'].includes(e.key) && !feedback) {
+                const keyMap: Record<string, string> = { '1': 'a', '2': 'b', '3': 'c', '4': 'd' }
+                const choice = keyMap[e.key]
+                handleAnswerSelect(choice)
+            }
+
+            // Navigation
+            if (e.key === 'ArrowRight' || e.key === 'Enter') {
+                if (currentIndex < questions.length - 1) {
+                    setCurrentIndex(prev => prev + 1)
+                }
+            } else if (e.key === 'ArrowLeft') {
+                if (currentIndex > 0) {
+                    setCurrentIndex(prev => prev - 1)
+                }
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [currentIndex, questions, feedback])
 
     // Sync state when current question changes or history is updated
     useEffect(() => {
@@ -443,6 +501,18 @@ function OnTapContent() {
                         </option>
                     ))}
                 </select>
+
+                <button
+                    onClick={() => setIsShuffled(!isShuffled)}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all border ${isShuffled
+                        ? 'bg-orange-500 border-orange-600 text-white shadow-lg'
+                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
+                >
+                    <RotateCcw className={`w-4 h-4 ${isShuffled ? 'animate-spin-slow' : ''}`} />
+                    <span>Trộn câu hỏi</span>
+                    {isShuffled && <span className="w-2 h-2 bg-white rounded-full animate-pulse" />}
+                </button>
 
                 <div className="relative flex-1 ml-auto">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -659,11 +729,16 @@ function OnTapContent() {
                                                     onChange={() => handleAnswerSelect(option)}
                                                     className="mt-1 w-5 h-5 text-blue-600"
                                                 />
-                                                <div className="flex-1">
+                                                <div className="flex-1 flex items-center justify-between gap-4">
                                                     <span className={`font-medium ${showCorrect ? 'text-green-700' : showWrong ? 'text-red-700' : 'text-slate-900'
                                                         }`}>
                                                         {option.toUpperCase()}. {optionText}
                                                     </span>
+                                                    {!feedback && (
+                                                        <span className="shrink-0 w-6 h-6 rounded-md bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] font-black text-slate-400 group-hover:text-blue-500 group-hover:border-blue-200">
+                                                            {{ 'a': '1', 'b': '2', 'c': '3', 'd': '4' }[option]}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </label>
                                         )
