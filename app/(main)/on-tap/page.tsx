@@ -10,6 +10,9 @@ import {
 } from 'lucide-react'
 import { removeVietnameseTones } from '@/lib/utils/vietnamese'
 import { useAppStore } from '@/lib/store/useAppStore'
+import { ReportModal } from '@/components/practice/ReportModal'
+import { GuideModal } from '@/components/practice/GuideModal'
+import { AlertTriangle, HelpCircle } from 'lucide-react'
 
 interface Question {
     id: number
@@ -86,6 +89,10 @@ function OnTapContent() {
     // Keyboard Navigation States
     const [kbArea, setKbArea] = useState<'sidebar' | 'main'>('sidebar')
     const [kbFocusIndex, setKbFocusIndex] = useState(0)
+
+    // Report Modal State
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false)
+    const [isGuideOpen, setIsGuideOpen] = useState(false)
 
     // Check authentication and load preferences
     useEffect(() => {
@@ -284,6 +291,13 @@ function OnTapContent() {
                 return
             }
 
+            // Report Modal Toggle: 'r' key
+            if (e.key.toLowerCase() === 'r' && !isReportModalOpen) {
+                e.preventDefault()
+                setIsReportModalOpen(true)
+                return
+            }
+
             // Navigation Keys handling with Prevent Default
             if (['Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Enter'].includes(e.key)) {
                 e.preventDefault()
@@ -352,7 +366,7 @@ function OnTapContent() {
 
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [kbArea, kbFocusIndex, questions, currentIndex, feedback])
+    }, [kbArea, kbFocusIndex, questions, currentIndex, feedback, isReportModalOpen])
 
     // Sync state when current question changes or history is updated
     useEffect(() => {
@@ -519,9 +533,34 @@ function OnTapContent() {
     return (
         <div className="min-h-screen py-6 space-y-6 flex flex-col">
             {/* Header */}
-            <div className="flex-shrink-0 px-6">
-                <h1 className="text-3xl font-black text-slate-900 mb-2">Hệ thống ôn tập</h1>
-                <p className="text-slate-600">Lựa chọn hạng và lĩnh vực để bắt đầu học</p>
+            <div className="flex-shrink-0 px-6 flex items-start justify-between gap-6">
+                <div className="space-y-1">
+                    <div className="flex items-center gap-4">
+                        <h1 className="text-3xl font-black text-slate-900 mb-2">Hệ thống ôn tập</h1>
+                        <button
+                            onClick={() => setIsGuideOpen(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-black uppercase tracking-widest border border-blue-100 hover:bg-blue-100 transition-all hover:shadow-lg hover:shadow-blue-500/10 active:scale-95 mb-1.5"
+                        >
+                            <HelpCircle className="w-4 h-4" />
+                            Xem hướng dẫn
+                        </button>
+                    </div>
+                    <p className="text-slate-600">Lựa chọn hạng và lĩnh vực để bắt đầu học</p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setIsShuffled(!isShuffled)}
+                        className={`flex items-center gap-2.5 px-6 py-3.5 rounded-2xl text-sm font-black transition-all border-2 ${isShuffled
+                            ? 'bg-orange-500 border-orange-600 text-white shadow-xl shadow-orange-500/20 active:scale-95'
+                            : 'bg-white border-slate-100 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                            }`}
+                    >
+                        <RotateCcw className={`w-5 h-5 ${isShuffled ? 'animate-spin-slow' : ''}`} />
+                        <span>Trộn câu hỏi</span>
+                        {isShuffled && <span className="w-2.5 h-2.5 bg-white rounded-full animate-pulse" />}
+                    </button>
+                </div>
             </div>
 
             {/* Top Controls */}
@@ -552,18 +591,6 @@ function OnTapContent() {
                         </option>
                     ))}
                 </select>
-
-                <button
-                    onClick={() => setIsShuffled(!isShuffled)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all border ${isShuffled
-                        ? 'bg-orange-500 border-orange-600 text-white shadow-lg'
-                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}
-                >
-                    <RotateCcw className={`w-4 h-4 ${isShuffled ? 'animate-spin-slow' : ''}`} />
-                    <span>Trộn câu hỏi</span>
-                    {isShuffled && <span className="w-2 h-2 bg-white rounded-full animate-pulse" />}
-                </button>
 
                 <div className="relative flex-1 ml-auto">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -747,9 +774,19 @@ function OnTapContent() {
                                         Câu {currentQuestion.stt || currentIndex + 1}
                                     </span>
                                     <div className="flex-1">
-                                        <p className="text-slate-900 font-bold leading-relaxed">
-                                            {currentQuestion.cau_hoi}
-                                        </p>
+                                        <div className="flex items-start justify-between gap-4 mb-2">
+                                            <p className="text-slate-900 font-bold leading-relaxed">
+                                                {currentQuestion.cau_hoi}
+                                            </p>
+                                            <button
+                                                onClick={() => setIsReportModalOpen(true)}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-orange-100 hover:bg-orange-100 transition-all flex-shrink-0"
+                                                title="Báo cáo sai sót (Phím R)"
+                                            >
+                                                <AlertTriangle className="w-3 h-3" />
+                                                Báo sai
+                                            </button>
+                                        </div>
                                         <span className="text-slate-400 text-sm font-medium mt-2 inline-block">
                                             ({currentIndex + 1} / {questions.length})
                                         </span>
@@ -810,7 +847,30 @@ function OnTapContent() {
                     )}
                 </div>
             </div>
-        </div>
+
+            {/* Modal Components */}
+            {
+                currentQuestion && (
+                    <ReportModal
+                        isOpen={isReportModalOpen}
+                        onClose={() => setIsReportModalOpen(false)}
+                        user={user}
+                        question={{
+                            id: currentQuestion.id,
+                            stt: currentQuestion.stt || currentIndex + 1,
+                            hang: currentQuestion.hang,
+                            phan_thi: currentQuestion.phan_thi,
+                            cau_hoi: currentQuestion.cau_hoi
+                        }}
+                    />
+                )
+            }
+
+            <GuideModal
+                isOpen={isGuideOpen}
+                onClose={() => setIsGuideOpen(false)}
+            />
+        </div >
     )
 }
 

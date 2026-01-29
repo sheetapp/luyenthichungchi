@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { AuthWall } from '@/components/auth/AuthWall'
-import { FileText, ChevronRight, Search, Play, AlertCircle, Clock, Award, BarChart3 } from 'lucide-react'
+import { FileText, ChevronRight, Search, Play, AlertCircle, Clock, Award, BarChart3, HelpCircle } from 'lucide-react'
 import { useAppStore } from '@/lib/store/useAppStore'
 import Link from 'next/link'
 import { removeVietnameseTones } from '@/lib/utils/vietnamese'
+import { GuideModal } from '@/components/practice/GuideModal'
 
 const HANG_TABS = ['Hạng I', 'Hạng II', 'Hạng III']
 
@@ -40,6 +41,7 @@ export default function ThiThuPage() {
     const [searchQuery, setSearchQuery] = useState('')
     const [mounted, setMounted] = useState(false)
     const [showSticky, setShowSticky] = useState(false)
+    const [isGuideOpen, setIsGuideOpen] = useState(false)
 
     // Check authentication
     useEffect(() => {
@@ -139,12 +141,23 @@ export default function ThiThuPage() {
             )}
 
             {/* Header */}
-            <div className="px-6">
-                <h1 className="text-3xl font-black text-slate-900 mb-2">Thi thử sát hạch</h1>
-                <p className="text-slate-600 flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    Mô phỏng kỳ thi thực tế theo Nghị định 175/2024/NĐ-CP
-                </p>
+            <div className="px-6 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                <div>
+                    <div className="flex items-center gap-4 mb-2">
+                        <h1 className="text-3xl font-black text-slate-900">Thi thử sát hạch</h1>
+                        <button
+                            onClick={() => setIsGuideOpen(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-black uppercase tracking-widest border border-blue-100 hover:bg-blue-100 transition-all active:scale-95 shadow-sm"
+                        >
+                            <HelpCircle className="w-4 h-4" />
+                            Xem hướng dẫn
+                        </button>
+                    </div>
+                    <p className="text-slate-600 flex items-center gap-2">
+                        <FileText className="w-4 h-4" />
+                        Mô phỏng kỳ thi thực tế theo Nghị định 175/2024/NĐ-CP
+                    </p>
+                </div>
             </div>
 
             {/* Exam Rules */}
@@ -264,6 +277,12 @@ export default function ThiThuPage() {
                     </div>
                 )}
             </div>
+
+            <GuideModal
+                isOpen={isGuideOpen}
+                onClose={() => setIsGuideOpen(false)}
+                type="exam"
+            />
         </div>
     )
 }

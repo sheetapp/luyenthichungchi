@@ -3,11 +3,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import {
-    Clock, ChevronLeft, ChevronRight, Send,
+    Clock, ChevronLeft, ChevronRight, Send, HelpCircle,
     ArrowLeft, AlertCircle, CheckCircle2, XCircle, FileText
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { useAppStore } from '@/lib/store/useAppStore'
+import { GuideModal } from '@/components/practice/GuideModal'
 
 const EXAM_TIME = 30 * 60 // 30 minutes in seconds
 
@@ -52,6 +53,7 @@ export default function ExamSessionPage() {
     const [showWrongAnswers, setShowWrongAnswers] = useState(false)
     const [showSubmitDialog, setShowSubmitDialog] = useState(false)
     const [activeModalTab, setActiveModalTab] = useState('Câu hỏi Pháp luật chung')
+    const [isGuideOpen, setIsGuideOpen] = useState(false)
 
     const timerRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -256,6 +258,7 @@ export default function ExamSessionPage() {
     const goPrev = () => currentIndex > 0 && setCurrentIndex(currentIndex - 1)
     const jumpTo = (index: number) => setCurrentIndex(index)
 
+
     if (!mounted || loading) return (
         <div className="min-h-screen py-6 flex flex-col items-center justify-center">
             <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
@@ -278,6 +281,7 @@ export default function ExamSessionPage() {
 
     const currentQ = questions[currentIndex]
     const isLawQuestion = currentIndex < 10
+
 
     // Results Screen
     if (isFinished) {
@@ -761,6 +765,14 @@ export default function ExamSessionPage() {
                     <Clock className="w-5 h-5" />
                     {formatTime(timeLeft)}
                 </div>
+
+                <button
+                    onClick={() => setIsGuideOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-black uppercase tracking-widest border border-blue-100 hover:bg-blue-100 transition-all active:scale-95"
+                >
+                    <HelpCircle className="w-4 h-4" />
+                    Xem hướng dẫn
+                </button>
             </div>
 
             {/* Exam Info */}
@@ -856,9 +868,8 @@ export default function ExamSessionPage() {
                                 </div>
                             </div>
 
-                            {/* Answer Options */}
                             <div className="space-y-3">
-                                {['a', 'b', 'c', 'd'].map((option) => {
+                                {['a', 'b', 'c', 'd'].map((option, index) => {
                                     const optionText = currentQ[`dap_an_${option}` as keyof Question] as string
                                     const isSelected = userAnswers[currentQ.id] === option
 
@@ -993,6 +1004,11 @@ export default function ExamSessionPage() {
                     )}
                 </div>
             </div>
+            <GuideModal
+                isOpen={isGuideOpen}
+                onClose={() => setIsGuideOpen(false)}
+                type="exam"
+            />
         </div>
     )
 }
