@@ -83,6 +83,10 @@ function OnTapContent() {
     const [phanThiCounts, setPhanThiCounts] = useState<Record<string, number>>({})
     const [isShuffled, setIsShuffled] = useState(false)
 
+    // Keyboard Navigation States
+    const [kbArea, setKbArea] = useState<'sidebar' | 'main'>('sidebar')
+    const [kbFocusIndex, setKbFocusIndex] = useState(0)
+
     // Check authentication and load preferences
     useEffect(() => {
         const checkAuth = async () => {
@@ -272,39 +276,83 @@ function OnTapContent() {
         }
     }, [isShuffled])
 
-    // Keyboard Shortcuts
+    // Standardized Keyboard Navigation Logic
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            // Disable when typing in search
+            // Disable when typing in search or other inputs
             if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') {
                 return
             }
 
-            const q = questions[currentIndex]
-            if (!q) return
+            // Navigation Keys handling with Prevent Default
+            if (['Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Enter'].includes(e.key)) {
+                e.preventDefault()
 
-            // 1-4 for a-d
-            if (['1', '2', '3', '4'].includes(e.key) && !feedback) {
-                const keyMap: Record<string, string> = { '1': 'a', '2': 'b', '3': 'c', '4': 'd' }
-                const choice = keyMap[e.key]
-                handleAnswerSelect(choice)
-            }
-
-            // Navigation
-            if (e.key === 'ArrowRight' || e.key === 'Enter') {
-                if (currentIndex < questions.length - 1) {
-                    setCurrentIndex(prev => prev + 1)
+                // Area Toggling with Tab
+                if (e.key === 'Tab') {
+                    setKbArea(prev => {
+                        const newArea = prev === 'sidebar' ? 'main' : 'sidebar'
+                        if (newArea === 'sidebar') {
+                            setKbFocusIndex(currentIndex)
+                        } else {
+                            setKbFocusIndex(0)
+                        }
+                        return newArea
+                    })
+                    return
                 }
-            } else if (e.key === 'ArrowLeft') {
-                if (currentIndex > 0) {
-                    setCurrentIndex(prev => prev - 1)
+
+                if (kbArea === 'sidebar') {
+                    const rowCount = 6
+                    switch (e.key) {
+                        case 'ArrowRight':
+                            if (kbFocusIndex < questions.length - 1) setKbFocusIndex(prev => prev + 1)
+                            break
+                        case 'ArrowLeft':
+                            if (kbFocusIndex > 0) setKbFocusIndex(prev => prev - 1)
+                            break
+                        case 'ArrowDown':
+                            if (kbFocusIndex + rowCount < questions.length) setKbFocusIndex(prev => prev + rowCount)
+                            break
+                        case 'ArrowUp':
+                            if (kbFocusIndex - rowCount >= 0) setKbFocusIndex(prev => prev - rowCount)
+                            break
+                        case ' ':
+                        case 'Enter':
+                            jumpToQuestion(kbFocusIndex)
+                            setKbArea('main')
+                            setKbFocusIndex(0)
+                            break
+                    }
+                } else { // kbArea === 'main'
+                    switch (e.key) {
+                        case 'ArrowUp':
+                            if (kbFocusIndex > 0) setKbFocusIndex(prev => prev - 1)
+                            break
+                        case 'ArrowDown':
+                            if (kbFocusIndex < 3) setKbFocusIndex(prev => prev + 1)
+                            break
+                        case 'ArrowRight':
+                            handleNext()
+                            setKbFocusIndex(0)
+                            break
+                        case 'ArrowLeft':
+                            handlePrevious()
+                            setKbFocusIndex(0)
+                            break
+                        case ' ':
+                        case 'Enter':
+                            const options = ['a', 'b', 'c', 'd']
+                            handleAnswerSelect(options[kbFocusIndex])
+                            break
+                    }
                 }
             }
         }
 
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [currentIndex, questions, feedback])
+    }, [kbArea, kbFocusIndex, questions, currentIndex, feedback])
 
     // Sync state when current question changes or history is updated
     useEffect(() => {
@@ -405,28 +453,31 @@ function OnTapContent() {
 
     function jumpToQuestion(index: number) {
         setCurrentIndex(index)
+        setKbFocusIndex(index)
     }
 
     function getQuestionButtonClass(index: number, question: Question) {
-        const baseClass = "w-10 h-10 rounded-lg font-bold transition-all text-sm flex items-center justify-center"
+        const baseClass = "w-10 h-10 rounded-lg font-bold transition-all text-sm flex items-center justify-center relative"
+        const isKbFocused = kbArea === 'sidebar' && kbFocusIndex === index
+        const focusRing = isKbFocused ? "ring-4 ring-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] z-10" : ""
 
         if (index === currentIndex) {
-            return `${baseClass} bg-blue-600 text-white ring-2 ring-blue-400`
+            return `${baseClass} bg-blue-600 text-white ring-2 ring-blue-400 ${focusRing}`
         }
 
         const history = practiceHistory[question.id]
         if (!history || history.attempts === 0) {
-            return `${baseClass} bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer`
+            return `${baseClass} bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer ${focusRing}`
         }
 
         if (history.wrongAttempts > 2) {
-            return `${baseClass} bg-orange-500 text-white cursor-pointer`
+            return `${baseClass} bg-orange-500 text-white cursor-pointer ${focusRing}`
         }
 
         if (history.isCorrect) {
-            return `${baseClass} bg-green-500 text-white cursor-pointer`
+            return `${baseClass} bg-green-500 text-white cursor-pointer ${focusRing}`
         } else {
-            return `${baseClass} bg-red-500 text-white cursor-pointer`
+            return `${baseClass} bg-red-500 text-white cursor-pointer ${focusRing}`
         }
     }
 
@@ -667,6 +718,10 @@ function OnTapContent() {
                                         onClick={() => jumpToQuestion(index)}
                                         className={getQuestionButtonClass(index, q)}
                                         title={`Câu ${q.stt || index + 1}`}
+                                        onMouseEnter={() => {
+                                            if (kbArea !== 'sidebar') setKbArea('sidebar')
+                                            setKbFocusIndex(index)
+                                        }}
                                     >
                                         {q.stt || index + 1}
                                     </button>
@@ -709,10 +764,13 @@ function OnTapContent() {
                                         const showCorrect = feedback && isCorrect
                                         const showWrong = feedback && isSelected && !isCorrect
 
+                                        const isKbFocused = kbArea === 'main' && kbFocusIndex === ['a', 'b', 'c', 'd'].indexOf(option)
+                                        const focusRing = isKbFocused ? 'ring-4 ring-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] z-10' : ''
+
                                         return (
                                             <label
                                                 key={option}
-                                                className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${showCorrect
+                                                className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${focusRing} ${showCorrect
                                                     ? 'border-green-500 bg-green-50'
                                                     : showWrong
                                                         ? 'border-red-500 bg-red-50'
@@ -720,6 +778,10 @@ function OnTapContent() {
                                                             ? 'border-blue-500 bg-blue-50'
                                                             : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                                                     }`}
+                                                onMouseEnter={() => {
+                                                    setKbArea('main')
+                                                    setKbFocusIndex(['a', 'b', 'c', 'd'].indexOf(option))
+                                                }}
                                             >
                                                 <input
                                                     type="radio"
@@ -734,11 +796,6 @@ function OnTapContent() {
                                                         }`}>
                                                         {option.toUpperCase()}. {optionText}
                                                     </span>
-                                                    {!feedback && (
-                                                        <span className="shrink-0 w-6 h-6 rounded-md bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] font-black text-slate-400 group-hover:text-blue-500 group-hover:border-blue-200">
-                                                            {{ 'a': '1', 'b': '2', 'c': '3', 'd': '4' }[option]}
-                                                        </span>
-                                                    )}
                                                 </div>
                                             </label>
                                         )
