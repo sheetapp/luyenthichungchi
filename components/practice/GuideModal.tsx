@@ -12,49 +12,49 @@ export function GuideModal({ isOpen, onClose, type = 'practice' }: GuideModalPro
     if (!isOpen) return null
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/20 backdrop-blur-md animate-in fade-in duration-300">
+            <div className="bg-white/90 backdrop-blur-2xl w-full max-w-2xl rounded-[32px] shadow-2xl border border-white/40 overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col transform">
                 {/* Header */}
-                <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-blue-50 to-white flex-shrink-0">
+                <div className="p-8 border-b border-black/5 flex items-center justify-between bg-white/50 flex-shrink-0">
                     <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-500/20">
+                        <div className="w-14 h-14 bg-[#007AFF] rounded-[16px] flex items-center justify-center shadow-lg shadow-blue-500/20">
                             <Zap className="w-7 h-7 text-white" />
                         </div>
                         <div>
-                            <h3 className="text-2xl font-black text-slate-900">
+                            <h3 className="text-2xl font-semibold text-[#1d1d1f] tracking-tight">
                                 {type === 'practice' ? 'Hướng dẫn học "Rảnh tay"' : 'Hướng dẫn thi "Rảnh tay"'}
                             </h3>
-                            <p className="text-slate-500 font-medium">Làm chủ hệ thống chỉ bằng bàn phím</p>
+                            <p className="text-[#86868b] text-[15px] font-medium">Làm chủ hệ thống chỉ bằng bàn phím</p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-3 hover:bg-slate-100 rounded-xl transition-colors"
+                        className="w-10 h-10 flex items-center justify-center hover:bg-black/5 rounded-full transition-colors text-[#86868b]"
                     >
-                        <X className="w-6 h-6 text-slate-400" />
+                        <X className="w-6 h-6" />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-8 space-y-10">
+                <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
                     {/* Section 1: Intro */}
                     <div className="flex gap-6 items-start">
-                        <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center shrink-0">
-                            <Keyboard className="w-6 h-6 text-slate-600" />
+                        <div className="w-12 h-12 bg-[#F5F5F7] rounded-full flex items-center justify-center shrink-0">
+                            <Keyboard className="w-6 h-6 text-[#1d1d1f]" />
                         </div>
                         <div className="space-y-2">
-                            <h4 className="text-lg font-black text-slate-900">Hệ thống điều hướng thông minh</h4>
-                            <p className="text-slate-500 font-medium leading-relaxed">
+                            <h4 className="text-lg font-semibold text-[#1d1d1f] tracking-tight">Hệ thống điều hướng thông minh</h4>
+                            <p className="text-[#86868b] text-[15px] leading-relaxed font-medium">
                                 Bạn có thể hoàn thành toàn bộ bài {type === 'practice' ? 'ôn tập' : 'thi thử'} mà không cần dùng đến chuột. Hệ thống tự động đồng bộ tiêu điểm giữa chuột và bàn phím.
                             </p>
                         </div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-8">
+                    <div className="grid md:grid-cols-2 gap-6">
                         {/* Short-cuts Card 1 */}
-                        <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 space-y-4">
-                            <h5 className="flex items-center gap-2 text-sm font-black text-blue-600 uppercase tracking-widest">
-                                <Zap className="w-4 h-4" /> Thao tác cơ bản
+                        <div className="p-6 bg-white border border-black/5 rounded-[24px] shadow-sm space-y-4">
+                            <h5 className="flex items-center gap-2 text-[10px] font-bold text-[#007AFF] uppercase tracking-widest">
+                                <Zap className="w-3.5 h-3.5" /> Thao tác cơ bản
                             </h5>
                             <div className="space-y-3">
                                 <ShortcutItem keys={['Tab']} label="Chuyển vùng (Câu hỏi ↔ Trả lời)" />
@@ -64,12 +64,12 @@ export function GuideModal({ isOpen, onClose, type = 'practice' }: GuideModalPro
                         </div>
 
                         {/* Short-cuts Card 2 */}
-                        <div className="p-6 bg-orange-50 rounded-[2rem] border border-orange-100 space-y-4">
-                            <h5 className="flex items-center gap-2 text-sm font-black text-orange-600 uppercase tracking-widest">
-                                <Zap className="w-4 h-4" /> Nâng cao
+                        <div className="p-6 bg-white border border-black/5 rounded-[24px] shadow-sm space-y-4">
+                            <h5 className="flex items-center gap-2 text-[10px] font-bold text-[#FF9500] uppercase tracking-widest">
+                                <Zap className="w-3.5 h-3.5" /> Nâng cao
                             </h5>
                             <div className="space-y-3">
-                                <ShortcutItem keys={['←', '→']} label="Chuyển câu Trước / Sau (trong mục Trả lời)" color="orange" />
+                                <ShortcutItem keys={['←', '→']} label="Chuyển câu Trước / Sau" color="orange" />
                                 <ShortcutItem keys={['R']} label="Mở bảng Báo sai" color="orange" />
                             </div>
                         </div>
@@ -77,29 +77,29 @@ export function GuideModal({ isOpen, onClose, type = 'practice' }: GuideModalPro
 
                     {/* Step by Step Guide */}
                     <div className="space-y-6">
-                        <h4 className="text-lg font-black text-slate-900 px-1">Quy trình học tiêu chuẩn</h4>
-                        <div className="space-y-6 relative">
-                            <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-slate-100" />
+                        <h4 className="text-lg font-semibold text-[#1d1d1f] px-1 tracking-tight">Quy trình học tiêu chuẩn</h4>
+                        <div className="space-y-6 relative ml-1">
+                            <div className="absolute left-6 top-6 bottom-6 w-[2px] bg-[#F5F5F7]" />
 
                             <Step
                                 number={1}
                                 title="Chọn câu hỏi"
-                                desc="Dùng mũi tên di chuyển. Bấm Space để chọn. Tiêu điểm sẽ tự nhảy sang đáp án."
+                                desc="Dùng mũi tên để di chuyển trong danh sách. Bấm Space để chọn."
                             />
                             <Step
                                 number={2}
                                 title="Trả lời"
-                                desc="Dùng Lên/Xuống để chọn lỗi. Bấm Space để xác nhận đáp án."
+                                desc="Tiêu điểm tự động nhảy sang mục đáp án. Dùng Lên/Xuống để chọn lỗi."
                                 isLast
                             />
                         </div>
                     </div>
                 </div>
 
-                <div className="p-8 bg-slate-50 border-t border-slate-100 flex-shrink-0">
+                <div className="p-8 bg-white/50 border-t border-black/5 flex-shrink-0">
                     <button
                         onClick={onClose}
-                        className="w-full py-4 bg-slate-900 text-white font-black rounded-2xl hover:bg-slate-800 transition-all active:scale-[0.98] shadow-xl shadow-slate-900/10"
+                        className="w-full py-4 bg-[#1d1d1f] text-white font-semibold rounded-[16px] hover:bg-black transition-all active:scale-[0.98] shadow-lg shadow-black/10"
                     >
                         {type === 'practice' ? 'Tôi đã hiểu, bắt đầu học ngay!' : 'Tôi đã hiểu, bắt đầu thi ngay!'}
                     </button>

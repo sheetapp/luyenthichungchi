@@ -6,6 +6,8 @@ import { MobileHeader } from '@/components/layout/MobileHeader'
 import { FloatingActionButtons } from '@/components/layout/FloatingActionButtons'
 import { SidebarProvider, useSidebar } from '@/contexts/SidebarContext'
 
+import { ThemeProvider } from '@/components/theme/ThemeContext'
+
 function MainLayoutContent({
     children,
 }: {
@@ -13,7 +15,7 @@ function MainLayoutContent({
 }) {
     const { collapsed } = useSidebar()
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-apple-bg transition-colors duration-300">
             {/* PC Sidebar */}
             <Sidebar />
 
@@ -42,8 +44,10 @@ export default function MainLayout({
     children: React.ReactNode
 }) {
     return (
-        <SidebarProvider>
-            <MainLayoutContent>{children}</MainLayoutContent>
-        </SidebarProvider>
+        <ThemeProvider>
+            <SidebarProvider>
+                <MainLayoutContent>{children}</MainLayoutContent>
+            </SidebarProvider>
+        </ThemeProvider>
     )
 }

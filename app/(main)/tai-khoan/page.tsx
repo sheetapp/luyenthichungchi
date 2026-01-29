@@ -390,28 +390,28 @@ export default function AccountPage() {
                 />
             )}
 
-            <div className="px-6 py-6 space-y-8">
+            <div className="px-6 py-6 space-y-8 min-h-screen bg-apple-bg">
                 {/* Header Greeting - Standardized style */}
                 <div className="flex flex-col gap-1">
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+                    <h1 className="text-3xl font-black text-apple-text tracking-tight">
                         Quản lý tài khoản
                     </h1>
-                    <p className="text-slate-500 font-medium">
+                    <p className="text-apple-text-secondary font-medium">
                         Xem và cập nhật thông tin cá nhân, theo dõi kết quả thi của bạn.
                     </p>
                 </div>
 
                 <div className="grid lg:grid-cols-[300px_1fr] gap-8 items-stretch">
                     {/* CV-Style Left Sidebar - High Contrast & Professional */}
-                    <div className="bg-white rounded-xl overflow-hidden shadow-xl flex flex-col border border-slate-200 font-sans">
-                        {/* Header Section - Deep Navy for Authority */}
-                        <div className="pt-12 pb-8 px-8 text-center bg-[#1e293b] text-white">
+                    <div className="bg-apple-card rounded-2xl overflow-hidden shadow-apple-shadow flex flex-col border border-apple-border font-sans">
+                        {/* Header Section - Theme Aware with glass effect */}
+                        <div className="pt-12 pb-8 px-8 text-center bg-gradient-to-br from-apple-blue/10 to-transparent border-b border-apple-border">
                             <div className="relative inline-block mb-6">
-                                <div className="w-36 h-36 rounded-full border-4 border-white/20 shadow-2xl overflow-hidden mx-auto bg-slate-800 flex items-center justify-center">
+                                <div className="w-36 h-36 rounded-2xl border-4 border-apple-card shadow-apple-shadow overflow-hidden mx-auto bg-apple-bg flex items-center justify-center">
                                     {profile?.avata ? (
                                         <img src={profile.avata} alt="Avatar" className="w-full h-full object-cover" />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-700 text-white text-4xl font-black">
+                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-apple-blue to-[#0051FF] text-white text-4xl font-black">
                                             {profile?.display_name?.charAt(0) || profile?.email?.charAt(0) || 'U'}
                                         </div>
                                     )}
@@ -420,23 +420,23 @@ export default function AccountPage() {
 
                             {/* Professional Star Rating Shelf */}
                             <div className="flex flex-col items-center gap-5">
-                                <div className="flex items-center gap-1.5 px-6 py-2.5 bg-slate-900/50 backdrop-blur-xl rounded-lg border border-white/10 shadow-2xl">
+                                <div className="flex items-center gap-1.5 px-6 py-2.5 bg-apple-bg/50 backdrop-blur-xl rounded-xl border border-apple-border shadow-sm">
                                     {[...Array(5)].map((_, i) => (
                                         <Star
                                             key={i}
                                             className={`w-4 h-4 transition-all duration-700 ${i < badges.stars
                                                 ? 'fill-yellow-400 text-yellow-400 filter drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]'
-                                                : 'text-white/10 fill-white/5 stroke-[1.5px]'
+                                                : 'text-apple-text-secondary/20 fill-apple-text-secondary/10 stroke-[1.5px]'
                                                 }`}
                                         />
                                     ))}
                                 </div>
 
                                 <div className="space-y-2">
-                                    <h3 className="text-2xl font-black tracking-tight drop-shadow-lg uppercase leading-none">
+                                    <h3 className="text-2xl font-black tracking-tight text-apple-text drop-shadow-sm uppercase leading-none">
                                         {profile?.display_name || 'Học viên'}
                                     </h3>
-                                    <div className="inline-flex items-center px-4 py-1 bg-blue-600 text-white rounded text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-blue-500/20">
+                                    <div className="inline-flex items-center px-4 py-1.5 bg-apple-blue text-white rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-apple-blue/20">
                                         {badges.level}
                                     </div>
                                 </div>
@@ -444,12 +444,12 @@ export default function AccountPage() {
                         </div>
 
                         {/* White Info Section - MAXIMUM Contrast Typography */}
-                        <div className="flex-1 p-6 space-y-8 bg-white">
+                        <div className="flex-1 p-6 space-y-8 bg-apple-card">
                             {/* CONTACT section - Deep Black Text */}
                             <div className="space-y-5">
-                                <div className="flex items-center gap-2 border-b-2 border-slate-900 pb-2.5">
-                                    <Mail className="w-4 h-4 text-slate-900" />
-                                    <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.25em]">LIÊN HỆ</h4>
+                                <div className="flex items-center gap-2 border-b-2 border-apple-text pb-2.5">
+                                    <Mail className="w-4 h-4 text-apple-text" />
+                                    <h4 className="text-[11px] font-black text-apple-text uppercase tracking-[0.25em]">LIÊN HỆ</h4>
                                 </div>
                                 <div className="space-y-4 px-1">
                                     {[
@@ -457,8 +457,8 @@ export default function AccountPage() {
                                         { icon: Mail, label: profile?.email || 'user@example.com' },
                                         { icon: Briefcase, label: profile?.job_title || 'Chưa cập nhật' }
                                     ].map((item, i) => (
-                                        <div key={i} className="flex items-center gap-4 text-slate-900 group">
-                                            <div className="w-8 h-8 bg-slate-100 rounded-md flex items-center justify-center text-slate-900 group-hover:bg-slate-900 group-hover:text-white transition-all shadow-sm">
+                                        <div key={i} className="flex items-center gap-4 text-apple-text group">
+                                            <div className="w-8 h-8 bg-apple-bg rounded-xl flex items-center justify-center text-apple-text group-hover:bg-apple-blue group-hover:text-white transition-all shadow-sm border border-apple-border">
                                                 <item.icon className="w-3.5 h-3.5" />
                                             </div>
                                             <span className="text-[12px] font-black tracking-tight truncate">{item.label}</span>
@@ -469,9 +469,9 @@ export default function AccountPage() {
 
                             {/* PROGRESS section - Sharp Dark Bars */}
                             <div className="space-y-5">
-                                <div className="flex items-center gap-2 border-b-2 border-slate-900 pb-2.5">
-                                    <TrendingUp className="w-4 h-4 text-slate-900" />
-                                    <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.25em]">TIẾN ĐỘ</h4>
+                                <div className="flex items-center gap-2 border-b-2 border-apple-text pb-2.5">
+                                    <TrendingUp className="w-4 h-4 text-apple-text" />
+                                    <h4 className="text-[11px] font-black text-apple-text uppercase tracking-[0.25em]">TIẾN ĐỘ</h4>
                                 </div>
                                 <div className="space-y-6 px-1">
                                     {[
@@ -480,13 +480,13 @@ export default function AccountPage() {
                                         { label: 'Pháp luật', value: Math.max(stats.avgScore - 5, 0) }
                                     ].map((skill, i) => (
                                         <div key={i} className="space-y-2.5">
-                                            <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-800 tracking-wider">
+                                            <div className="flex justify-between items-center text-[10px] font-black uppercase text-apple-text-secondary tracking-wider">
                                                 <span>{skill.label}</span>
-                                                <span className="text-slate-900 font-mono">{Math.round(skill.value * 10) / 10}%</span>
+                                                <span className="text-apple-text font-mono">{Math.round(skill.value * 10) / 10}%</span>
                                             </div>
-                                            <div className="h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                                            <div className="h-2.5 bg-apple-bg rounded-full overflow-hidden border border-apple-border">
                                                 <div
-                                                    className="h-full bg-slate-900 transition-all duration-1000 shadow-[2px_0_10px_rgba(0,0,0,0.1)]"
+                                                    className="h-full bg-apple-text transition-all duration-1000 shadow-[2px_0_10px_rgba(0,0,0,0.1)]"
                                                     style={{ width: `${skill.value}%` }}
                                                 />
                                             </div>
@@ -497,21 +497,21 @@ export default function AccountPage() {
 
                             {/* NAVIGATION - Premium Sharp Tabs */}
                             <div className="space-y-5 pt-4">
-                                <div className="flex items-center gap-2 border-b-2 border-slate-900 pb-2.5">
-                                    <LayoutDashboard className="w-4 h-4 text-slate-900" />
-                                    <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.25em]">DANH MỤC</h4>
+                                <div className="flex items-center gap-2 border-b-2 border-apple-text pb-2.5">
+                                    <LayoutDashboard className="w-4 h-4 text-apple-text" />
+                                    <h4 className="text-[11px] font-black text-apple-text uppercase tracking-[0.25em]">DANH MỤC</h4>
                                 </div>
-                                <div className="space-y-1.5">
+                                <div className="space-y-2">
                                     {menuItems.map((item) => (
                                         <button
                                             key={item.id}
                                             onClick={() => setActiveTab(item.id)}
-                                            className={`w-full flex items-center gap-4 px-4 py-3.5 rounded transition-all text-[11px] font-black uppercase tracking-[0.15em] border ${activeTab === item.id
-                                                ? 'bg-slate-900 border-slate-900 text-white shadow-2xl translate-x-1.5'
-                                                : 'bg-transparent border-transparent text-slate-800 hover:bg-slate-100 hover:text-slate-900'
+                                            className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all text-[11px] font-black uppercase tracking-[0.15em] border ${activeTab === item.id
+                                                ? 'bg-apple-blue border-apple-blue text-white shadow-xl translate-x-1.5'
+                                                : 'bg-transparent border-transparent text-apple-text-secondary hover:bg-apple-bg hover:text-apple-text'
                                                 }`}
                                         >
-                                            <item.icon className={`w-4 h-4 ${activeTab === item.id ? 'text-white' : 'text-slate-400 group-hover:text-slate-900'}`} />
+                                            <item.icon className={`w-4 h-4 ${activeTab === item.id ? 'text-white' : 'text-apple-text-secondary group-hover:text-apple-text'}`} />
                                             <span>{item.label}</span>
                                         </button>
                                     ))}
@@ -520,10 +520,10 @@ export default function AccountPage() {
                         </div>
 
                         {/* Footer - Solid Action */}
-                        <div className="p-6 bg-slate-50 border-t-2 border-slate-100 mt-auto">
+                        <div className="p-6 bg-apple-bg/30 border-t-2 border-apple-border mt-auto">
                             <button
                                 onClick={handleLogout}
-                                className="w-full flex items-center justify-center gap-3 py-4 px-4 bg-white border-2 border-slate-300 hover:bg-red-600 hover:border-red-600 hover:text-white text-slate-900 rounded-lg font-black text-[11px] uppercase tracking-[0.25em] shadow-sm transition-all"
+                                className="w-full flex items-center justify-center gap-3 py-4 px-4 bg-apple-card border border-apple-border hover:bg-red-600 hover:border-red-600 hover:text-white text-apple-text rounded-xl font-black text-[11px] uppercase tracking-[0.25em] shadow-sm transition-all"
                             >
                                 <LogOut className="w-4 h-4" />
                                 Đăng xuất
@@ -536,30 +536,30 @@ export default function AccountPage() {
                         {/* Quick Stats Grid - Sharp & Minimalist */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {[
-                                { label: 'Tổng bài thi', value: stats.totalExams, icon: History, color: 'text-blue-600', badge: 'TOTAL', bg: 'bg-blue-50' },
-                                { label: 'Điểm trung bình', value: `${stats.avgScore}%`, icon: TrendingUp, color: 'text-emerald-600', badge: 'AVG', bg: 'bg-emerald-50' },
-                                { label: 'Điểm cao nhất', value: `${stats.highestScore}%`, icon: Award, color: 'text-orange-600', badge: 'BEST', bg: 'bg-orange-50' },
+                                { label: 'Tổng bài thi', value: stats.totalExams, icon: History, color: 'text-apple-blue', badge: 'TOTAL', bg: 'bg-apple-blue/10' },
+                                { label: 'Điểm trung bình', value: `${stats.avgScore}%`, icon: TrendingUp, color: 'text-emerald-text', badge: 'AVG', bg: 'bg-emerald-muted' },
+                                { label: 'Điểm cao nhất', value: `${stats.highestScore}%`, icon: Award, color: 'text-orange-text', badge: 'BEST', bg: 'bg-orange-muted' },
                                 { label: 'Tỉ lệ đạt', value: `${stats.passRate}%`, icon: Target, color: 'text-purple-600', badge: 'RATE', bg: 'bg-purple-50' }
                             ].map((stat, i) => (
-                                <div key={i} className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm flex flex-col justify-between hover:scale-[1.02] transition-all group">
+                                <div key={i} className="bg-apple-card rounded-2xl p-4 border border-apple-border shadow-apple-shadow flex flex-col justify-between hover:scale-[1.02] transition-all group">
                                     <div className="flex items-center justify-between mb-4">
-                                        <div className={`w-8 h-8 ${stat.bg} ${stat.color} rounded-lg flex items-center justify-center shadow-inner`}>
+                                        <div className={`w-8 h-8 ${stat.bg} ${stat.color} rounded-xl flex items-center justify-center shadow-inner`}>
                                             <stat.icon className="w-4 h-4" />
                                         </div>
-                                        <span className={`text-[7px] font-black px-1.5 py-0.5 rounded bg-slate-900 text-white tracking-[0.2em]`}>
+                                        <span className={`text-[7px] font-black px-1.5 py-0.5 rounded-lg bg-apple-text text-apple-bg tracking-[0.2em]`}>
                                             {stat.badge}
                                         </span>
                                     </div>
                                     <div>
-                                        <div className="text-xl font-black text-[#0f172a] leading-none mb-1">{stat.value}</div>
-                                        <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</div>
+                                        <div className="text-xl font-black text-apple-text leading-none mb-1">{stat.value}</div>
+                                        <div className="text-[9px] font-bold text-apple-text-secondary uppercase tracking-widest">{stat.label}</div>
                                     </div>
                                 </div>
                             ))}
                         </div>
 
                         {/* Main Tab Content Card - Matches sharp sidebar */}
-                        <div className="flex-1 bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                        <div className="flex-1 bg-apple-card rounded-2xl border border-apple-border shadow-apple-shadow overflow-hidden">
                             <div className="p-6">
 
                                 {/* Other Tabs Content (History, Wrong, Feedback) - Same styling refinements applied */}
@@ -571,13 +571,13 @@ export default function AccountPage() {
                                         </div>
 
                                         {examHistory.length === 0 ? (
-                                            <div className="text-center py-20 bg-slate-50/30 rounded-3xl border-2 border-dashed border-slate-100">
-                                                <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto text-slate-100 shadow-sm border border-slate-50 mb-6">
+                                            <div className="text-center py-20 bg-apple-bg/30 rounded-2xl border-2 border-dashed border-apple-border">
+                                                <div className="w-20 h-20 bg-apple-card rounded-2xl flex items-center justify-center mx-auto text-apple-border shadow-sm border border-apple-border mb-6">
                                                     <FileText className="w-10 h-10" />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <p className="text-slate-900 font-black text-lg">Lịch sử đang trống</p>
-                                                    <p className="text-slate-400 font-medium text-sm max-w-[240px] mx-auto">Thực hiện bài thi đầu tiên để bắt đầu ghi nhận thành tích.</p>
+                                                    <p className="text-apple-text font-black text-lg">Lịch sử đang trống</p>
+                                                    <p className="text-apple-text-secondary font-medium text-sm max-w-[240px] mx-auto">Thực hiện bài thi đầu tiên để bắt đầu ghi nhận thành tích.</p>
                                                 </div>
                                             </div>
                                         ) : (
@@ -585,62 +585,62 @@ export default function AccountPage() {
                                                 {examHistory.slice(0, 10).map((exam, idx) => {
                                                     const isExpanded = expandedExam === exam.id
                                                     return (
-                                                        <div key={idx} className="flex flex-col p-4 bg-slate-50/50 rounded-2xl border border-transparent hover:border-slate-200 transition-all">
+                                                        <div key={idx} className="flex flex-col p-4 bg-apple-bg/50 rounded-2xl border border-apple-border hover:border-apple-blue transition-all">
                                                             <div
                                                                 className="flex items-center justify-between cursor-pointer group"
                                                                 onClick={() => setExpandedExam(isExpanded ? null : exam.id)}
                                                             >
                                                                 <div className="flex items-center gap-5">
-                                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${exam.passed ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${exam.passed ? 'bg-emerald-muted text-emerald-text' : 'bg-red-muted text-red-text'}`}>
                                                                         {exam.passed ? <CheckCircle className="w-6 h-6" /> : <XCircle className="w-6 h-6" />}
                                                                     </div>
                                                                     <div className="space-y-0.5">
-                                                                        <div className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                                                                        <div className="font-bold text-apple-text text-sm flex items-center gap-2">
                                                                             {exam.chuyen_nganh || 'Bài thi sát hạch'}
-                                                                            {idx === 0 && <span className="px-1.5 py-0.5 bg-green-500 text-[8px] text-white rounded font-black uppercase tracking-widest">Mới nhất</span>}
+                                                                            {idx === 0 && <span className="px-1.5 py-0.5 bg-emerald-500 text-[8px] text-white rounded font-black uppercase tracking-widest">Mới nhất</span>}
                                                                         </div>
-                                                                        <div className="text-[10px] text-slate-400 font-bold flex items-center gap-3">
-                                                                            <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-blue-400" /> {new Date(exam.created_at).toLocaleDateString('vi-VN')}</span>
-                                                                            <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                                                                        <div className="text-[10px] text-apple-text-secondary font-bold flex items-center gap-3">
+                                                                            <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-apple-blue" /> {new Date(exam.created_at).toLocaleDateString('vi-VN')}</span>
+                                                                            <span className="w-1 h-1 bg-apple-border rounded-full" />
                                                                             <span className="uppercase tracking-tighter">{exam.hang || 'Hạng III'}</span>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                                 <div className="flex items-center gap-6">
                                                                     <div className="text-right hidden sm:block">
-                                                                        <div className={`text-xl font-black ${exam.passed ? 'text-green-600' : 'text-red-600'}`}>
+                                                                        <div className={`text-xl font-black ${exam.passed ? 'text-emerald-text' : 'text-red-text'}`}>
                                                                             {exam.score}/30
                                                                         </div>
-                                                                        <div className={`text-[8px] font-black uppercase tracking-widest ${exam.passed ? 'text-green-500/50' : 'text-red-400/50'}`}>
+                                                                        <div className={`text-[8px] font-black uppercase tracking-widest ${exam.passed ? 'text-emerald-500/50' : 'text-red-400/50'}`}>
                                                                             {exam.passed ? 'Đã vượt qua' : 'Chưa đạt'}
                                                                         </div>
                                                                     </div>
-                                                                    <ChevronDown className={`w-5 h-5 text-slate-300 transition-transform ${isExpanded ? 'rotate-180 text-blue-600' : ''}`} />
+                                                                    <ChevronDown className={`w-5 h-5 text-apple-text-secondary transition-transform ${isExpanded ? 'rotate-180 text-apple-blue' : ''}`} />
                                                                 </div>
                                                             </div>
 
                                                             {/* Detailed Breakdown */}
                                                             {isExpanded && (
-                                                                <div className="mt-4 pt-4 border-t border-slate-100 grid md:grid-cols-3 gap-4 animate-in slide-in-from-top-2 duration-300">
-                                                                    <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Cấu trúc điểm</p>
+                                                                <div className="mt-4 pt-4 border-t border-apple-border grid md:grid-cols-3 gap-4 animate-in slide-in-from-top-2 duration-300">
+                                                                    <div className="bg-apple-card p-4 rounded-xl border border-apple-border shadow-sm">
+                                                                        <p className="text-[10px] font-black text-apple-text-secondary uppercase tracking-widest mb-1">Cấu trúc điểm</p>
                                                                         <div className="flex flex-col gap-2">
                                                                             <div className="flex justify-between items-center text-xs">
-                                                                                <span className="text-slate-500 font-medium">Pháp luật:</span>
-                                                                                <span className={`font-bold ${exam.law_correct >= 7 ? 'text-green-600' : 'text-red-600'}`}>{exam.law_correct}/10</span>
+                                                                                <span className="text-apple-text-secondary font-medium">Pháp luật:</span>
+                                                                                <span className={`font-bold ${exam.law_correct >= 7 ? 'text-emerald-text' : 'text-red-text'}`}>{exam.law_correct}/10</span>
                                                                             </div>
                                                                             <div className="flex justify-between items-center text-xs">
-                                                                                <span className="text-slate-500 font-medium">Chuyên môn:</span>
-                                                                                <span className="font-bold text-blue-600">{exam.specialist_correct}/20</span>
+                                                                                <span className="text-apple-text-secondary font-medium">Chuyên môn:</span>
+                                                                                <span className="font-bold text-apple-blue">{exam.specialist_correct}/20</span>
                                                                             </div>
                                                                         </div>
                                                                     </div>
 
-                                                                    <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Thời gian làm</p>
+                                                                    <div className="bg-apple-card p-4 rounded-xl border border-apple-border shadow-sm">
+                                                                        <p className="text-[10px] font-black text-apple-text-secondary uppercase tracking-widest mb-1">Thời gian làm</p>
                                                                         <div className="flex items-center gap-2">
-                                                                            <Clock className="w-4 h-4 text-orange-400" />
-                                                                            <span className="text-lg font-black text-slate-700">
+                                                                            <Clock className="w-4 h-4 text-orange-text" />
+                                                                            <span className="text-lg font-black text-apple-text">
                                                                                 {Math.floor(exam.time_taken / 60)}:{String(exam.time_taken % 60).padStart(2, '0')}
                                                                             </span>
                                                                         </div>
@@ -702,19 +702,19 @@ export default function AccountPage() {
                                             </div>
                                         ) : (
                                             <div className="space-y-4">
-                                                <div className="p-8 bg-gradient-to-br from-red-50 to-pink-50 rounded-3xl border border-red-100 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group shadow-sm">
+                                                <div className="p-8 bg-gradient-to-br from-red-600/10 to-red-600/5 rounded-2xl border border-red-500/20 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group shadow-sm">
                                                     <div className="relative z-10 flex items-center gap-5">
-                                                        <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-red-500 shadow-lg shadow-red-100/50 shrink-0">
+                                                        <div className="w-14 h-14 bg-apple-card rounded-2xl flex items-center justify-center text-red-text shadow-lg shadow-red-500/10 shrink-0 border border-apple-border">
                                                             <AlertTriangle className="w-7 h-7" />
                                                         </div>
                                                         <div className="space-y-0.5">
-                                                            <p className="text-red-900 font-black text-xl leading-tight">Chế độ ôn tập cấp tốc</p>
-                                                            <p className="text-red-600/70 font-medium text-xs">Khắc phục ngay các lỗi sai để sẵn sàng cho kỳ thi thật.</p>
+                                                            <p className="text-apple-text font-black text-xl leading-tight">Chế độ ôn tập cấp tốc</p>
+                                                            <p className="text-red-text/70 font-medium text-xs">Khắc phục ngay các lỗi sai để sẵn sàng cho kỳ thi thật.</p>
                                                         </div>
                                                     </div>
                                                     <Link
                                                         href="/on-tap?mode=wrong"
-                                                        className="relative z-10 px-8 py-3.5 bg-red-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-700 transition-all shadow-xl shadow-red-200 whitespace-nowrap active:scale-95"
+                                                        className="relative z-10 px-8 py-3.5 bg-red-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-700 transition-all shadow-xl shadow-red-500/20 whitespace-nowrap active:scale-95"
                                                     >
                                                         Bắt đầu học ngay
                                                     </Link>
@@ -722,25 +722,25 @@ export default function AccountPage() {
 
                                                 <div className="space-y-3">
                                                     {groupedWrongQuestions.map((group, idx) => (
-                                                        <div key={idx} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-red-100 transition-all group">
+                                                        <div key={idx} className="flex items-center justify-between p-4 bg-apple-bg/50 rounded-2xl border border-apple-border shadow-sm hover:border-red-500/30 transition-all group">
                                                             <div className="flex items-center gap-4">
-                                                                <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-red-500 font-bold text-xs shadow-sm">
+                                                                <div className="w-10 h-10 bg-red-muted rounded-xl flex items-center justify-center text-red-text font-bold text-xs shadow-sm border border-red-500/10">
                                                                     {group.count}
                                                                 </div>
                                                                 <div className="space-y-0.5">
-                                                                    <div className="font-bold text-slate-900 text-sm whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px] sm:max-w-md">
+                                                                    <div className="font-bold text-apple-text text-sm whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px] sm:max-w-md">
                                                                         {group.examName}
                                                                     </div>
-                                                                    <div className="text-[10px] text-slate-400 font-bold flex items-center gap-2">
+                                                                    <div className="text-[10px] text-apple-text-secondary font-bold flex items-center gap-2">
                                                                         <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(group.date).toLocaleDateString('vi-VN')}</span>
-                                                                        <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                                                                        <span className="w-1 h-1 bg-apple-border rounded-full" />
                                                                         <span>{group.hang}</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                             <Link
                                                                 href={`/on-tap?mode=exam_review&resultId=${group.resultId}`}
-                                                                className="px-4 py-2 bg-slate-900 text-white rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-red-600 transition-all whitespace-nowrap"
+                                                                className="px-4 py-2 bg-apple-text text-apple-bg rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-red-600 hover:text-white transition-all whitespace-nowrap"
                                                             >
                                                                 Ôn tập ngay
                                                             </Link>
@@ -811,7 +811,7 @@ export default function AccountPage() {
                                                     { id: 'address', label: 'Địa chỉ liên hệ', value: profile.address, icon: FileText, placeholder: 'Địa chỉ...' }
                                                 ].map((field) => (
                                                     <div key={field.id} className="space-y-1.5">
-                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+                                                        <label className="text-[10px] font-black text-apple-text-secondary uppercase tracking-widest px-1">
                                                             {field.label}
                                                         </label>
                                                         {isEditing && !field.readOnly ? (
@@ -820,12 +820,12 @@ export default function AccountPage() {
                                                                     type="text"
                                                                     value={(editForm as any)[field.id]}
                                                                     onChange={(e) => setEditForm({ ...editForm, [field.id]: e.target.value })}
-                                                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all outline-none font-bold text-slate-700 text-sm"
+                                                                    className="w-full px-4 py-2.5 bg-apple-bg border border-apple-border rounded-xl focus:ring-4 focus:ring-apple-blue/10 focus:border-apple-blue transition-all outline-none font-bold text-apple-text text-sm"
                                                                     placeholder={field.placeholder}
                                                                 />
                                                             </div>
                                                         ) : (
-                                                            <div className="px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg text-[#0f172a] font-bold min-h-[42px] flex items-center text-sm shadow-sm">
+                                                            <div className="px-4 py-2.5 bg-apple-bg border border-apple-border rounded-xl text-apple-text font-bold min-h-[42px] flex items-center text-sm shadow-sm">
                                                                 {field.value || 'Chưa cập nhật'}
                                                             </div>
                                                         )}
@@ -835,12 +835,12 @@ export default function AccountPage() {
 
                                             {/* Achievements Sidebar - High-end Document Style */}
                                             <div className="space-y-6">
-                                                <div className="bg-slate-50 p-6 rounded-xl border border-slate-100 shadow-sm">
+                                                <div className="bg-apple-bg/30 p-6 rounded-2xl border border-apple-border shadow-sm">
                                                     <div className="flex items-center gap-3 mb-6">
-                                                        <div className="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center shadow-lg shadow-blue-200">
+                                                        <div className="w-8 h-8 bg-apple-blue text-white rounded-lg flex items-center justify-center shadow-lg shadow-apple-blue/20">
                                                             <Award className="w-4 h-4" />
                                                         </div>
-                                                        <h3 className="text-[10px] font-black text-[#0f172a] uppercase tracking-widest">Thành tựu</h3>
+                                                        <h3 className="text-[10px] font-black text-apple-text uppercase tracking-widest">Thành tựu</h3>
                                                     </div>
 
                                                     <div className="space-y-3">
@@ -850,12 +850,12 @@ export default function AccountPage() {
                                                             { label: 'Gold', color: 'text-yellow-400', achieved: stats.avgScore >= 80 },
                                                             { label: 'Master', color: 'text-purple-400', achieved: badges.stars === 5 }
                                                         ].map((medal, i) => (
-                                                            <div key={i} className={`flex items-center justify-between p-3 rounded-lg border transition-all ${medal.achieved ? 'bg-white border-blue-100' : 'bg-transparent border-slate-100 opacity-40'}`}>
+                                                            <div key={i} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${medal.achieved ? 'bg-apple-card border-apple-blue/30' : 'bg-transparent border-apple-border opacity-40'}`}>
                                                                 <div className="flex items-center gap-3">
                                                                     <Medal className={`w-4 h-4 ${medal.color}`} />
-                                                                    <span className="text-[10px] font-black uppercase text-slate-600 tracking-tight">{medal.label}</span>
+                                                                    <span className="text-[10px] font-black uppercase text-apple-text-secondary tracking-tight">{medal.label}</span>
                                                                 </div>
-                                                                {medal.achieved && <div className="w-1.5 h-1.5 bg-blue-600 rounded-full" />}
+                                                                {medal.achieved && <div className="w-1.5 h-1.5 bg-apple-blue rounded-full shadow-[0_0_8px_rgba(0,102,255,0.5)]" />}
                                                             </div>
                                                         ))}
                                                     </div>
@@ -880,17 +880,17 @@ export default function AccountPage() {
                                         <div className="grid gap-6">
                                             {/* Group: Study Configuration (macOS style grouped rows) */}
                                             <div className="space-y-2">
-                                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Thiết lập Ôn tập</h3>
-                                                <div className="bg-slate-50/50 rounded-xl border border-slate-100 overflow-hidden divide-y divide-slate-100">
+                                                <h3 className="text-[10px] font-black text-apple-text-secondary uppercase tracking-[0.2em] px-1">Thiết lập Ôn tập</h3>
+                                                <div className="bg-apple-bg rounded-2xl border border-apple-border overflow-hidden divide-y divide-apple-border shadow-sm">
                                                     {/* Rank Preference Row */}
                                                     <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center">
+                                                            <div className="w-8 h-8 bg-orange-muted text-orange-text rounded-xl flex items-center justify-center border border-orange-500/10">
                                                                 <Target className="w-4 h-4" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-sm font-black text-slate-900">Hạng mục thi</p>
-                                                                <p className="text-[10px] text-slate-400 font-medium whitespace-nowrap">Hạng mục ưu tiên khi vào bài thi</p>
+                                                                <p className="text-sm font-black text-apple-text">Hạng mục thi</p>
+                                                                <p className="text-[10px] text-apple-text-secondary font-medium whitespace-nowrap">Hạng mục ưu tiên khi vào bài thi</p>
                                                             </div>
                                                         </div>
                                                         <div className="flex gap-1 overflow-x-auto pb-1 sm:pb-0">
@@ -899,8 +899,8 @@ export default function AccountPage() {
                                                                     key={rank}
                                                                     onClick={() => setPreferences({ ...preferences, rank })}
                                                                     className={`px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all border ${preferences.rank === rank
-                                                                        ? 'bg-slate-900 border-slate-900 text-white'
-                                                                        : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300'
+                                                                        ? 'bg-apple-text border-apple-text text-apple-bg'
+                                                                        : 'bg-apple-card border-apple-border text-apple-text-secondary hover:border-apple-text-secondary'
                                                                         }`}
                                                                 >
                                                                     {rank}
@@ -912,18 +912,18 @@ export default function AccountPage() {
                                                     {/* Specialty Row */}
                                                     <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+                                                            <div className="w-8 h-8 bg-apple-blue/10 text-apple-blue rounded-xl flex items-center justify-center border border-apple-blue/10">
                                                                 <Briefcase className="w-4 h-4" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-sm font-black text-slate-900">Chuyên ngành mặc định</p>
-                                                                <p className="text-[10px] text-slate-400 font-medium">Lĩnh vực ưu tiên ôn luyện</p>
+                                                                <p className="text-sm font-black text-apple-text">Chuyên ngành mặc định</p>
+                                                                <p className="text-[10px] text-apple-text-secondary font-medium">Lĩnh vực ưu tiên ôn luyện</p>
                                                             </div>
                                                         </div>
                                                         <select
                                                             value={preferences.specialty}
                                                             onChange={(e) => setPreferences({ ...preferences, specialty: e.target.value })}
-                                                            className="px-4 py-2 bg-white border border-slate-200 rounded-lg focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all outline-none font-bold text-slate-700 text-[11px] max-w-[200px] appearance-none"
+                                                            className="px-4 py-2 bg-apple-card border border-apple-border rounded-xl focus:ring-4 focus:ring-apple-blue/10 focus:border-apple-blue transition-all outline-none font-bold text-apple-text text-[11px] max-w-[200px] appearance-none"
                                                         >
                                                             {[
                                                                 'Khảo sát địa hình',
@@ -940,13 +940,13 @@ export default function AccountPage() {
                                                                 'Thiết kế xây dựng công trình - Công trình Xử lý chất thải rắn',
                                                                 'Thiết kế cơ - điện công trình - Hệ thống điện',
                                                                 'Thiết kế cơ - điện công trình - Hệ thống cấp - thoát nước công trình',
-                                                                'Thiết kế cơ - điện công trình - Hệ thống thông gió - cấp thoát nhiệt',
+                                                                'Thiết kế cơ - điện công trình - Hệ hệ thống thông gió - cấp thoát nhiệt',
                                                                 'Giám sát công tác xây dựng công trình',
                                                                 'Giám sát công tác lắp đặt thiết bị công trình',
                                                                 'Định giá xây dựng',
                                                                 'Quản lý dự án đầu tư xây dựng'
                                                             ].map(opt => (
-                                                                <option key={opt} value={opt}>{opt}</option>
+                                                                <option key={opt} value={opt} className="bg-apple-card">{opt}</option>
                                                             ))}
                                                         </select>
                                                     </div>
@@ -1014,15 +1014,15 @@ export default function AccountPage() {
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                                            <div className="flex items-center gap-2 text-emerald-600">
+                                        <div className="flex items-center justify-between pt-4 border-t border-apple-border">
+                                            <div className="flex items-center gap-2 text-emerald-text">
                                                 <ShieldCheck className="w-3.5 h-3.5" />
                                                 <span className="text-[9px] font-black uppercase tracking-widest">Trạng thái: An toàn</span>
                                             </div>
                                             <button
                                                 onClick={handleSaveSettings}
                                                 disabled={isSavingProfile}
-                                                className="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:bg-blue-600 transition-all flex items-center gap-2 disabled:opacity-50"
+                                                className="px-6 py-2.5 bg-apple-text text-apple-bg rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:bg-apple-blue hover:text-white transition-all flex items-center gap-2 disabled:opacity-50"
                                             >
                                                 {isSavingProfile ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                                                 Lưu thiết lập

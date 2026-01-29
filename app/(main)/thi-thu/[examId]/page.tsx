@@ -55,6 +55,10 @@ export default function ExamSessionPage() {
     const [activeModalTab, setActiveModalTab] = useState('Câu hỏi Pháp luật chung')
     const [isGuideOpen, setIsGuideOpen] = useState(false)
 
+    // Keyboard Navigation States
+    const [kbArea, setKbArea] = useState<'sidebar' | 'main'>('sidebar')
+    const [kbFocusIndex, setKbFocusIndex] = useState(0)
+
     const timerRef = useRef<NodeJS.Timeout | null>(null)
 
     useEffect(() => {
@@ -258,21 +262,106 @@ export default function ExamSessionPage() {
     const goPrev = () => currentIndex > 0 && setCurrentIndex(currentIndex - 1)
     const jumpTo = (index: number) => setCurrentIndex(index)
 
+    // Standardized Keyboard Navigation Logic
+    useEffect(() => {
+        if (isFinished || loading) return
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Disable when typing
+            if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') {
+                return
+            }
+
+            // Navigation Keys handling with Prevent Default
+            if (['Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Enter'].includes(e.key)) {
+                e.preventDefault()
+
+                // Area Toggling with Tab
+                if (e.key === 'Tab') {
+                    setKbArea(prev => {
+                        const newArea = prev === 'sidebar' ? 'main' : 'sidebar'
+                        if (newArea === 'sidebar') {
+                            setKbFocusIndex(currentIndex)
+                        } else {
+                            setKbFocusIndex(0)
+                        }
+                        return newArea
+                    })
+                    return
+                }
+
+                if (kbArea === 'sidebar') {
+                    const rowCount = 5 // Exam grid is 5 columns
+                    switch (e.key) {
+                        case 'ArrowRight':
+                            if (kbFocusIndex < questions.length - 1) setKbFocusIndex(prev => prev + 1)
+                            break
+                        case 'ArrowLeft':
+                            if (kbFocusIndex > 0) setKbFocusIndex(prev => prev - 1)
+                            break
+                        case 'ArrowDown':
+                            if (kbFocusIndex + rowCount < questions.length) setKbFocusIndex(prev => prev + rowCount)
+                            break
+                        case 'ArrowUp':
+                            if (kbFocusIndex - rowCount >= 0) setKbFocusIndex(prev => prev - rowCount)
+                            break
+                        case ' ':
+                        case 'Enter':
+                            setCurrentIndex(kbFocusIndex)
+                            setKbArea('main')
+                            setKbFocusIndex(0)
+                            break
+                    }
+                } else { // kbArea === 'main'
+                    switch (e.key) {
+                        case 'ArrowUp':
+                            if (kbFocusIndex > 0) setKbFocusIndex(prev => prev - 1)
+                            break
+                        case 'ArrowDown':
+                            if (kbFocusIndex < 3) setKbFocusIndex(prev => prev + 1)
+                            break
+                        case 'ArrowRight':
+                            goNext()
+                            break
+                        case 'ArrowLeft':
+                            goPrev()
+                            break
+                        case ' ':
+                        case 'Enter':
+                            const options = ['a', 'b', 'c', 'd']
+                            const currentQ = questions[currentIndex]
+                            if (currentQ) selectAnswer(currentQ.id, options[kbFocusIndex])
+                            break
+                    }
+                }
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [kbArea, kbFocusIndex, questions, currentIndex, isFinished, loading])
+
 
     if (!mounted || loading) return (
-        <div className="min-h-screen py-6 flex flex-col items-center justify-center">
-            <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
-            <p className="text-slate-500 font-bold animate-pulse uppercase tracking-widest text-xs">Đang khởi tạo đề thi...</p>
+        <div className="min-h-screen bg-[#F5F5F7] flex flex-col items-center justify-center p-6 font-sans">
+            <div className="relative">
+                <div className="w-16 h-16 border-[5px] border-black/5 rounded-full" />
+                <div className="w-16 h-16 border-[5px] border-[#007AFF] border-t-transparent rounded-full animate-spin absolute top-0 left-0" />
+            </div>
+            <p className="mt-8 text-[#86868b] font-semibold text-xs uppercase tracking-[0.2em] animate-pulse">Khởi tạo đề thi...</p>
         </div>
     )
 
     if (!questions.length) return (
-        <div className="min-h-screen py-6 flex flex-col items-center justify-center px-6">
-            <FileText className="w-16 h-16 text-slate-300 mb-4" />
-            <p className="text-slate-500 text-center mb-4">Bộ đề thi hiện không khả dụng. Vui lòng quay lại sau.</p>
+        <div className="min-h-screen bg-[#F5F5F7] flex flex-col items-center justify-center px-6 font-sans">
+            <div className="w-20 h-20 bg-white rounded-[24px] shadow-sm border border-black/5 flex items-center justify-center mb-6">
+                <FileText className="w-10 h-10 text-[#86868b]" />
+            </div>
+            <h3 className="text-xl font-semibold text-[#1d1d1f] mb-2">Không tìm thấy đề thi</h3>
+            <p className="text-[#86868b] text-center mb-8 max-w-xs">Bộ đề thi hiện không khả dụng hoặc đã có lỗi xảy ra. Vui lòng quay lại sau.</p>
             <button
                 onClick={() => router.push('/thi-thu')}
-                className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
+                className="px-8 py-3 bg-[#1d1d1f] text-white font-semibold rounded-[10px] hover:bg-black transition-all shadow-md active:scale-95"
             >
                 Quay lại
             </button>
@@ -322,206 +411,243 @@ export default function ExamSessionPage() {
         }
 
         return (
-            <div className="min-h-screen py-6 px-6">
-                <div className="max-w-5xl mx-auto space-y-6">
-                    {/* Result Header */}
-                    <div className={`p-10 rounded-2xl shadow-2xl text-center relative overflow-hidden ${passed ? 'bg-gradient-to-br from-green-500 to-emerald-600' : 'bg-gradient-to-br from-red-500 to-rose-600'
+            <div className="min-h-screen bg-[#F5F5F7] py-8 px-6 font-sans">
+                <div className="max-w-5xl mx-auto space-y-8">
+                    {/* Result Header - Premium Sonoma Style */}
+                    <div className={`relative p-12 rounded-[32px] overflow-hidden text-center shadow-2xl ${passed ? 'shadow-green-500/10' : 'shadow-red-500/10'
                         }`}>
-                        <div className="relative z-10 text-white">
-                            <div className="inline-flex p-4 bg-white/20 rounded-full mb-6">
+                        {/* Dynamic Background Gradient */}
+                        <div className={`absolute inset-0 opacity-90 ${passed
+                            ? 'bg-gradient-to-br from-[#34C759] via-[#30D158] to-[#28CD41]'
+                            : 'bg-gradient-to-br from-[#FF3B30] via-[#FF453A] to-[#E02D24]'
+                            }`} />
+
+                        {/* Glass Overlay for Depth */}
+                        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/10 to-transparent" />
+
+                        <div className="relative z-10 text-white space-y-4">
+                            <div className="inline-flex p-5 bg-white/20 backdrop-blur-md rounded-full mb-4 shadow-inner">
                                 {passed ? <CheckCircle2 className="w-12 h-12" /> : <XCircle className="w-12 h-12" />}
                             </div>
-                            <h1 className="text-4xl font-black mb-2 uppercase tracking-tight">
-                                KẾT QUẢ: {passed ? 'ĐẠT' : 'KHÔNG ĐẠT'}
+                            <h1 className="text-5xl font-bold tracking-tight mb-2 uppercase">
+                                {passed ? 'ĐẠT' : 'KHÔNG ĐẠT'}
                             </h1>
-                            <p className="text-white/90 text-lg">
-                                {passed ? '🎉 Chúc mừng! Bạn đã vượt qua kỳ thi.' : '💪 Đừng nản lòng! Hãy cố gắng lần sau.'}
+                            <p className="text-white/90 text-xl font-medium max-w-md mx-auto leading-relaxed">
+                                {passed
+                                    ? '🎉 Chúc mừng! Bạn đã xuất sắc hoàn thành kỳ thi sát hạch.'
+                                    : '💪 Đừng nản lòng! Hãy ôn tập thêm và thử sức một lần nữa nhé.'}
                             </p>
                         </div>
                     </div>
 
-                    {/* Share Dialog for Passed Exams */}
+                    {/* Share Dialog - Sonoma Card */}
                     {passed && !showShareDialog && (
-                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border-2 border-blue-200">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <h3 className="font-bold text-blue-900 mb-1">🏆 Chia sẻ thành tích của bạn!</h3>
-                                    <p className="text-blue-700 text-sm">Hiển thị kết quả này trên bảng xếp hạng để mọi người cùng biết</p>
+                        <div className="bg-white/70 backdrop-blur-xl rounded-[24px] p-8 border border-white/40 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+                            <div className="flex items-center gap-6">
+                                <div className="w-16 h-16 bg-[#007AFF]/10 rounded-full flex items-center justify-center shrink-0">
+                                    <FileText className="w-8 h-8 text-[#007AFF]" />
                                 </div>
-                                <button
-                                    onClick={() => setShowShareDialog(true)}
-                                    className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30"
-                                >
-                                    Chia sẻ ngay
-                                </button>
+                                <div>
+                                    <h3 className="text-xl font-semibold text-[#1d1d1f] mb-1">Chia sẻ thành tích!</h3>
+                                    <p className="text-[#86868b] text-[15px]">Hiển thị kết quả này trên bảng xếp hạng công khai</p>
+                                </div>
                             </div>
+                            <button
+                                onClick={() => setShowShareDialog(true)}
+                                className="px-10 py-4 bg-[#007AFF] text-white font-semibold rounded-[12px] hover:bg-[#0062CC] transition-all shadow-lg shadow-blue-500/20 active:scale-95 whitespace-nowrap"
+                            >
+                                Công khai kết quả
+                            </button>
                         </div>
                     )}
 
-                    {/* Share Confirmation Dialog */}
+                    {/* Share Confirmation - Simple Modal */}
                     {showShareDialog && (
-                        <div className="bg-white rounded-2xl p-6 border-2 border-blue-500 shadow-xl">
-                            <h3 className="font-bold text-slate-900 mb-3 text-lg">Xác nhận chia sẻ kết quả</h3>
-                            <p className="text-slate-600 mb-6">
-                                Kết quả thi của bạn sẽ được hiển thị công khai trên bảng xếp hạng.
-                                Mọi người sẽ thấy điểm số và thông tin của bạn.
+                        <div className="bg-white rounded-[24px] p-8 border border-black/5 shadow-2xl space-y-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-black/5 rounded-full flex items-center justify-center">
+                                    <AlertCircle className="w-6 h-6 text-[#1d1d1f]" />
+                                </div>
+                                <h3 className="text-2xl font-semibold text-[#1d1d1f] tracking-tight">Xác nhận chia sẻ</h3>
+                            </div>
+                            <p className="text-[#86868b] text-[15px] leading-relaxed">
+                                Kết quả thi của bạn sẽ được hiển thị công khai trên bảng xếp hạng của cộng đồng.
+                                Những người dùng khác có thể thấy điểm số và hồ sơ của bạn.
                             </p>
-                            <div className="flex gap-3">
+                            <div className="flex gap-4 pt-2">
                                 <button
                                     onClick={() => setShowShareDialog(false)}
                                     disabled={sharing}
-                                    className="flex-1 px-6 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all disabled:opacity-50"
+                                    className="flex-1 px-6 py-4 bg-white border border-black/5 text-[#1d1d1f] font-semibold rounded-[12px] hover:bg-[#F5F5F7] transition-all disabled:opacity-50"
                                 >
-                                    Hủy
+                                    Hủy bỏ
                                 </button>
                                 <button
                                     onClick={handleShare}
                                     disabled={sharing}
-                                    className="flex-1 px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 disabled:opacity-50"
+                                    className="flex-1 px-6 py-4 bg-[#1d1d1f] text-white font-semibold rounded-[12px] hover:bg-black transition-all shadow-lg shadow-black/10 disabled:opacity-50 active:scale-95"
                                 >
-                                    {sharing ? 'Đang chia sẻ...' : 'Xác nhận chia sẻ'}
+                                    {sharing ? 'Đang thực hiện...' : 'Xác nhận chia sẻ'}
                                 </button>
                             </div>
                         </div>
                     )}
 
-                    {/* Score Summary */}
-                    <div className="grid md:grid-cols-4 gap-4">
-                        <div className="bg-white rounded-2xl p-6 border-2 border-slate-200 shadow-sm">
-                            <div className="text-slate-600 text-sm font-medium mb-2">Điểm Pháp luật</div>
-                            <div className={`text-4xl font-black ${lawCorrect >= 7 ? 'text-green-600' : 'text-red-600'}`}>
-                                {lawCorrect}/10
+                    {/* Score Summary Grid */}
+                    <div className="grid md:grid-cols-4 gap-5">
+                        <div className="bg-white/80 backdrop-blur-md rounded-[24px] p-6 border border-white/40 shadow-sm flex flex-col justify-between h-full group hover:shadow-md transition-all">
+                            <div className="text-[#86868b] text-[10px] font-bold uppercase tracking-widest mb-4">Pháp luật</div>
+                            <div className={`text-4xl font-bold tracking-tight ${lawCorrect >= 7 ? 'text-[#34C759]' : 'text-[#FF3B30]'}`}>
+                                {lawCorrect}<span className="text-[#86868b] text-xl ml-1">/ 10</span>
                             </div>
-                            <div className="text-xs text-slate-500 mt-2">Yêu cầu: ≥ 7 điểm</div>
+                            <div className="text-[11px] font-medium text-[#86868b] mt-4 flex items-center gap-1.5 opacity-60">
+                                {lawCorrect >= 7 ? (
+                                    <> <CheckCircle2 className="w-3.5 h-3.5" /> Đạt yêu cầu </>
+                                ) : (
+                                    <> <XCircle className="w-3.5 h-3.5" /> Cần ≥ 7 điểm </>
+                                )}
+                            </div>
                         </div>
 
-                        <div className="bg-white rounded-2xl p-6 border-2 border-slate-200 shadow-sm">
-                            <div className="text-slate-600 text-sm font-medium mb-2">Điểm Chuyên môn</div>
-                            <div className="text-4xl font-black text-blue-600">
-                                {specialtyCorrect}/20
+                        <div className="bg-white/80 backdrop-blur-md rounded-[24px] p-6 border border-white/40 shadow-sm flex flex-col justify-between h-full group hover:shadow-md transition-all">
+                            <div className="text-[#86868b] text-[10px] font-bold uppercase tracking-widest mb-4">Chuyên môn</div>
+                            <div className="text-4xl font-bold tracking-tight text-[#007AFF]">
+                                {specialtyCorrect}<span className="text-[#86868b] text-xl ml-1">/ 20</span>
+                            </div>
+                            <div className="text-[11px] font-medium text-[#86868b] mt-4 opacity-60">
+                                Kiển thức chuyên sâu
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-2xl p-6 border-2 border-slate-200 shadow-sm">
-                            <div className="text-slate-600 text-sm font-medium mb-2">Tổng điểm</div>
-                            <div className={`text-4xl font-black ${totalCorrect >= 21 ? 'text-green-600' : 'text-red-600'}`}>
-                                {totalCorrect}/30
+                        <div className="bg-white/80 backdrop-blur-md rounded-[24px] p-6 border border-white/40 shadow-sm flex flex-col justify-between h-full group hover:shadow-md transition-all">
+                            <div className="text-[#86868b] text-[10px] font-bold uppercase tracking-widest mb-4">Tổng điểm</div>
+                            <div className={`text-4xl font-bold tracking-tight ${totalCorrect >= 21 ? 'text-[#34C759]' : 'text-[#FF3B30]'}`}>
+                                {totalCorrect}<span className="text-[#86868b] text-xl ml-1">/ 30</span>
                             </div>
-                            <div className="text-xs text-slate-500 mt-2">Yêu cầu: ≥ 21 điểm</div>
+                            <div className="text-[11px] font-medium text-[#86868b] mt-4 flex items-center gap-1.5 opacity-60">
+                                {totalCorrect >= 21 ? (
+                                    <> <CheckCircle2 className="w-3.5 h-3.5" /> Đạt yêu cầu </>
+                                ) : (
+                                    <> <XCircle className="w-3.5 h-3.5" /> Cần ≥ 21 điểm </>
+                                )}
+                            </div>
                         </div>
 
-                        <div className="bg-white rounded-2xl p-6 border-2 border-slate-200 shadow-sm">
-                            <div className="text-slate-600 text-sm font-medium mb-2">Thời gian</div>
-                            <div className="text-4xl font-black text-slate-700">
+                        <div className="bg-white/80 backdrop-blur-md rounded-[24px] p-6 border border-white/40 shadow-sm flex flex-col justify-between h-full group hover:shadow-md transition-all">
+                            <div className="text-[#86868b] text-[10px] font-bold uppercase tracking-widest mb-4">Thời gian</div>
+                            <div className="text-4xl font-bold tracking-tight text-[#1d1d1f] tabular-nums">
                                 {formatTime(EXAM_TIME - timeLeft)}
                             </div>
-                            <div className="text-xs text-slate-500 mt-2">/ 30:00</div>
+                            <div className="text-[11px] font-medium text-[#86868b] mt-4 opacity-60">
+                                /{formatTime(EXAM_TIME)}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Correct/Wrong Summary */}
-                    <div className="grid md:grid-cols-2 gap-4">
-                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border-2 border-green-200">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <div className="text-green-700 text-sm font-medium mb-1">Trả lời đúng</div>
-                                    <div className="text-4xl font-black text-green-600">{totalCorrect}</div>
-                                </div>
-                                <CheckCircle2 className="w-12 h-12 text-green-500" />
+                    {/* Quick Stats Cards */}
+                    <div className="grid md:grid-cols-2 gap-5">
+                        <div className="bg-[#34C759]/5 rounded-[24px] p-6 border border-[#34C759]/10 flex items-center justify-between group hover:bg-[#34C759]/10 transition-all">
+                            <div className="space-y-1">
+                                <div className="text-[#34C759] text-[10px] font-bold uppercase tracking-widest">Trả lời đúng</div>
+                                <div className="text-4xl font-bold text-[#34C759] tabular-nums">{totalCorrect}</div>
+                            </div>
+                            <div className="w-14 h-14 bg-[#34C759]/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <CheckCircle2 className="w-7 h-7 text-[#34C759]" />
                             </div>
                         </div>
 
                         <button
                             onClick={() => setShowWrongAnswers(true)}
                             disabled={totalWrong === 0}
-                            className="bg-gradient-to-br from-red-50 to-rose-50 rounded-2xl p-6 border-2 border-red-200 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                            className={`rounded-[24px] p-6 flex items-center justify-between text-left transition-all border group ${totalWrong === 0
+                                ? 'bg-[#86868b]/5 border-black/5 opacity-50 cursor-not-allowed'
+                                : 'bg-[#FF3B30]/5 border-[#FF3B30]/10 hover:bg-[#FF3B30]/10 cursor-pointer active:scale-97'
+                                }`}
                         >
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <div className="text-red-700 text-sm font-medium mb-1">Trả lời sai</div>
-                                    <div className="text-4xl font-black text-red-600">{totalWrong}</div>
-                                    {totalWrong > 0 && (
-                                        <div className="text-xs text-red-600 mt-2 font-medium">👆 Nhấn để xem chi tiết</div>
-                                    )}
-                                </div>
-                                <XCircle className="w-12 h-12 text-red-500" />
+                            <div className="space-y-1">
+                                <div className="text-[#FF3B30] text-[10px] font-bold uppercase tracking-widest">Trả lời sai</div>
+                                <div className="text-4xl font-bold text-[#FF3B30] tabular-nums">{totalWrong}</div>
+                                {totalWrong > 0 && <div className="text-[11px] font-semibold text-[#FF3B30] mt-1 opacity-70">Nhấn xem chi tiết ↗</div>}
+                            </div>
+                            <div className="w-14 h-14 bg-[#FF3B30]/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <XCircle className="w-7 h-7 text-[#FF3B30]" />
                             </div>
                         </button>
                     </div>
 
                     {/* Wrong Answers Modal */}
                     {showWrongAnswers && (
-                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                            <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+                        <div className="fixed inset-0 bg-black/30 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+                            <div className="bg-white/95 backdrop-blur-2xl rounded-[32px] shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col border border-white/40 transform animate-in zoom-in-95 duration-300">
                                 {/* Modal Header */}
-                                <div className="bg-gradient-to-r from-red-500 to-rose-600 text-white p-6 flex items-center justify-between">
-                                    <div>
-                                        <h3 className="text-2xl font-black">Các câu trả lời sai</h3>
-                                        <p className="text-white/90 text-sm mt-1">Xem lại để học tập và cải thiện</p>
+                                <div className="bg-[#1d1d1f] text-white p-8 flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <h3 className="text-2xl font-semibold tracking-tight">Câu trả lời lỗi</h3>
+                                        <p className="text-white/60 text-sm font-medium">Phân tích và cải thiện kiến thức của bạn</p>
                                     </div>
                                     <button
                                         onClick={() => setShowWrongAnswers(false)}
-                                        className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+                                        className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all group"
                                     >
-                                        <XCircle className="w-6 h-6" />
+                                        <XCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />
                                     </button>
                                 </div>
 
                                 {/* Modal Content */}
                                 <div className="flex-1 overflow-y-auto flex flex-col min-h-0">
                                     {/* Tabs inside Modal */}
-                                    <div className="flex border-b-2 border-slate-100 bg-slate-50 px-6 shrink-0">
+                                    <div className="flex border-b border-black/5 bg-[#F5F5F7] px-8 shrink-0">
                                         {['Câu hỏi Pháp luật chung', 'Câu hỏi Pháp luật riêng', 'Câu hỏi Chuyên môn'].map((tab) => {
                                             const wrongInTab = questions.filter(q =>
                                                 q.phan_thi === tab &&
                                                 userAnswers[q.id] !== q.dap_an_dung
                                             ).length
+                                            const isActive = activeModalTab === tab
 
                                             return (
                                                 <button
                                                     key={tab}
                                                     onClick={() => setActiveModalTab(tab)}
-                                                    className={`px-4 py-3 text-sm font-bold transition-all relative flex items-center gap-2 ${activeModalTab === tab ? 'text-blue-600' : 'text-slate-500 hover:text-slate-700'
+                                                    className={`px-4 py-4 text-xs font-bold uppercase tracking-widest transition-all relative flex items-center gap-2 ${isActive ? 'text-[#007AFF]' : 'text-[#86868b] hover:text-[#1d1d1f]'
                                                         }`}
                                                 >
                                                     <span>{tab.replace('Câu hỏi ', '')}</span>
                                                     {wrongInTab > 0 && (
-                                                        <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-black ${activeModalTab === tab ? 'bg-blue-100 text-blue-600' : 'bg-slate-200 text-slate-500'
+                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-[#007AFF] text-white' : 'bg-black/5 text-[#86868b]'
                                                             }`}>
                                                             {wrongInTab}
                                                         </span>
                                                     )}
-                                                    {activeModalTab === tab && (
-                                                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                                                    {isActive && (
+                                                        <div className="absolute bottom-0 left-4 right-4 h-0.5 bg-[#007AFF] rounded-t-full" />
                                                     )}
                                                 </button>
                                             )
                                         })}
                                     </div>
 
-                                    <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                                    <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
                                         {questions
                                             .filter(q => q.phan_thi === activeModalTab && userAnswers[q.id] !== q.dap_an_dung)
                                             .map((q, idx) => {
                                                 const userAnswer = userAnswers[q.id]
                                                 const correctAnswer = q.dap_an_dung
-                                                const questionType = q.phan_thi
 
                                                 return (
-                                                    <div key={q.id} className="bg-slate-50 rounded-xl p-6 border-2 border-slate-200">
+                                                    <div key={q.id} className="bg-white border border-black/5 rounded-[20px] p-6 shadow-sm space-y-6">
                                                         {/* Question Header */}
-                                                        <div className="flex items-start gap-3 mb-4">
-                                                            <div className="w-8 h-8 rounded-lg bg-red-500 text-white font-bold flex items-center justify-center shrink-0">
+                                                        <div className="flex items-start gap-4">
+                                                            <div className="w-8 h-8 rounded-[8px] bg-[#FF3B30] text-white font-bold flex items-center justify-center shrink-0 text-sm">
                                                                 {q.stt}
                                                             </div>
-                                                            <div className="flex-1">
-                                                                <div className="text-xs text-slate-500 mb-1">{questionType}</div>
-                                                                <div className="text-slate-900 font-medium leading-relaxed">{q.cau_hoi}</div>
+                                                            <div className="flex-1 space-y-1">
+                                                                <div className="text-[10px] font-bold text-[#86868b] uppercase tracking-wider opacity-60">{q.phan_thi}</div>
+                                                                <div className="text-[#1d1d1f] font-semibold leading-relaxed tracking-tight">{q.cau_hoi}</div>
                                                             </div>
                                                         </div>
 
                                                         {/* Answer Options */}
-                                                        <div className="space-y-2">
+                                                        <div className="grid gap-2">
                                                             {['a', 'b', 'c', 'd'].map(option => {
                                                                 const answerText = q[`dap_an_${option}` as keyof Question] as string
                                                                 const isUserAnswer = userAnswer === option
@@ -530,30 +656,30 @@ export default function ExamSessionPage() {
                                                                 return (
                                                                     <div
                                                                         key={option}
-                                                                        className={`p-4 rounded-xl border-2 transition-all ${isCorrectAnswer
-                                                                            ? 'bg-emerald-50 border-emerald-200 shadow-sm'
+                                                                        className={`p-4 rounded-[12px] border transition-all ${isCorrectAnswer
+                                                                            ? 'bg-[#34C759]/5 border-[#34C759]/20 shadow-sm'
                                                                             : isUserAnswer
-                                                                                ? 'bg-rose-50 border-rose-200'
-                                                                                : 'bg-white border-slate-100'
+                                                                                ? 'bg-[#FF3B30]/5 border-[#FF3B30]/20'
+                                                                                : 'bg-[#F5F5F7]/50 border-transparent'
                                                                             }`}
                                                                     >
                                                                         <div className="flex items-start gap-4">
                                                                             <div
-                                                                                className={`w-9 h-9 rounded-lg font-black flex items-center justify-center text-sm shrink-0 shadow-sm ${isCorrectAnswer
-                                                                                    ? 'bg-emerald-600 text-white'
+                                                                                className={`w-8 h-8 rounded-[6px] font-bold flex items-center justify-center text-xs shrink-0 ${isCorrectAnswer
+                                                                                    ? 'bg-[#34C759] text-white'
                                                                                     : isUserAnswer
-                                                                                        ? 'bg-rose-600 text-white'
-                                                                                        : 'bg-slate-100 text-slate-500'
+                                                                                        ? 'bg-[#FF3B30] text-white'
+                                                                                        : 'bg-black/5 text-[#86868b]'
                                                                                     }`}
                                                                             >
                                                                                 {option.toUpperCase()}
                                                                             </div>
                                                                             <div className="flex-1 pt-1.5">
-                                                                                <div className={`text-sm leading-relaxed ${isCorrectAnswer
-                                                                                    ? 'text-emerald-900 font-semibold'
+                                                                                <div className={`text-[14px] leading-snug ${isCorrectAnswer
+                                                                                    ? 'text-[#1d1d1f] font-semibold'
                                                                                     : isUserAnswer
-                                                                                        ? 'text-rose-900 font-semibold'
-                                                                                        : 'text-slate-600'
+                                                                                        ? 'text-[#1d1d1f] font-semibold'
+                                                                                        : 'text-[#86868b]'
                                                                                     }`}>
                                                                                     {answerText}
                                                                                 </div>
@@ -569,24 +695,24 @@ export default function ExamSessionPage() {
 
                                         {/* Empty state if no wrong answers in this category */}
                                         {questions.filter(q => q.phan_thi === activeModalTab && userAnswers[q.id] !== q.dap_an_dung).length === 0 && (
-                                            <div className="flex flex-col items-center justify-center h-full py-20 text-slate-400">
-                                                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                                                    <CheckCircle2 className="w-8 h-8 text-slate-300" />
+                                            <div className="flex flex-col items-center justify-center h-full py-20 text-[#86868b]">
+                                                <div className="w-20 h-20 bg-black/5 rounded-full flex items-center justify-center mb-6">
+                                                    <CheckCircle2 className="w-10 h-10 text-[#34C759]" />
                                                 </div>
-                                                <p className="font-bold text-slate-500">Tuyệt vời!</p>
-                                                <p className="text-sm">Bạn không có câu sai nào trong phần này.</p>
+                                                <p className="font-semibold text-xl text-[#1d1d1f]">Hoàn hảo!</p>
+                                                <p className="text-[15px] max-w-[240px] text-center mt-2">Bạn không trả lời sai câu nào trong phần kiến thức này.</p>
                                             </div>
                                         )}
                                     </div>
                                 </div>
 
                                 {/* Modal Footer */}
-                                <div className="bg-slate-50 p-4 border-t-2 border-slate-200">
+                                <div className="bg-[#F5F5F7] p-6 border-t border-black/5">
                                     <button
                                         onClick={() => setShowWrongAnswers(false)}
-                                        className="w-full px-6 py-3 bg-slate-700 text-white font-bold rounded-xl hover:bg-slate-800 transition-all"
+                                        className="w-full px-6 py-4 bg-[#1d1d1f] text-white font-semibold rounded-[12px] hover:bg-black transition-all active:scale-97"
                                     >
-                                        Đóng
+                                        Đã hiểu
                                     </button>
                                 </div>
                             </div>
@@ -594,41 +720,42 @@ export default function ExamSessionPage() {
                     )}
 
                     {/* Detailed Breakdown by Category */}
-                    <div className="bg-white rounded-2xl p-6 border-2 border-slate-200 shadow-sm">
-                        <h3 className="font-bold text-slate-900 mb-4 text-lg">Chi tiết theo từng phần</h3>
+                    <div className="bg-white/50 backdrop-blur-sm rounded-[24px] p-8 border border-white/40 shadow-sm">
+                        <h3 className="text-xl font-semibold text-[#1d1d1f] mb-6 tracking-tight">Chi tiết hiệu suất</h3>
 
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {/* Common Law Tab */}
-                            <details className="group">
-                                <summary className="cursor-pointer list-none">
-                                    <div className="flex items-center justify-between p-4 bg-orange-50 border-2 border-orange-200 rounded-xl hover:bg-orange-100 transition-all">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white ${lawCommonCorrect >= 3 ? 'bg-green-500' : 'bg-red-500'
+                            <details className="group overflow-hidden rounded-[20px] border border-black/5">
+                                <summary className="cursor-pointer list-none outline-none">
+                                    <div className="flex items-center justify-between p-5 bg-white group-open:bg-[#F5F5F7] transition-all">
+                                        <div className="flex items-center gap-5">
+                                            <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center font-bold text-white shadow-lg ${lawCommonCorrect >= 3
+                                                ? 'bg-[#34C759] shadow-green-500/20'
+                                                : 'bg-[#FF3B30] shadow-red-500/20'
                                                 }`}>
                                                 {lawCommonCorrect}
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-orange-900">Pháp luật chung</h4>
-                                                <p className="text-xs text-orange-700">{lawCommonCorrect}/5 câu đúng</p>
+                                                <h4 className="font-semibold text-[#1d1d1f]">Pháp luật chung</h4>
+                                                <p className="text-[11px] text-[#86868b] font-bold uppercase tracking-wider">{lawCommonCorrect} / 5 câu trả lời đúng</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm text-slate-500 font-medium group-open:hidden">Xem chi tiết</span>
-                                            <span className="text-sm text-slate-500 font-medium hidden group-open:inline">Thu gọn</span>
-                                            <svg className="w-5 h-5 text-slate-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                            </svg>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-[11px] font-bold text-[#86868b] uppercase tracking-widest group-open:hidden">Chi tiết</span>
+                                            <ChevronRight className="w-5 h-5 text-[#86868b] transition-transform group-open:rotate-90" />
                                         </div>
                                     </div>
                                 </summary>
-                                <div className="mt-3 p-4 bg-slate-50 rounded-xl border-2 border-slate-200">
-                                    <div className="grid grid-cols-5 gap-2">
+                                <div className="p-6 bg-white border-t border-black/5">
+                                    <div className="grid grid-cols-5 gap-3">
                                         {lawCommonQuestions.map((q, idx) => {
                                             const isCorrect = userAnswers[q.id] === q.dap_an_dung
                                             return (
                                                 <div
                                                     key={q.id}
-                                                    className={`w-10 h-10 rounded-lg font-bold flex items-center justify-center text-sm ${isCorrect ? 'bg-white text-green-600 border-2 border-green-500' : 'bg-red-500 text-white'
+                                                    className={`aspect-square rounded-[10px] font-bold flex items-center justify-center text-sm transition-all ${isCorrect
+                                                        ? 'bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20'
+                                                        : 'bg-[#FF3B30]/10 text-[#FF3B30] border border-[#FF3B30]/20'
                                                         }`}
                                                 >
                                                     {idx + 1}
@@ -640,36 +767,37 @@ export default function ExamSessionPage() {
                             </details>
 
                             {/* Specific Law Tab */}
-                            <details className="group">
-                                <summary className="cursor-pointer list-none">
-                                    <div className="flex items-center justify-between p-4 bg-amber-50 border-2 border-amber-200 rounded-xl hover:bg-amber-100 transition-all">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white ${lawSpecificCorrect >= 3 ? 'bg-green-500' : 'bg-red-500'
+                            <details className="group overflow-hidden rounded-[20px] border border-black/5">
+                                <summary className="cursor-pointer list-none outline-none">
+                                    <div className="flex items-center justify-between p-5 bg-white group-open:bg-[#F5F5F7] transition-all">
+                                        <div className="flex items-center gap-5">
+                                            <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center font-bold text-white shadow-lg ${lawSpecificCorrect >= 3
+                                                ? 'bg-[#34C759] shadow-green-500/20'
+                                                : 'bg-[#FF3B30] shadow-red-500/20'
                                                 }`}>
                                                 {lawSpecificCorrect}
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-amber-900">Pháp luật riêng</h4>
-                                                <p className="text-xs text-amber-700">{lawSpecificCorrect}/5 câu đúng</p>
+                                                <h4 className="font-semibold text-[#1d1d1f]">Pháp luật riêng</h4>
+                                                <p className="text-[11px] text-[#86868b] font-bold uppercase tracking-wider">{lawSpecificCorrect} / 5 câu trả lời đúng</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm text-slate-500 font-medium group-open:hidden">Xem chi tiết</span>
-                                            <span className="text-sm text-slate-500 font-medium hidden group-open:inline">Thu gọn</span>
-                                            <svg className="w-5 h-5 text-slate-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                            </svg>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-[11px] font-bold text-[#86868b] uppercase tracking-widest group-open:hidden">Chi tiết</span>
+                                            <ChevronRight className="w-5 h-5 text-[#86868b] transition-transform group-open:rotate-90" />
                                         </div>
                                     </div>
                                 </summary>
-                                <div className="mt-3 p-4 bg-slate-50 rounded-xl border-2 border-slate-200">
-                                    <div className="grid grid-cols-5 gap-2">
+                                <div className="p-6 bg-white border-t border-black/5">
+                                    <div className="grid grid-cols-5 gap-3">
                                         {lawSpecificQuestions.map((q, idx) => {
                                             const isCorrect = userAnswers[q.id] === q.dap_an_dung
                                             return (
                                                 <div
                                                     key={q.id}
-                                                    className={`w-10 h-10 rounded-lg font-bold flex items-center justify-center text-sm ${isCorrect ? 'bg-white text-green-600 border-2 border-green-500' : 'bg-red-500 text-white'
+                                                    className={`aspect-square rounded-[10px] font-bold flex items-center justify-center text-sm transition-all ${isCorrect
+                                                        ? 'bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20'
+                                                        : 'bg-[#FF3B30]/10 text-[#FF3B30] border border-[#FF3B30]/20'
                                                         }`}
                                                 >
                                                     {idx + 6}
@@ -681,36 +809,37 @@ export default function ExamSessionPage() {
                             </details>
 
                             {/* Specialty Tab */}
-                            <details className="group">
-                                <summary className="cursor-pointer list-none">
-                                    <div className="flex items-center justify-between p-4 bg-blue-50 border-2 border-blue-200 rounded-xl hover:bg-blue-100 transition-all">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white ${specialtyCorrect >= 12 ? 'bg-green-500' : 'bg-red-500'
+                            <details className="group overflow-hidden rounded-[20px] border border-black/5">
+                                <summary className="cursor-pointer list-none outline-none">
+                                    <div className="flex items-center justify-between p-5 bg-white group-open:bg-[#F5F5F7] transition-all">
+                                        <div className="flex items-center gap-5">
+                                            <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center font-bold text-white shadow-lg ${specialtyCorrect >= 12
+                                                ? 'bg-[#34C759] shadow-green-500/20'
+                                                : 'bg-[#FF3B30] shadow-red-500/20'
                                                 }`}>
                                                 {specialtyCorrect}
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-blue-900">Chuyên môn</h4>
-                                                <p className="text-xs text-blue-700">{specialtyCorrect}/20 câu đúng</p>
+                                                <h4 className="font-semibold text-[#1d1d1f]">Chuyên môn</h4>
+                                                <p className="text-[11px] text-[#86868b] font-bold uppercase tracking-wider">{specialtyCorrect} / 20 câu trả lời đúng</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm text-slate-500 font-medium group-open:hidden">Xem chi tiết</span>
-                                            <span className="text-sm text-slate-500 font-medium hidden group-open:inline">Thu gọn</span>
-                                            <svg className="w-5 h-5 text-slate-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                            </svg>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-[11px] font-bold text-[#86868b] uppercase tracking-widest group-open:hidden">Chi tiết</span>
+                                            <ChevronRight className="w-5 h-5 text-[#86868b] transition-transform group-open:rotate-90" />
                                         </div>
                                     </div>
                                 </summary>
-                                <div className="mt-3 p-4 bg-slate-50 rounded-xl border-2 border-slate-200">
+                                <div className="p-6 bg-white border-t border-black/5">
                                     <div className="grid grid-cols-10 gap-2">
                                         {specialtyQuestions.map((q, idx) => {
                                             const isCorrect = userAnswers[q.id] === q.dap_an_dung
                                             return (
                                                 <div
                                                     key={q.id}
-                                                    className={`w-10 h-10 rounded-lg font-bold flex items-center justify-center text-sm ${isCorrect ? 'bg-white text-green-600 border-2 border-green-500' : 'bg-red-500 text-white'
+                                                    className={`aspect-square rounded-[8px] font-bold flex items-center justify-center text-sm transition-all ${isCorrect
+                                                        ? 'bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20'
+                                                        : 'bg-[#FF3B30]/10 text-[#FF3B30] border border-[#FF3B30]/20'
                                                         }`}
                                                 >
                                                     {idx + 11}
@@ -724,18 +853,18 @@ export default function ExamSessionPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-4">
+                    <div className="flex flex-col md:flex-row gap-4 pt-4 pb-12">
                         <button
                             onClick={() => router.push('/thi-thu')}
-                            className="flex-1 px-6 py-4 bg-white border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all"
+                            className="flex-1 px-8 py-5 bg-white border border-black/5 text-[#1d1d1f] font-semibold rounded-[16px] hover:bg-[#F5F5F7] transition-all shadow-sm active:scale-97"
                         >
-                            Về danh sách đề thi
+                            Về trang chủ
                         </button>
                         <button
                             onClick={() => window.location.reload()}
-                            className="flex-1 px-6 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30"
+                            className="flex-1 px-8 py-5 bg-[#1d1d1f] text-white font-semibold rounded-[16px] hover:bg-black transition-all shadow-xl shadow-black/10 active:scale-97"
                         >
-                            Thi lại
+                            Thử thách lại
                         </button>
                     </div>
                 </div>
@@ -745,7 +874,7 @@ export default function ExamSessionPage() {
 
     // Exam Interface
     return (
-        <div className="min-h-screen py-6 space-y-6 flex flex-col">
+        <div className="min-h-screen bg-[#F5F5F7] py-6 space-y-6 flex flex-col font-sans">
             {/* Header with Timer */}
             <div className="px-6 flex items-center justify-between flex-shrink-0">
                 <button
@@ -754,77 +883,103 @@ export default function ExamSessionPage() {
                             router.push('/thi-thu')
                         }
                     }}
-                    className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900 font-medium transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-[#86868b] hover:text-[#1d1d1f] font-medium transition-colors"
                 >
                     <ArrowLeft className="w-5 h-5" />
                     Thoát
                 </button>
 
-                <div className={`flex items-center gap-3 px-6 py-3 rounded-xl font-bold ${timeLeft < 300 ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
+                <div className={`flex items-center gap-3 px-6 py-2.5 rounded-[12px] font-semibold backdrop-blur-md border ${timeLeft < 300
+                    ? 'bg-[#FF3B30]/10 border-[#FF3B30]/20 text-[#FF3B30]'
+                    : 'bg-white/70 border-white/40 text-[#1d1d1f] shadow-sm'
                     }`}>
-                    <Clock className="w-5 h-5" />
-                    {formatTime(timeLeft)}
+                    <Clock className={`w-4 h-4 ${timeLeft < 300 ? 'animate-pulse' : ''}`} />
+                    <span className="tabular-nums text-lg">{formatTime(timeLeft)}</span>
                 </div>
 
                 <button
                     onClick={() => setIsGuideOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-black uppercase tracking-widest border border-blue-100 hover:bg-blue-100 transition-all active:scale-95"
+                    className="flex items-center gap-2 px-4 py-2 bg-white/70 backdrop-blur-md text-[#007AFF] rounded-[10px] text-xs font-semibold uppercase tracking-wider border border-white/20 hover:bg-white/90 transition-all shadow-sm active:scale-95"
                 >
                     <HelpCircle className="w-4 h-4" />
-                    Xem hướng dẫn
+                    Hướng dẫn
                 </button>
             </div>
 
             {/* Exam Info */}
             <div className="px-6 flex-shrink-0">
-                <h1 className="text-2xl font-black text-slate-900 mb-1">{examId}</h1>
-                <p className="text-slate-600 text-sm">{selectedHang} • Câu {currentIndex + 1}/{questions.length}</p>
+                <h1 className="text-2xl font-semibold text-[#1d1d1f] tracking-tight mb-1">{examId}</h1>
+                <p className="text-[#86868b] text-sm font-medium">{selectedHang} • Câu {currentIndex + 1} / {questions.length}</p>
             </div>
 
             {/* Main Content */}
             <div className="grid lg:grid-cols-[280px_1fr] gap-6 flex-1 min-h-0 px-6">
-                {/* Question Grid */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border-2 border-slate-200 flex flex-col overflow-hidden">
-                    <h3 className="font-bold text-slate-800 mb-4 flex-shrink-0">Danh sách câu hỏi</h3>
+                {/* Question Grid Sidebar */}
+                <div className="bg-white/80 backdrop-blur-md rounded-[20px] p-6 shadow-sm border border-white/40 flex flex-col overflow-hidden">
+                    <h3 className="font-semibold text-[#86868b] text-[10px] uppercase tracking-wider mb-4 flex-shrink-0">Danh sách câu hỏi</h3>
 
-                    <div className="overflow-y-auto flex-1">
-                        <div className="space-y-4">
+                    <div className="overflow-y-auto flex-1 pr-1 custom-scrollbar">
+                        <div className="space-y-6">
                             {/* Law Questions */}
-                            <div>
-                                <div className="text-xs font-bold text-orange-600 mb-2 uppercase tracking-wider">Pháp luật (10 câu)</div>
+                            <div className="space-y-3">
+                                <div className="text-[10px] font-bold text-[#FF9500] uppercase tracking-widest opacity-80">Pháp luật (10 câu)</div>
                                 <div className="grid grid-cols-5 gap-2">
-                                    {questions.slice(0, 10).map((q, idx) => (
-                                        <button
-                                            key={q.id}
-                                            onClick={() => jumpTo(idx)}
-                                            className={`w-10 h-10 rounded-lg font-bold transition-all text-sm ${idx === currentIndex
-                                                ? 'bg-blue-600 text-white ring-2 ring-blue-400'
-                                                : userAnswers[q.id]
-                                                    ? 'bg-green-500 text-white'
-                                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                                                }`}
-                                        >
-                                            {idx + 1}
-                                        </button>
-                                    ))}
+                                    {questions.slice(0, 10).map((q, idx) => {
+                                        const isCurrent = idx === currentIndex
+                                        const isAnswered = !!userAnswers[q.id]
+                                        const isKbFocused = kbArea === 'sidebar' && kbFocusIndex === idx
+
+                                        return (
+                                            <button
+                                                key={q.id}
+                                                onClick={() => jumpTo(idx)}
+                                                onMouseEnter={() => {
+                                                    setKbArea('sidebar')
+                                                    setKbFocusIndex(idx)
+                                                }}
+                                                className={`w-10 h-10 rounded-[10px] font-semibold transition-all text-xs relative flex items-center justify-center active:scale-90 ${isCurrent
+                                                    ? 'bg-[#007AFF] text-white shadow-md shadow-blue-500/20'
+                                                    : isAnswered
+                                                        ? 'bg-[#34C759] text-white'
+                                                        : 'bg-black/5 text-[#1d1d1f] hover:bg-black/10'
+                                                    } ${isKbFocused
+                                                        ? 'ring-[3px] ring-[#007AFF] z-10 scale-110'
+                                                        : isCurrent ? 'ring-2 ring-white/50' : ''
+                                                    }`}
+                                            >
+                                                {idx + 1}
+                                            </button>
+                                        )
+                                    })}
                                 </div>
                             </div>
 
                             {/* Specialty Questions */}
-                            <div>
-                                <div className="text-xs font-bold text-blue-600 mb-2 uppercase tracking-wider">Chuyên môn (20 câu)</div>
+                            <div className="space-y-3">
+                                <div className="text-[10px] font-bold text-[#007AFF] uppercase tracking-widest opacity-80">Chuyên môn (20 câu)</div>
                                 <div className="grid grid-cols-5 gap-2">
                                     {questions.slice(10, 30).map((q, idx) => {
                                         const actualIdx = idx + 10
+                                        const isCurrent = actualIdx === currentIndex
+                                        const isAnswered = !!userAnswers[q.id]
+                                        const isKbFocused = kbArea === 'sidebar' && kbFocusIndex === actualIdx
+
                                         return (
                                             <button
                                                 key={q.id}
                                                 onClick={() => jumpTo(actualIdx)}
-                                                className={`w-10 h-10 rounded-lg font-bold transition-all text-sm ${actualIdx === currentIndex
-                                                    ? 'bg-blue-600 text-white ring-2 ring-blue-400'
-                                                    : userAnswers[q.id]
-                                                        ? 'bg-green-500 text-white'
-                                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                                onMouseEnter={() => {
+                                                    setKbArea('sidebar')
+                                                    setKbFocusIndex(actualIdx)
+                                                }}
+                                                className={`w-10 h-10 rounded-[10px] font-semibold transition-all text-xs relative flex items-center justify-center active:scale-90 ${isCurrent
+                                                    ? 'bg-[#007AFF] text-white shadow-md shadow-blue-500/20'
+                                                    : isAnswered
+                                                        ? 'bg-[#34C759] text-white'
+                                                        : 'bg-black/5 text-[#1d1d1f] hover:bg-black/10'
+                                                    } ${isKbFocused
+                                                        ? 'ring-[3px] ring-[#007AFF] z-10 scale-110'
+                                                        : isCurrent ? 'ring-2 ring-white/50' : ''
                                                     }`}
                                             >
                                                 {actualIdx + 1}
@@ -839,32 +994,35 @@ export default function ExamSessionPage() {
                     {/* Submit Button */}
                     <button
                         onClick={() => setShowSubmitDialog(true)}
-                        className="mt-4 w-full px-6 py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-500/30 flex items-center justify-center gap-2 flex-shrink-0"
+                        className="mt-6 w-full px-6 py-4 bg-[#1d1d1f] text-white font-semibold rounded-[12px] hover:bg-black transition-all shadow-lg shadow-black/10 flex items-center justify-center gap-2 flex-shrink-0 active:scale-97"
                     >
-                        <Send className="w-5 h-5" />
-                        Nộp bài
+                        <Send className="w-4 h-4" />
+                        Nộp bài thi
                     </button>
                 </div>
 
-                {/* Question Display */}
-                <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 flex flex-col overflow-hidden">
+                {/* Question Display Container */}
+                <div className="bg-white rounded-[20px] shadow-sm border border-black/5 flex flex-col overflow-hidden">
                     <div className="overflow-y-auto flex-1 p-8">
-                        <div className="space-y-6">
+                        <div className="space-y-8">
                             {/* Question Header */}
-                            <div className="flex items-start gap-4 pb-4 border-b-2 border-slate-200">
-                                <span className={`px-4 py-2 font-bold rounded-lg text-sm flex-shrink-0 ${isLawQuestion
-                                    ? 'bg-orange-100 text-orange-700'
-                                    : 'bg-blue-100 text-blue-700'
+                            <div className="flex items-start gap-4 pb-6 border-b border-black/5">
+                                <span className={`px-4 py-2 font-bold rounded-[10px] text-xs flex-shrink-0 ${isLawQuestion
+                                    ? 'bg-[#FF9500]/10 text-[#FF9500]'
+                                    : 'bg-[#007AFF]/10 text-[#007AFF]'
                                     }`}>
                                     Câu {currentIndex + 1}
                                 </span>
                                 <div className="flex-1">
-                                    <p className="text-slate-900 font-bold leading-relaxed">
+                                    <p className="text-[#1d1d1f] text-lg font-semibold leading-relaxed tracking-tight">
                                         {currentQ.cau_hoi}
                                     </p>
-                                    <span className="text-slate-400 text-sm font-medium mt-2 inline-block">
-                                        {isLawQuestion ? '📋 Pháp luật' : '🔧 Chuyên môn'}
-                                    </span>
+                                    <div className="flex items-center gap-2 mt-3 text-[#86868b] text-sm">
+                                        <span className="font-medium opacity-60">Phân loại:</span>
+                                        <span className={`font-semibold ${isLawQuestion ? 'text-[#FF9500]' : 'text-[#007AFF]'}`}>
+                                            {isLawQuestion ? 'Pháp luật' : 'Chuyên môn'}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -872,13 +1030,18 @@ export default function ExamSessionPage() {
                                 {['a', 'b', 'c', 'd'].map((option, index) => {
                                     const optionText = currentQ[`dap_an_${option}` as keyof Question] as string
                                     const isSelected = userAnswers[currentQ.id] === option
+                                    const isKbFocused = kbArea === 'main' && kbFocusIndex === index
 
                                     return (
                                         <label
                                             key={option}
-                                            className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${isSelected
-                                                ? 'border-blue-500 bg-blue-50'
-                                                : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                                            onMouseEnter={() => {
+                                                setKbArea('main')
+                                                setKbFocusIndex(index)
+                                            }}
+                                            className={`flex items-start gap-4 p-5 rounded-[12px] border transition-all relative cursor-pointer group ${isKbFocused ? 'ring-[3px] ring-[#007AFF]/30 border-[#007AFF] shadow-sm' : ''} ${isSelected
+                                                ? 'border-[#007AFF] bg-[#007AFF]/5'
+                                                : 'border-black/5 bg-[#F5F5F7]/50 hover:bg-white hover:border-black/10 hover:shadow-sm'
                                                 }`}
                                         >
                                             <input
@@ -887,11 +1050,12 @@ export default function ExamSessionPage() {
                                                 value={option}
                                                 checked={isSelected}
                                                 onChange={() => selectAnswer(currentQ.id, option)}
-                                                className="mt-1 w-5 h-5 text-blue-600"
+                                                className="mt-1 w-5 h-5 accent-[#007AFF] cursor-pointer"
                                             />
                                             <div className="flex-1">
-                                                <span className="font-medium text-slate-900">
-                                                    {option.toUpperCase()}. {optionText}
+                                                <span className={`font-medium text-[15px] leading-snug ${isSelected ? 'text-[#007AFF]' : 'text-[#1d1d1f]'}`}>
+                                                    <span className="opacity-50 font-bold mr-2 uppercase">{option}.</span>
+                                                    {optionText}
                                                 </span>
                                             </div>
                                         </label>
@@ -901,34 +1065,37 @@ export default function ExamSessionPage() {
                         </div>
                     </div>
 
-                    {/* Navigation */}
-                    <div className="border-t-2 border-slate-200 p-6 flex items-center justify-between flex-shrink-0">
+                    {/* Navigation Footer */}
+                    <div className="border-t border-black/5 p-6 flex items-center justify-between flex-shrink-0 bg-white/50 backdrop-blur-sm">
                         <button
                             onClick={goPrev}
                             disabled={currentIndex === 0}
-                            className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            className="flex items-center gap-2 px-6 py-3 bg-white border border-black/5 text-[#1d1d1f] font-semibold rounded-[10px] hover:bg-[#F5F5F7] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm active:scale-97"
                         >
                             <ChevronLeft className="w-5 h-5" />
                             Câu trước
                         </button>
 
-                        <span className="text-slate-500 font-medium">
-                            {Object.keys(userAnswers).length}/{questions.length} đã trả lời
-                        </span>
+                        <div className="flex flex-col items-center">
+                            <span className="text-[#86868b] text-[10px] font-bold uppercase tracking-widest mb-1">Tiến độ</span>
+                            <span className="text-[#1d1d1f] font-semibold tabular-nums">
+                                {Object.keys(userAnswers).length} / {questions.length}
+                            </span>
+                        </div>
 
                         {currentIndex === questions.length - 1 ? (
                             Object.keys(userAnswers).length === questions.length ? (
                                 <button
                                     onClick={() => setShowSubmitDialog(true)}
-                                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg shadow-green-500/30"
+                                    className="flex items-center gap-2 px-8 py-3 bg-[#34C759] text-white font-semibold rounded-[10px] hover:bg-[#28A745] transition-all shadow-lg shadow-green-500/10 active:scale-97"
                                 >
                                     <CheckCircle2 className="w-5 h-5" />
-                                    Nộp bài
+                                    Nộp bài ngay
                                 </button>
                             ) : (
                                 <button
                                     disabled
-                                    className="flex items-center gap-2 px-6 py-3 bg-slate-100 text-slate-400 font-bold rounded-xl cursor-not-allowed transition-all"
+                                    className="flex items-center gap-2 px-8 py-3 bg-black/5 text-[#86868b] font-semibold rounded-[10px] cursor-not-allowed transition-all opacity-50"
                                 >
                                     Câu tiếp
                                     <ChevronRight className="w-5 h-5" />
@@ -937,7 +1104,7 @@ export default function ExamSessionPage() {
                         ) : (
                             <button
                                 onClick={goNext}
-                                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all"
+                                className="flex items-center gap-2 px-8 py-3 bg-[#007AFF] text-white font-semibold rounded-[10px] hover:bg-[#0062CC] transition-all shadow-lg shadow-blue-500/10 active:scale-97"
                             >
                                 Câu tiếp
                                 <ChevronRight className="w-5 h-5" />
@@ -947,54 +1114,43 @@ export default function ExamSessionPage() {
 
                     {/* Submit Confirmation Dialog */}
                     {showSubmitDialog && (
-                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-                                <div className="flex items-start gap-4 mb-6">
-                                    <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-                                        <AlertCircle className="w-6 h-6 text-amber-600" />
+                        <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+                            <div className="bg-white/90 backdrop-blur-xl rounded-[24px] shadow-2xl max-w-md w-full p-8 border border-white/40 transform animate-in zoom-in-95 duration-300">
+                                <div className="flex flex-col items-center text-center mb-8">
+                                    <div className="w-16 h-16 rounded-full bg-[#FF9500]/10 flex items-center justify-center mb-4">
+                                        <AlertCircle className="w-8 h-8 text-[#FF9500]" />
                                     </div>
-                                    <div className="flex-1">
-                                        <h3 className="text-xl font-black text-slate-900 mb-2">Xác nhận nộp bài</h3>
-                                        <p className="text-slate-600 mb-3">
-                                            Bạn có chắc chắn muốn hoàn tất bài thi lúc này không?
-                                        </p>
+                                    <h3 className="text-2xl font-semibold text-[#1d1d1f] tracking-tight mb-2">Xác nhận nộp bài</h3>
+                                    <p className="text-[#86868b] text-[15px] leading-relaxed">
+                                        Bạn có chắc chắn muốn hoàn tất bài thi và xem kết quả ngay bây giờ không?
+                                    </p>
+                                </div>
 
-                                        {timeLeft <= 0 && (
-                                            <div className="bg-red-50 border-2 border-red-200 rounded-lg p-3 mb-3">
-                                                <p className="text-red-700 text-sm font-bold flex items-center gap-2">
-                                                    <Clock className="w-4 h-4" />
-                                                    Bạn đã quá thời gian thi!
-                                                </p>
-                                            </div>
-                                        )}
-
-                                        <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-3">
-                                            <div className="flex items-center justify-between text-sm mb-2">
-                                                <span className="text-slate-600">Đã trả lời:</span>
-                                                <span className="font-bold text-blue-600">
-                                                    {Object.keys(userAnswers).length}/{questions.length} câu
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center justify-between text-sm">
-                                                <span className="text-slate-600">Thời gian còn lại:</span>
-                                                <span className={`font-bold ${timeLeft <= 0 ? 'text-red-600' : 'text-blue-600'}`}>
-                                                    {formatTime(Math.max(0, timeLeft))}
-                                                </span>
-                                            </div>
-                                        </div>
+                                <div className="space-y-3 mb-8">
+                                    <div className="flex items-center justify-between p-4 bg-black/5 rounded-[12px]">
+                                        <span className="text-[#86868b] text-sm font-medium">Đã trả lời</span>
+                                        <span className="text-[#1d1d1f] font-bold">
+                                            {Object.keys(userAnswers).length} / {questions.length} câu
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between p-4 bg-black/5 rounded-[12px]">
+                                        <span className="text-[#86868b] text-sm font-medium">Thời gian còn lại</span>
+                                        <span className={`font-bold tabular-nums ${timeLeft <= 300 ? 'text-[#FF3B30]' : 'text-[#007AFF]'}`}>
+                                            {formatTime(Math.max(0, timeLeft))}
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div className="flex gap-3">
+                                <div className="grid grid-cols-2 gap-3">
                                     <button
                                         onClick={() => setShowSubmitDialog(false)}
-                                        className="flex-1 px-6 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all"
+                                        className="px-6 py-3.5 bg-white border border-black/5 text-[#1d1d1f] font-semibold rounded-[12px] hover:bg-[#F5F5F7] transition-all active:scale-95"
                                     >
-                                        Hủy
+                                        Tiếp tục làm
                                     </button>
                                     <button
                                         onClick={confirmSubmit}
-                                        className="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all"
+                                        className="px-6 py-3.5 bg-[#34C759] text-white font-semibold rounded-[12px] hover:bg-[#28A745] transition-all shadow-lg shadow-green-500/10 active:scale-95"
                                     >
                                         Nộp bài
                                     </button>

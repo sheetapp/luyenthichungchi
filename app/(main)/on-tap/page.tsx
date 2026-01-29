@@ -12,6 +12,7 @@ import { removeVietnameseTones } from '@/lib/utils/vietnamese'
 import { useAppStore } from '@/lib/store/useAppStore'
 import { ReportModal } from '@/components/practice/ReportModal'
 import { GuideModal } from '@/components/practice/GuideModal'
+import { ThemeToggle } from '@/components/theme/ThemeContext'
 import { AlertTriangle, HelpCircle } from 'lucide-react'
 
 interface Question {
@@ -471,27 +472,27 @@ function OnTapContent() {
     }
 
     function getQuestionButtonClass(index: number, question: Question) {
-        const baseClass = "w-10 h-10 rounded-lg font-bold transition-all text-sm flex items-center justify-center relative"
+        const baseClass = "w-10 h-10 rounded-xl font-semibold transition-all text-xs flex items-center justify-center relative active:scale-90 border"
         const isKbFocused = kbArea === 'sidebar' && kbFocusIndex === index
-        const focusRing = isKbFocused ? "ring-4 ring-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] z-10" : ""
+        const focusRing = isKbFocused ? "ring-[3px] ring-apple-blue/30 z-10 scale-110" : ""
 
         if (index === currentIndex) {
-            return `${baseClass} bg-blue-600 text-white ring-2 ring-blue-400 ${focusRing}`
+            return `${baseClass} bg-[#0A84FF] border-[#0A84FF] text-white shadow-apple-shadow scale-105 z-10 ${focusRing}`
         }
 
         const history = practiceHistory[question.id]
         if (!history || history.attempts === 0) {
-            return `${baseClass} bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer ${focusRing}`
+            return `${baseClass} bg-transparent border-apple-border text-apple-text-secondary hover:border-apple-text/30 cursor-pointer ${focusRing}`
         }
 
         if (history.wrongAttempts > 2) {
-            return `${baseClass} bg-orange-500 text-white cursor-pointer ${focusRing}`
+            return `${baseClass} bg-red-muted border-red-soft text-red-text cursor-pointer ${focusRing}`
         }
 
         if (history.isCorrect) {
-            return `${baseClass} bg-green-500 text-white cursor-pointer ${focusRing}`
+            return `${baseClass} bg-emerald-muted border-emerald-soft text-emerald-text cursor-pointer ${focusRing}`
         } else {
-            return `${baseClass} bg-red-500 text-white cursor-pointer ${focusRing}`
+            return `${baseClass} bg-red-muted border-red-soft text-red-text cursor-pointer ${focusRing}`
         }
     }
 
@@ -531,48 +532,49 @@ function OnTapContent() {
     // Show practice content for authenticated users
 
     return (
-        <div className="min-h-screen py-6 space-y-6 flex flex-col">
+        <div className="min-h-screen bg-apple-bg py-6 space-y-6 flex flex-col font-sans transition-colors duration-300">
             {/* Header */}
             <div className="flex-shrink-0 px-6 flex items-start justify-between gap-6">
                 <div className="space-y-1">
                     <div className="flex items-center gap-4">
-                        <h1 className="text-3xl font-black text-slate-900 mb-2">Hệ thống ôn tập</h1>
+                        <h1 className="text-3xl font-black text-apple-text tracking-tight mb-2">Hệ thống ôn tập</h1>
                         <button
                             onClick={() => setIsGuideOpen(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-black uppercase tracking-widest border border-blue-100 hover:bg-blue-100 transition-all hover:shadow-lg hover:shadow-blue-500/10 active:scale-95 mb-1.5"
+                            className="flex items-center gap-2 px-4 py-2 bg-apple-card/70 backdrop-blur-md text-apple-blue rounded-[10px] text-xs font-semibold uppercase tracking-wider border border-apple-glass-border hover:bg-apple-card/90 transition-all shadow-sm active:scale-95 mb-1.5"
                         >
                             <HelpCircle className="w-4 h-4" />
                             Xem hướng dẫn
                         </button>
                     </div>
-                    <p className="text-slate-600">Lựa chọn hạng và lĩnh vực để bắt đầu học</p>
+                    <p className="text-apple-text-secondary text-sm font-normal">Lựa chọn hạng và lĩnh vực để bắt đầu học</p>
                 </div>
 
                 <div className="flex items-center gap-3">
+                    <ThemeToggle />
                     <button
                         onClick={() => setIsShuffled(!isShuffled)}
-                        className={`flex items-center gap-2.5 px-6 py-3.5 rounded-2xl text-sm font-black transition-all border-2 ${isShuffled
-                            ? 'bg-orange-500 border-orange-600 text-white shadow-xl shadow-orange-500/20 active:scale-95'
-                            : 'bg-white border-slate-100 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                        className={`flex items-center gap-2.5 px-6 py-3 rounded-[10px] text-sm font-semibold transition-all border ${isShuffled
+                            ? 'bg-[#FF9500] border-[#FF9500] text-white shadow-lg shadow-orange-500/20 active:scale-97'
+                            : 'bg-apple-card dark:text-[#1d1d1f] text-apple-text border-[#apple-border] hover:bg-apple-bg shadow-sm'
                             }`}
                     >
-                        <RotateCcw className={`w-5 h-5 ${isShuffled ? 'animate-spin-slow' : ''}`} />
+                        <RotateCcw className={`w-4 h-4 ${isShuffled ? 'animate-spin-slow' : ''}`} />
                         <span>Trộn câu hỏi</span>
-                        {isShuffled && <span className="w-2.5 h-2.5 bg-white rounded-full animate-pulse" />}
+                        {isShuffled && <span className="w-2 h-2 bg-white rounded-full animate-pulse" />}
                     </button>
                 </div>
             </div>
 
             {/* Top Controls */}
             <div className="flex items-center gap-4 flex-shrink-0 px-6">
-                <div className="flex gap-2">
+                <div className="flex p-1 bg-apple-bg rounded-xl border border-apple-border shadow-sm">
                     {HANG_TABS.map(hang => (
                         <button
                             key={hang}
                             onClick={() => setSelectedHang(hang)}
-                            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${selectedHang === hang
-                                ? 'bg-blue-600 text-white shadow-lg'
-                                : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                            className={`px-6 py-2 rounded-lg text-sm font-black uppercase tracking-tight transition-all ${selectedHang === hang
+                                ? 'bg-apple-card text-apple-blue shadow-md'
+                                : 'text-apple-text-secondary hover:text-apple-text'
                                 }`}
                         >
                             {hang}
@@ -580,50 +582,58 @@ function OnTapContent() {
                     ))}
                 </div>
 
-                <select
-                    value={selectedChuyenNganh}
-                    onChange={(e) => setSelectedChuyenNganh(e.target.value)}
-                    className="px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                >
-                    {CHUYEN_NGANH_OPTIONS.map((option) => (
-                        <option key={option} value={option}>
-                            {option}
-                        </option>
-                    ))}
-                </select>
+                <div className="relative">
+                    <select
+                        value={selectedChuyenNganh}
+                        onChange={(e) => setSelectedChuyenNganh(e.target.value)}
+                        className="appearance-none pl-4 pr-10 py-2.5 bg-apple-card border border-apple-border rounded-[10px] outline-none focus:ring-2 focus:ring-apple-blue/20 shadow-sm transition-all text-sm font-black tracking-tight"
+                    >
+                        {CHUYEN_NGANH_OPTIONS.map((option) => (
+                            <option key={option} value={option} className="bg-apple-card text-apple-text">
+                                {option}
+                            </option>
+                        ))}
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-apple-text-secondary">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
 
-                <div className="relative flex-1 ml-auto">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <div className="relative flex-1 max-w-md ml-auto">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-secondary" />
                     <input
                         type="text"
-                        placeholder="Tìm kiếm theo nội dung câu hỏi (bấm Enter)..."
+                        placeholder="Tìm kiếm nội dung..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                        className="w-full pl-10 pr-4 py-2.5 bg-apple-card border border-apple-border rounded-xl text-sm font-medium text-apple-text placeholder:text-apple-text-secondary focus:outline-none focus:ring-2 focus:ring-apple-blue/10 shadow-apple-shadow"
                     />
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 border-b-2 border-slate-200 flex-shrink-0 px-6">
+            <div className="flex px-6 border-b border-apple-border flex-shrink-0">
                 {PHAN_THI_OPTIONS.map((phan) => {
                     const count = phanThiCounts[phan] || 0
+                    const isActive = selectedPhanThi === phan
                     return (
                         <button
                             key={phan}
                             onClick={() => setSelectedPhanThi(phan)}
-                            className={`px-6 py-3 text-sm font-bold transition-all relative flex items-center gap-2 ${selectedPhanThi === phan ? 'text-blue-600' : 'text-slate-600 hover:text-slate-900'
+                            className={`px-6 py-4 text-sm font-semibold transition-all relative flex items-center gap-2 ${isActive ? 'text-apple-blue' : 'text-apple-text-secondary hover:text-apple-text'
                                 }`}
                         >
                             <span>{phan.replace('Câu hỏi ', '')}</span>
                             {count > 0 && (
-                                <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-black shadow-sm ${selectedPhanThi === phan ? 'bg-orange-500 text-white' : 'bg-slate-200 text-slate-600'
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-apple-blue text-white' : 'bg-apple-bg border border-apple-border text-apple-text-secondary'
                                     }`}>
                                     {count}
                                 </span>
                             )}
-                            {selectedPhanThi === phan && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                            {isActive && (
+                                <div className="absolute bottom-0 left-6 right-6 h-[2.5px] bg-apple-blue rounded-t-full shadow-[0_-2px_8px_rgba(0,122,255,0.4)]" />
                             )}
                         </button>
                     )
@@ -631,52 +641,52 @@ function OnTapContent() {
             </div>
 
             {/* Navigation & Statistics */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 flex-shrink-0 mx-6">
-                <div className="flex items-center justify-between mb-4">
+            <div className="mx-6 bg-apple-card/80 backdrop-blur-[20px] rounded-2xl p-6 border border-apple-border shadow-apple-shadow flex-shrink-0">
+                <div className="flex items-center justify-between mb-6">
                     <button
                         onClick={handlePrevious}
                         disabled={currentIndex === 0}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-apple-bg border border-apple-border text-apple-text font-semibold rounded-xl hover:bg-apple-border/50 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-sm active:scale-97"
                     >
                         <ChevronLeft className="w-4 h-4" />
                         Câu trước
                     </button>
 
-                    <div className="text-center px-4 py-2">
+                    <div className="text-center">
                         {feedback ? (
-                            <span className={`font-bold text-base ${feedback.isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+                            <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold border ${feedback.isCorrect ? 'bg-emerald-muted text-emerald-text border-emerald-soft' : 'bg-red-muted text-red-text border-red-soft'}`}>
                                 {feedback.message}
                             </span>
                         ) : (
-                            <span className="text-slate-600 font-semibold">Chưa trả lời</span>
+                            <span className="text-apple-text-secondary text-[11px] font-bold uppercase tracking-widest bg-apple-bg px-4 py-1.5 rounded-full border border-apple-border">Chưa trả lời</span>
                         )}
                     </div>
 
                     <button
                         onClick={handleNext}
                         disabled={currentIndex === questions.length - 1}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-[#007AFF] text-white font-semibold rounded-[10px] hover:bg-[#0062CC] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-md shadow-blue-500/10 active:scale-97"
                     >
                         Câu tiếp
                         <ChevronRight className="w-4 h-4" />
                     </button>
                 </div>
 
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-shrink-0 px-6">
                     <button
                         onClick={() => {
-                            const firstDoneIndex = questions.findIndex(q => {
+                            const firstActiveIndex = questions.findIndex(q => {
                                 const history = practiceHistory[q.id]
                                 return history && history.attempts > 0
                             })
-                            if (firstDoneIndex !== -1) jumpToQuestion(firstDoneIndex)
+                            if (firstActiveIndex !== -1) jumpToQuestion(firstActiveIndex)
                         }}
-                        className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:bg-blue-50 transition-colors text-left"
+                        className="bg-apple-card rounded-2xl p-4 border border-apple-border hover:border-apple-text/10 transition-all text-left group shadow-sm"
                     >
-                        <div className="text-slate-600 text-xs font-medium mb-1">Đã làm (bấm để xem)</div>
-                        <div className="text-2xl font-bold text-blue-600">
-                            {stats.done}
-                            <span className="text-sm text-slate-400 ml-1">/ {questions.length}</span>
+                        <div className="text-apple-text-secondary text-[10px] font-semibold uppercase tracking-wider mb-1 group-hover:text-apple-text">Đã làm</div>
+                        <div className="flex items-end justify-between">
+                            <div className="text-2xl font-bold text-apple-text tracking-tight">{stats.done}</div>
+                            <div className="text-[10px] text-apple-text-secondary opacity-60 mb-1 font-medium">{Math.round((stats.done / questions.length) * 100) || 0}%</div>
                         </div>
                     </button>
 
@@ -688,10 +698,10 @@ function OnTapContent() {
                             })
                             if (firstNotDoneIndex !== -1) jumpToQuestion(firstNotDoneIndex)
                         }}
-                        className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors text-left"
+                        className="bg-apple-card rounded-2xl p-4 border border-apple-border hover:border-apple-text/10 transition-all text-left group shadow-sm"
                     >
-                        <div className="text-slate-600 text-xs font-medium mb-1">Chưa làm (bấm để xem)</div>
-                        <div className="text-2xl font-bold text-slate-600">{stats.notDone}</div>
+                        <div className="text-apple-text-secondary text-[10px] font-semibold uppercase tracking-wider mb-1 group-hover:text-apple-text">Chưa làm</div>
+                        <div className="text-2xl font-bold text-apple-text">{stats.notDone}</div>
                     </button>
 
                     <button
@@ -702,10 +712,10 @@ function OnTapContent() {
                             })
                             if (firstCorrectIndex !== -1) jumpToQuestion(firstCorrectIndex)
                         }}
-                        className="bg-white rounded-xl p-4 border border-green-200 shadow-sm hover:bg-green-50 transition-colors text-left"
+                        className="bg-emerald-muted rounded-2xl p-4 border border-emerald-soft hover:bg-emerald-muted/80 transition-all text-left group shadow-sm"
                     >
-                        <div className="text-slate-600 text-xs font-medium mb-1">Trả lời đúng</div>
-                        <div className="text-2xl font-bold text-green-600">{stats.correct}</div>
+                        <div className="text-emerald-text text-[10px] font-bold uppercase tracking-wider mb-1">Trả lời đúng</div>
+                        <div className="text-2xl font-bold text-emerald-text">{stats.correct}</div>
                     </button>
 
                     <button
@@ -716,28 +726,28 @@ function OnTapContent() {
                             })
                             if (firstWrongIndex !== -1) jumpToQuestion(firstWrongIndex)
                         }}
-                        className="bg-white rounded-xl p-4 border border-red-200 shadow-sm hover:bg-red-50 transition-colors text-left"
+                        className="bg-red-muted rounded-2xl p-4 border border-red-soft hover:bg-red-muted/80 transition-all text-left group shadow-sm"
                     >
-                        <div className="text-slate-600 text-xs font-medium mb-1">Trả lời sai (bấm để xem)</div>
-                        <div className="text-2xl font-bold text-red-600">{stats.wrong}</div>
+                        <div className="text-red-text text-[10px] font-bold uppercase tracking-wider mb-1">Trả lời sai</div>
+                        <div className="text-2xl font-bold text-red-text">{stats.wrong}</div>
                     </button>
                 </div>
             </div>
 
             {/* Main Content */}
-            <div className="grid lg:grid-cols-[320px_1fr] gap-6 flex-1 min-h-0 px-6">
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col overflow-hidden">
-                    <h3 className="font-bold text-slate-800 mb-4 flex items-center justify-between flex-shrink-0">
-                        <span>Danh sách câu hỏi</span>
-                        <span className="text-sm font-medium text-slate-500">{questions.length} câu</span>
+            <div className="grid lg:grid-cols-[300px_1fr] gap-6 flex-1 min-h-0 px-6 pb-6">
+                <div className="bg-apple-card/80 backdrop-blur-[20px] rounded-2xl p-6 shadow-apple-shadow border border-apple-border flex flex-col overflow-hidden">
+                    <h3 className="font-semibold text-apple-text mb-4 flex items-center justify-between flex-shrink-0">
+                        <span className="text-[10px] uppercase tracking-wider text-apple-text-secondary font-black">Danh sách câu hỏi</span>
+                        <span className="text-[10px] font-bold text-apple-text-secondary bg-apple-bg px-2 py-0.5 rounded-full ring-1 ring-apple-border">{questions.length}</span>
                     </h3>
 
                     {loading ? (
                         <div className="text-center py-10 flex-1 flex items-center justify-center">
-                            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                            <div className="w-8 h-8 border-4 border-apple-blue border-t-transparent rounded-full animate-spin" />
                         </div>
                     ) : (
-                        <div className="overflow-y-auto flex-1 pr-2">
+                        <div className="overflow-y-auto flex-1 pr-2 no-scrollbar">
                             <div className="grid grid-cols-6 gap-2">
                                 {questions.map((q, index) => (
                                     <button
@@ -758,38 +768,41 @@ function OnTapContent() {
                     )}
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
+                <div className="bg-apple-card rounded-2xl shadow-apple-shadow border border-apple-border flex flex-col overflow-hidden">
                     {loading ? (
                         <div className="text-center py-20 flex-1 flex items-center justify-center">
                             <div>
-                                <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                                <p className="text-slate-500 font-medium">Đang tải câu hỏi...</p>
+                                <div className="w-12 h-12 border-4 border-apple-blue border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                                <p className="text-apple-text-secondary font-medium">Đang tải câu hỏi...</p>
                             </div>
                         </div>
                     ) : currentQuestion ? (
                         <div className="overflow-y-auto flex-1 p-8">
                             <div className="space-y-6">
-                                <div className="flex items-start gap-4 pb-4 border-b border-slate-200">
-                                    <span className="px-4 py-2 bg-blue-100 text-blue-700 font-bold rounded-lg text-sm flex-shrink-0">
+                                <div className="flex items-start gap-4 pb-6 border-b border-apple-border">
+                                    <span className="px-4 py-2 bg-apple-blue/10 text-apple-blue font-bold rounded-xl text-[11px] flex-shrink-0 ring-1 ring-apple-blue/20">
                                         Câu {currentQuestion.stt || currentIndex + 1}
                                     </span>
                                     <div className="flex-1">
-                                        <div className="flex items-start justify-between gap-4 mb-2">
-                                            <p className="text-slate-900 font-bold leading-relaxed">
+                                        <div className="flex items-start justify-between gap-4 mb-3">
+                                            <p className="text-apple-text text-xl font-semibold leading-relaxed tracking-tight">
                                                 {currentQuestion.cau_hoi}
                                             </p>
                                             <button
                                                 onClick={() => setIsReportModalOpen(true)}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-orange-100 hover:bg-orange-100 transition-all flex-shrink-0"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FF9500]/10 text-[#FF9500] rounded-[8px] text-[10px] font-bold uppercase tracking-widest border border-[#FF9500]/20 hover:bg-[#FF9500]/20 transition-all flex-shrink-0"
                                                 title="Báo cáo sai sót (Phím R)"
                                             >
                                                 <AlertTriangle className="w-3 h-3" />
-                                                Báo sai
+                                                Phản hồi
                                             </button>
                                         </div>
-                                        <span className="text-slate-400 text-sm font-medium mt-2 inline-block">
-                                            ({currentIndex + 1} / {questions.length})
-                                        </span>
+                                        <div className="flex items-center gap-2 text-apple-text-secondary text-sm">
+                                            <span className="font-medium opacity-60">Bộ đề:</span>
+                                            <span className="font-medium text-apple-text/80 italic">{selectedChuyenNganh}</span>
+                                            <span className="mx-1">•</span>
+                                            <span className="font-medium">{currentIndex + 1} / {questions.length}</span>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -807,13 +820,13 @@ function OnTapContent() {
                                         return (
                                             <label
                                                 key={option}
-                                                className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${focusRing} ${showCorrect
-                                                    ? 'border-green-500 bg-green-50'
+                                                className={`flex items-start gap-4 p-5 rounded-2xl border transition-all relative cursor-pointer group shadow-sm ${isKbFocused ? 'ring-[3px] ring-apple-blue/30 border-apple-blue' : ''} ${showCorrect
+                                                    ? 'border-emerald-soft bg-emerald-muted'
                                                     : showWrong
-                                                        ? 'border-red-500 bg-red-50'
+                                                        ? 'border-red-soft bg-red-muted'
                                                         : isSelected
-                                                            ? 'border-blue-500 bg-blue-50'
-                                                            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                                                            ? 'border-apple-blue bg-apple-blue/10 scale-[1.01]'
+                                                            : 'border-apple-border bg-apple-card hover:bg-apple-bg hover:border-apple-text/10'
                                                     }`}
                                                 onMouseEnter={() => {
                                                     setKbArea('main')
@@ -826,12 +839,13 @@ function OnTapContent() {
                                                     value={option}
                                                     checked={isSelected}
                                                     onChange={() => handleAnswerSelect(option)}
-                                                    className="mt-1 w-5 h-5 text-blue-600"
+                                                    className="mt-1 w-5 h-5 accent-[#007AFF] cursor-pointer"
                                                 />
                                                 <div className="flex-1 flex items-center justify-between gap-4">
-                                                    <span className={`font-medium ${showCorrect ? 'text-green-700' : showWrong ? 'text-red-700' : 'text-slate-900'
+                                                    <span className={`font-medium text-[15px] leading-relaxed ${showCorrect ? 'text-emerald-text' : showWrong ? 'text-red-text' : 'text-apple-text-secondary group-hover:text-apple-text'
                                                         }`}>
-                                                        {option.toUpperCase()}. {optionText}
+                                                        <span className="opacity-50 font-bold mr-2">{option.toUpperCase()}.</span>
+                                                        {optionText}
                                                     </span>
                                                 </div>
                                             </label>
@@ -877,10 +891,10 @@ function OnTapContent() {
 export default function OnTapPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+            <div className="min-h-screen bg-apple-bg flex items-center justify-center">
                 <div className="text-center space-y-4">
-                    <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
-                    <p className="text-slate-500 font-bold animate-pulse uppercase tracking-widest text-xs">Đang tải dữ liệu ôn tập...</p>
+                    <div className="w-12 h-12 border-4 border-apple-blue border-t-transparent rounded-full animate-spin mx-auto" />
+                    <p className="text-apple-text-secondary font-bold animate-pulse uppercase tracking-widest text-xs">Đang tải dữ liệu ôn tập...</p>
                 </div>
             </div>
         }>

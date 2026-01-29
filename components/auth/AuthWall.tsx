@@ -1,6 +1,6 @@
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Lock, ShieldCheck, Zap, Star, Shield, ArrowRight } from 'lucide-react'
+import { Lock, ShieldCheck, Zap, Star, Shield, ArrowRight, Award } from 'lucide-react'
 
 interface AuthWallProps {
     title: string
@@ -26,7 +26,7 @@ export function AuthWall({
 
     return (
         <div className="flex-1 flex items-center justify-center p-6 min-h-[60vh]">
-            <div className="w-full max-w-4xl bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 overflow-hidden relative group">
+            <div className="w-full max-w-4xl bg-apple-bg rounded-2xl border border-apple-border shadow-2xl overflow-hidden relative group">
                 {/* Background Decor */}
                 <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${gradientFrom} ${gradientTo} opacity-[0.03] rounded-full -mr-32 -mt-32 blur-3xl`} />
                 <div className={`absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr ${gradientFrom} ${gradientTo} opacity-[0.03] rounded-full -ml-32 -mb-32 blur-3xl`} />
@@ -35,55 +35,54 @@ export function AuthWall({
                     {/* Left: Info Section */}
                     <div className="p-10 md:p-12 space-y-8 flex flex-col justify-center">
                         <div>
-                            <div className={`w-14 h-14 bg-gradient-to-br ${gradientFrom} ${gradientTo} rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 mb-6`}>
+                            <div className={`w-14 h-14 bg-gradient-to-br ${gradientFrom} ${gradientTo} rounded-2xl flex items-center justify-center shadow-lg shadow-apple-blue/20 mb-6`}>
                                 <Lock className="w-7 h-7 text-white" />
                             </div>
-                            <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-3">
-                                {title}
-                            </h2>
-                            <p className="text-slate-500 font-medium leading-relaxed">
-                                {description}
+                            <h1 className="text-3xl font-black text-apple-text tracking-tight">Hệ Thống Luyện Thi</h1>
+                            <p className="text-apple-text-secondary font-medium flex items-center gap-2 mt-1">
+                                <Award className="w-4 h-4 text-apple-blue" />
+                                Nền tảng ôn tập chứng chỉ hành nghề xây dựng chuyên nghiệp
                             </p>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {features.map((feature, idx) => (
-                                <div key={idx} className="flex items-center gap-3 p-3 bg-slate-50/50 border border-slate-100/50 rounded-xl">
-                                    <div className="w-8 h-8 bg-white border border-slate-100 rounded-lg flex items-center justify-center shrink-0">
-                                        <feature.icon className="w-4 h-4 text-blue-600" />
+                                <div key={idx} className="flex items-center gap-3 p-3 bg-apple-bg/50 border border-apple-border rounded-xl">
+                                    <div className="w-8 h-8 bg-apple-card border border-apple-border rounded-lg flex items-center justify-center shrink-0">
+                                        <feature.icon className="w-4 h-4 text-apple-blue" />
                                     </div>
-                                    <span className="text-xs font-bold text-slate-600">{feature.text}</span>
+                                    <span className="text-xs font-bold text-apple-text-secondary">{feature.text}</span>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="flex items-center gap-4 py-4 px-6 bg-blue-50/50 border border-blue-100/20 rounded-2xl">
-                            <ShieldCheck className="w-5 h-5 text-blue-600" />
-                            <p className="text-[11px] font-bold text-blue-700/70 uppercase tracking-widest">
+                        <div className="flex items-center gap-4 py-4 px-6 bg-apple-blue/5 border border-apple-blue/20 rounded-2xl">
+                            <ShieldCheck className="w-5 h-5 text-apple-blue" />
+                            <p className="text-[11px] font-bold text-apple-blue uppercase tracking-widest">
                                 Hệ thống bảo mật & Miễn phí hoàn toàn 100%
                             </p>
                         </div>
                     </div>
 
                     {/* Right: Action Section */}
-                    <div className="bg-[#F8FAFC] border-l border-slate-100 p-10 md:p-12 flex flex-col items-center justify-center text-center space-y-8 relative overflow-hidden">
+                    <div className="bg-apple-card border-l border-apple-border p-10 md:p-12 flex flex-col items-center justify-center text-center space-y-8 relative overflow-hidden">
                         {/* Decorative Icons */}
                         <div className="absolute top-10 right-10 opacity-[0.05] -rotate-12">
-                            <Shield className="w-20 h-20 text-slate-900" />
+                            <Shield className="w-20 h-20 text-apple-text" />
                         </div>
                         <div className="absolute bottom-10 left-10 opacity-[0.05] rotate-12">
-                            <Star className="w-16 h-16 text-slate-900" />
+                            <Star className="w-16 h-16 text-apple-text" />
                         </div>
 
                         <div className="space-y-4 relative z-10 w-full">
                             <div className="space-y-1">
-                                <h3 className="text-xl font-black text-slate-900">Bắt đầu ngay</h3>
-                                <p className="text-slate-400 text-xs font-medium">Đăng nhập bằng Google để truy cập</p>
+                                <h3 className="text-xl font-black text-apple-text">Bắt đầu ngay</h3>
+                                <p className="text-apple-text-secondary text-xs font-medium">Đăng nhập bằng Google để truy cập</p>
                             </div>
 
                             <button
                                 onClick={() => router.push(`/login?redirect=${encodeURIComponent(redirectPath)}`)}
-                                className="w-full flex items-center justify-center gap-3 px-8 py-4 bg-white border border-slate-200 text-slate-700 rounded-2xl font-bold text-sm hover:border-blue-500 hover:text-blue-600 hover:shadow-xl hover:shadow-blue-500/10 transition-all active:scale-[0.98] group"
+                                className="w-full flex items-center justify-center gap-3 px-8 py-4 bg-apple-bg border border-apple-border text-apple-text rounded-2xl font-bold text-sm hover:border-apple-blue hover:text-apple-blue hover:shadow-xl hover:shadow-apple-blue/10 transition-all active:scale-[0.98] group"
                             >
                                 <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -97,7 +96,7 @@ export function AuthWall({
                             <div className="pt-4">
                                 <Link
                                     href="/"
-                                    className="inline-flex items-center gap-2 text-slate-400 hover:text-blue-600 font-bold text-[10px] uppercase tracking-widest transition-colors"
+                                    className="inline-flex items-center gap-2 text-apple-text-secondary hover:text-apple-blue font-bold text-[10px] uppercase tracking-widest transition-colors"
                                 >
                                     Quay lại trang chủ
                                     <ArrowRight className="w-3 h-3" />
@@ -105,15 +104,15 @@ export function AuthWall({
                             </div>
                         </div>
 
-                        <div className="pt-6 border-t border-slate-100 w-full">
+                        <div className="pt-6 border-t border-apple-border w-full">
                             <div className="flex justify-center gap-6">
                                 <div className="text-center">
-                                    <div className="text-slate-900 font-black text-sm">1.000+</div>
-                                    <div className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Câu hỏi</div>
+                                    <div className="text-apple-text font-black text-sm">1.000+</div>
+                                    <div className="text-[8px] font-bold text-apple-text-secondary uppercase tracking-tighter">Câu hỏi</div>
                                 </div>
-                                <div className="text-center border-l border-slate-100 pl-6">
-                                    <div className="text-slate-900 font-black text-sm">Miễn phí</div>
-                                    <div className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Vĩnh viễn</div>
+                                <div className="text-center border-l border-apple-border pl-6">
+                                    <div className="text-apple-text font-black text-sm">Miễn phí</div>
+                                    <div className="text-[8px] font-bold text-apple-text-secondary uppercase tracking-tighter">Vĩnh viễn</div>
                                 </div>
                             </div>
                         </div>
