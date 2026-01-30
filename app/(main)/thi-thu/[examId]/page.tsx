@@ -1074,37 +1074,37 @@ export default function ExamSessionPage() {
                         </div>
                     </div>
 
+                    {/* Desktop Footer (Hidden on Mobile) */}
+                    <div className="hidden md:flex border-t border-black/5 p-6 items-center justify-between flex-shrink-0 bg-white/50 backdrop-blur-sm">
+                        <button
+                            onClick={goPrev}
+                            disabled={currentIndex === 0}
+                            className="flex items-center gap-2 px-6 py-3 bg-white border border-black/5 text-[#1d1d1f] font-semibold rounded-[10px] hover:bg-[#F5F5F7] disabled:opacity-30 transition-all shadow-sm active:scale-97"
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                            Câu trước
+                        </button>
+                        <div className="flex flex-col items-center">
+                            <span className="text-[#86868b] text-[10px] font-bold uppercase tracking-widest mb-1">Tiến độ</span>
+                            <span className="text-[#1d1d1f] font-semibold tabular-nums">{Object.keys(userAnswers).length} / {questions.length}</span>
+                        </div>
+                        {currentIndex === questions.length - 1 ? (
+                            <button
+                                onClick={() => setShowSubmitDialog(true)}
+                                className="flex items-center gap-2 px-8 py-3 bg-[#34C759] text-white font-semibold rounded-[10px] hover:bg-[#28A745] transition-all shadow-lg active:scale-97"
+                            >
+                                <CheckCircle2 className="w-5 h-5" />
+                                Nộp bài ngay
+                            </button>
+                        ) : (
+                            <button onClick={goNext} className="flex items-center gap-2 px-8 py-3 bg-[#007AFF] text-white font-semibold rounded-[10px] hover:bg-[#0062CC] transition-all shadow-lg active:scale-97">
+                                Câu tiếp
+                                <ChevronRight className="w-5 h-5" />
+                            </button>
+                        )}
+                    </div>
                 </div>
 
-                {/* Desktop Footer (Hidden on Mobile) */}
-                <div className="hidden md:flex border-t border-black/5 p-6 items-center justify-between flex-shrink-0 bg-white/50 backdrop-blur-sm">
-                    <button
-                        onClick={goPrev}
-                        disabled={currentIndex === 0}
-                        className="flex items-center gap-2 px-6 py-3 bg-white border border-black/5 text-[#1d1d1f] font-semibold rounded-[10px] hover:bg-[#F5F5F7] disabled:opacity-30 transition-all shadow-sm active:scale-97"
-                    >
-                        <ChevronLeft className="w-5 h-5" />
-                        Câu trước
-                    </button>
-                    <div className="flex flex-col items-center">
-                        <span className="text-[#86868b] text-[10px] font-bold uppercase tracking-widest mb-1">Tiến độ</span>
-                        <span className="text-[#1d1d1f] font-semibold tabular-nums">{Object.keys(userAnswers).length} / {questions.length}</span>
-                    </div>
-                    {currentIndex === questions.length - 1 ? (
-                        <button
-                            onClick={() => setShowSubmitDialog(true)}
-                            className="flex items-center gap-2 px-8 py-3 bg-[#34C759] text-white font-semibold rounded-[10px] hover:bg-[#28A745] transition-all shadow-lg active:scale-97"
-                        >
-                            <CheckCircle2 className="w-5 h-5" />
-                            Nộp bài ngay
-                        </button>
-                    ) : (
-                        <button onClick={goNext} className="flex items-center gap-2 px-8 py-3 bg-[#007AFF] text-white font-semibold rounded-[10px] hover:bg-[#0062CC] transition-all shadow-lg active:scale-97">
-                            Câu tiếp
-                            <ChevronRight className="w-5 h-5" />
-                        </button>
-                    )}
-                </div>
 
                 {/* Mobile Persistent Navigation (New Style) */}
                 <div className="md:hidden fixed bottom-[68px] left-0 right-0 z-50 flex flex-col pointer-events-none px-2 pb-safe">
