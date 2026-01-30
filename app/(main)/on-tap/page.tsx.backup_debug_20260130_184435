@@ -111,13 +111,6 @@ function OnTapContent() {
         return () => window.removeEventListener('resize', checkMobile)
     }, [])
 
-    // Auto-select first tab on PC to avoid duplicate STT issue
-    useEffect(() => {
-        if (!isMobile && selectedPhanThi === 'Tất cả') {
-            setSelectedPhanThi(PHAN_THI_OPTIONS[0])
-        }
-    }, [isMobile])
-
     // Sticky header on scroll
     useEffect(() => {
         const handleScroll = () => {
@@ -919,7 +912,7 @@ function OnTapContent() {
                 <>
                     {/* Tabs - Hidden on mobile quiz view */}
                     <div className={`px-4 md:px-6 border-b border-apple-border flex-shrink-0 overflow-x-auto no-scrollbar ${isMobile && practiceStep === 'active' ? 'hidden' : 'flex'}`}>
-                        {PHAN_THI_OPTIONS.map((phan, index) => {
+                        {PHAN_THI_OPTIONS.map((phan) => {
                             const count = phanThiCounts[phan] || 0
                             const isActive = selectedPhanThi === phan
                             return (
@@ -1313,7 +1306,6 @@ function OnTapContent() {
                                                         : 'bg-apple-bg border-apple-border text-apple-text/40'
                                                 }
                                             `}
-
                                         >
                                             {index + 1}
                                         </button>

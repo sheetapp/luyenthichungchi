@@ -13,7 +13,7 @@ import { useAppStore } from '@/lib/store/useAppStore'
 import { ReportModal } from '@/components/practice/ReportModal'
 import { GuideModal } from '@/components/practice/GuideModal'
 import { ThemeToggle } from '@/components/theme/ThemeContext'
-import { AlertTriangle, HelpCircle, Trash2 } from 'lucide-react'
+import { AlertTriangle, HelpCircle } from 'lucide-react'
 
 interface Question {
     id: number
@@ -110,13 +110,6 @@ function OnTapContent() {
         window.addEventListener('resize', checkMobile)
         return () => window.removeEventListener('resize', checkMobile)
     }, [])
-
-    // Auto-select first tab on PC to avoid duplicate STT issue
-    useEffect(() => {
-        if (!isMobile && selectedPhanThi === 'Tất cả') {
-            setSelectedPhanThi(PHAN_THI_OPTIONS[0])
-        }
-    }, [isMobile])
 
     // Sticky header on scroll
     useEffect(() => {
@@ -518,56 +511,6 @@ function OnTapContent() {
         setKbFocusIndex(index)
     }
 
-    async function handleClearHistory() {
-        if (!confirm(`Bạn có chắc chắn muốn xóa lịch sử ôn tập của chuyên ngành "${selectedChuyenNganh}"? Hành động này không thể hoàn tác.`)) {
-            return
-        }
-
-        try {
-            setLoading(true)
-
-            // 1. Identify question IDs to remove
-            const qIdsToRemove = questions.map(q => q.id.toString())
-
-            // 2. Create new history object excluding these IDs
-            const newHistory = { ...practiceHistory }
-            qIdsToRemove.forEach(id => {
-                delete newHistory[id]
-            })
-
-            // 3. Update State
-            setPracticeHistory(newHistory)
-            setSelectedAnswer('')
-            setFeedback(null)
-
-            // 4. Update LocalStorage
-            const storageKey = `practice_${selectedHang}_${selectedChuyenNganh}_${selectedPhanThi}`
-            localStorage.removeItem(storageKey)
-
-            // 5. Update Supabase
-            if (user) {
-                const { error } = await supabase
-                    .from('user_practice_stats')
-                    .upsert({
-                        user_id: user.id,
-                        history: newHistory,
-                        updated_at: new Date().toISOString()
-                    }, {
-                        onConflict: 'user_id'
-                    })
-
-                if (error) throw error
-            }
-
-            alert('Đã xóa lịch sử ôn tập thành công!')
-        } catch (error: any) {
-            console.error('Error clearing history:', error)
-            alert('Có lỗi xảy ra khi xóa lịch sử: ' + (error.message || 'Lỗi không xác định'))
-        } finally {
-            setLoading(false)
-        }
-    }
-
     function getQuestionButtonClass(index: number, question: Question) {
         const baseClass = "w-10 h-10 rounded-xl font-semibold transition-all text-xs flex items-center justify-center relative active:scale-90 border"
         const isKbFocused = kbArea === 'sidebar' && kbFocusIndex === index
@@ -755,14 +698,6 @@ function OnTapContent() {
                         <ThemeToggle />
                     </div>
                     <button
-                        onClick={handleClearHistory}
-                        className="hidden md:flex flex-1 md:flex-none items-center justify-center gap-2 px-4 md:px-6 py-2.5 md:py-3 rounded-[10px] text-xs md:text-sm font-bold transition-all border bg-apple-card text-red-500 border-apple-border hover:bg-red-50 shadow-sm active:scale-97"
-                        title="Xóa lịch sử ôn tập"
-                    >
-                        <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                        <span>Xóa lịch sử</span>
-                    </button>
-                    <button
                         onClick={() => setIsShuffled(!isShuffled)}
                         className={`flex-1 md:flex-none flex items-center justify-center gap-2 md:gap-2.5 px-4 md:px-6 py-2.5 md:py-3 rounded-[10px] text-xs md:text-sm font-bold transition-all border ${isShuffled
                             ? 'bg-[#FF9500] border-[#FF9500] text-white shadow-lg shadow-orange-500/20 active:scale-97'
@@ -919,7 +854,7 @@ function OnTapContent() {
                 <>
                     {/* Tabs - Hidden on mobile quiz view */}
                     <div className={`px-4 md:px-6 border-b border-apple-border flex-shrink-0 overflow-x-auto no-scrollbar ${isMobile && practiceStep === 'active' ? 'hidden' : 'flex'}`}>
-                        {PHAN_THI_OPTIONS.map((phan, index) => {
+                        {PHAN_THI_OPTIONS.map((phan) => {
                             const count = phanThiCounts[phan] || 0
                             const isActive = selectedPhanThi === phan
                             return (
@@ -1313,7 +1248,6 @@ function OnTapContent() {
                                                         : 'bg-apple-bg border-apple-border text-apple-text/40'
                                                 }
                                             `}
-
                                         >
                                             {index + 1}
                                         </button>
