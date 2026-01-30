@@ -12,7 +12,7 @@ const navItems = [
     { icon: BookOpen, label: 'Ôn tập', href: '/on-tap', requireAuth: true },
     { icon: FileText, label: 'Thi thử', href: '/thi-thu', requireAuth: true },
     { icon: Trophy, label: 'Xếp hạng', href: '/xep-hang', requireAuth: true },
-    { icon: Database, label: 'Database', href: '/database', requireAuth: false },
+    { icon: Database, label: 'Cơ sở dữ liệu', href: '/database', requireAuth: false },
 ]
 
 export function Sidebar() {
