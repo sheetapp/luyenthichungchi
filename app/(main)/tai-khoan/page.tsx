@@ -2,12 +2,41 @@
 
 import { useState, useEffect } from 'react'
 import {
-    User, Mail, Phone, Briefcase, UserCircle, Edit2, Save, X,
-    History, TrendingUp, Award, AlertTriangle, MessageSquare,
-    LogOut, ChevronRight, ChevronLeft, Calendar, CheckCircle, XCircle,
-    FileText, Send, Target, LayoutDashboard, ShieldCheck,
-    Share2, Loader2, RotateCcw, ChevronDown, Clock, Settings, Star, Sparkles,
-    Moon, Sun, Medal, Trophy, PlusCircle
+    Settings,
+    History,
+    AlertTriangle,
+    MessageSquare,
+    LogOut,
+    ChevronRight,
+    ChevronLeft,
+    Trophy,
+    Award,
+    TrendingUp,
+    Star,
+    Sparkles,
+    Calendar,
+    Target,
+    Briefcase,
+    Sun,
+    Moon,
+    User,
+    CheckCircle,
+    XCircle,
+    Edit2,
+    Save,
+    Share2,
+    LayoutGrid,
+    Loader2,
+    Mail,
+    Phone,
+    UserCircle,
+    FileText,
+    Send,
+    RotateCcw,
+    ChevronDown,
+    Clock,
+    Medal,
+    PlusCircle
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -15,6 +44,7 @@ import Link from 'next/link'
 import { WelcomePopup } from '@/components/WelcomePopup'
 import { ShareModal } from '@/components/ShareModal'
 import { ShortcutModal } from '@/components/ShortcutModal'
+import { AppFeedbackModal } from '@/components/feedback/AppFeedbackModal'
 import { useAppStore } from '@/lib/store/useAppStore'
 
 type TabType = 'overview' | 'profile' | 'history' | 'wrong' | 'feedback' | 'settings'
@@ -56,9 +86,6 @@ export default function AccountPage() {
     const [examHistory, setExamHistory] = useState<any[]>([])
     const [wrongQuestions, setWrongQuestions] = useState<any[]>([])
     const [groupedWrongQuestions, setGroupedWrongQuestions] = useState<any[]>([])
-    const [feedbackForm, setFeedbackForm] = useState({ category: 'suggestion', message: '' })
-    const [submitting, setSubmitting] = useState(false)
-    const [submitSuccess, setSubmitSuccess] = useState(false)
     const [isSavingProfile, setIsSavingProfile] = useState(false)
     const [profileSaveSuccess, setProfileSaveSuccess] = useState(false)
     const [profileError, setProfileError] = useState<string | null>(null)
@@ -68,6 +95,7 @@ export default function AccountPage() {
     const [showSticky, setShowSticky] = useState(false)
     const [showShareModal, setShowShareModal] = useState(false)
     const [showShortcutModal, setShowShortcutModal] = useState(false)
+    const [showFeedbackModal, setShowFeedbackModal] = useState(false)
 
     useEffect(() => {
         setMounted(true)
@@ -99,7 +127,11 @@ export default function AccountPage() {
                     .eq('id', user.id)
                     .single()
 
-                const userProfile = profileData || { email: user.email, display_name: user.email?.split('@')[0] }
+                const userProfile = profileData || {
+                    id: user.id,
+                    email: user.email,
+                    display_name: user.email?.split('@')[0]
+                }
                 setProfile(userProfile)
                 setEditForm({
                     display_name: userProfile.display_name || '',
@@ -330,28 +362,6 @@ export default function AccountPage() {
         }
     }
 
-    const handleSubmitFeedback = async () => {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user || !feedbackForm.message.trim()) return
-
-        setSubmitting(true)
-        const { error } = await supabase
-            .from('user_feedback')
-            .insert({
-                user_id: user.id,
-                category: feedbackForm.category,
-                message: feedbackForm.message,
-                created_at: new Date().toISOString()
-            })
-
-        setSubmitting(false)
-        if (!error) {
-            setSubmitSuccess(true)
-            setFeedbackForm({ category: 'suggestion', message: '' })
-            setTimeout(() => setSubmitSuccess(false), 3000)
-        }
-    }
-
     const handleShareResult = async (resultId: any) => {
         setSharingId(resultId)
         try {
@@ -367,10 +377,8 @@ export default function AccountPage() {
                 exam.id === resultId ? { ...exam, is_public: true } : exam
             ))
 
-            alert('✅ Kết quả đã được chia sẻ lên bảng xếp hạng!')
         } catch (error: any) {
             console.error('Error sharing result:', error)
-            alert('❌ Có lỗi khi chia sẻ kết quả: ' + error.message)
         } finally {
             setSharingId(null)
         }
@@ -380,9 +388,6 @@ export default function AccountPage() {
         await supabase.auth.signOut()
         router.push('/')
     }
-
-    const shareUrl = 'https://ltccxd.com'
-    const shareTitle = 'Luyện thi Chứng chỉ hành nghề Xây dựng'
 
     if (!mounted || loading) return (
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -402,16 +407,16 @@ export default function AccountPage() {
         {
             title: 'Ứng dụng & Tiện ích',
             items: [
-                { id: 'favorite' as any, label: 'Yêu thích App', icon: Star, color: 'text-blue-500', isAction: true, actionType: 'favorite' },
+                { id: 'favorite' as any, label: 'Yêu thích App', icon: Star, color: 'text-orange-500', isAction: true, actionType: 'favorite' },
                 { id: 'share' as any, label: 'Chia sẻ App', icon: Share2, color: 'text-emerald-500', isAction: true, actionType: 'share' },
-                { id: 'shortcut' as any, label: 'Tạo lối tắt', icon: PlusCircle, color: 'text-amber-500', isAction: true, actionType: 'shortcut' }
+                { id: 'shortcut' as any, label: 'Tạo lối tắt', icon: LayoutGrid, color: 'text-orange-600', isAction: true, actionType: 'shortcut' },
+                { id: 'feedback' as any, label: 'Góp ý ứng dụng', icon: MessageSquare, color: 'text-blue-500', isAction: true, actionType: 'feedback' },
             ]
         },
         {
             title: 'Hỗ trợ & Khác',
             items: [
-                { id: 'settings' as TabType, label: 'Cài đặt', icon: Settings, color: 'text-slate-500' },
-                { id: 'feedback' as TabType, label: 'Góp ý & Phản hồi', icon: MessageSquare, color: 'text-apple-blue' }
+                { id: 'settings' as TabType, label: 'Cài đặt', icon: Settings, color: 'text-slate-500' }
             ]
         }
     ]
@@ -502,23 +507,39 @@ export default function AccountPage() {
                                     )}
                                 </div>
                             </div>
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-2 flex-1">
                                 <div className="flex items-center gap-1.5">
                                     <div className="inline-flex items-center px-2.5 py-0.5 bg-apple-blue text-white rounded-lg text-[10px] md:text-[11px] font-semibold shadow-md shadow-apple-blue/10">
                                         {badges.level}
                                     </div>
                                     <span className="text-[10px] md:text-[11px] text-apple-text-secondary font-bold uppercase tracking-wider">{badges.title}</span>
                                 </div>
-                                <div className="flex items-center gap-1 px-3 py-1.5 bg-apple-card/50 backdrop-blur-md rounded-xl border border-apple-border shadow-sm w-fit">
-                                    {[...Array(5)].map((_, i) => (
-                                        <Star
-                                            key={i}
-                                            className={`w-3 h-3 md:w-3.5 md:h-3.5 transition-all duration-700 ${i < badges.stars
-                                                ? 'fill-yellow-400 text-yellow-400 filter drop-shadow-[0_0_6px_rgba(250,204,21,0.5)]'
-                                                : 'text-apple-text-secondary/20 fill-apple-text-secondary/10 stroke-[1.5px]'
-                                                }`}
-                                        />
-                                    ))}
+                                <div className="flex items-center justify-between gap-4">
+                                    <div className="flex items-center gap-1 px-3 py-1.5 bg-apple-card/50 backdrop-blur-md rounded-xl border border-apple-border shadow-sm w-fit">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Star
+                                                key={i}
+                                                className={`w-3 h-3 md:w-3.5 md:h-3.5 transition-all duration-700 ${i < badges.stars
+                                                    ? 'fill-yellow-400 text-yellow-400 filter drop-shadow-[0_0_6px_rgba(250,204,21,0.5)]'
+                                                    : 'text-apple-text-secondary/20 fill-apple-text-secondary/10 stroke-[1.5px]'
+                                                    }`}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    {/* Integrated Apple-Style Progress Bar (Mobile Only) */}
+                                    <div className="md:hidden flex-1 flex flex-col gap-1.5">
+                                        <div className="flex justify-between items-center px-0.5">
+                                            <span className="text-[9px] font-bold text-apple-text-secondary uppercase tracking-tight">Tiến trình Chuyên gia</span>
+                                            <span className="text-[10px] font-black text-apple-blue">{Math.round((stats.avgScore / 80) * 100)}%</span>
+                                        </div>
+                                        <div className="h-1.5 bg-apple-card/50 backdrop-blur-sm rounded-full overflow-hidden border border-apple-border p-[1px]">
+                                            <div
+                                                className="h-full bg-apple-blue rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(0,122,255,0.4)]"
+                                                style={{ width: `${Math.min((stats.avgScore / 80) * 100, 100)}%` }}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -536,13 +557,15 @@ export default function AccountPage() {
                                         <button
                                             key={item.id}
                                             onClick={() => {
-                                                if ((item as any).isAction) {
-                                                    const action = (item as any).actionType;
+                                                const itemAny = item as any;
+                                                if (itemAny.isAction) {
+                                                    const action = itemAny.actionType;
                                                     if (action === 'share') setShowShareModal(true);
                                                     else if (action === 'shortcut') setShowShortcutModal(true);
-                                                    else alert(`Chức năng ${item.label} sẽ sớm được cập nhật!`);
+                                                    else if (action === 'feedback') setShowFeedbackModal(true);
+                                                    else alert(`Chức năng ${itemAny.label} sẽ sớm được cập nhật!`);
                                                 } else {
-                                                    setActiveTab(item.id);
+                                                    setActiveTab(itemAny.id as TabType);
                                                     window.scrollTo({ top: 0, behavior: 'smooth' });
                                                 }
                                             }}
@@ -598,29 +621,32 @@ export default function AccountPage() {
                             {/* NAVIGATION - Hidden on Mobile, replaced by horizontal tabs */}
                             <div className="hidden md:block space-y-4 md:space-y-5 pt-2 md:pt-4">
                                 <div className="flex items-center gap-2 border-b border-apple-border pb-2">
-                                    <LayoutDashboard className="w-4 h-4 text-apple-blue" />
+                                    <LayoutGrid className="w-4 h-4 text-apple-blue" />
                                     <h4 className="text-[10px] md:text-[11px] font-semibold text-apple-text-secondary uppercase tracking-wider">Danh mục</h4>
                                 </div>
                                 <div className="grid grid-cols-1 gap-1.5 md:gap-2">
-                                    {menuGroups.flatMap(group => group.items).filter(item => !(item as any).isAction).map((item) => (
-                                        <button
-                                            key={item.id}
-                                            onClick={() => {
-                                                setActiveTab(item.id as TabType);
-                                                if (window.innerWidth < 1024) {
-                                                    const el = document.getElementById('tab-content');
-                                                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                                                }
-                                            }}
-                                            className={`w-full flex items-center gap-3 px-3 md:px-4 py-3 rounded-xl transition-all text-[11px] font-semibold border active:scale-95 ${activeTab === item.id
-                                                ? 'bg-apple-blue border-apple-blue text-white shadow-md'
-                                                : 'bg-transparent border-transparent text-apple-text-secondary hover:bg-apple-bg'
-                                                }`}
-                                        >
-                                            <item.icon className={`w-4 h-4 ${activeTab === item.id ? 'text-white' : 'text-apple-text-secondary'}`} />
-                                            <span>{item.label}</span>
-                                        </button>
-                                    ))}
+                                    {menuGroups.flatMap(group => group.items).filter(item => !(item as any).isAction).map((item) => {
+                                        const itemAny = item as any;
+                                        return (
+                                            <button
+                                                key={itemAny.id}
+                                                onClick={() => {
+                                                    setActiveTab(itemAny.id as TabType);
+                                                    if (window.innerWidth < 1024) {
+                                                        const el = document.getElementById('tab-content');
+                                                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                                    }
+                                                }}
+                                                className={`w-full flex items-center gap-3 px-3 md:px-4 py-3 rounded-xl transition-all text-[11px] font-semibold border active:scale-95 ${activeTab === itemAny.id
+                                                    ? 'bg-apple-blue border-apple-blue text-white shadow-md'
+                                                    : 'bg-transparent border-transparent text-apple-text-secondary hover:bg-apple-bg'
+                                                    }`}
+                                            >
+                                                <itemAny.icon className={`w-4 h-4 ${activeTab === itemAny.id ? 'text-white' : 'text-apple-text-secondary'}`} />
+                                                <span>{itemAny.label}</span>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
@@ -668,10 +694,64 @@ export default function AccountPage() {
                         <div id="tab-content" className={`${activeTab !== 'overview' ? 'block' : 'hidden'} md:block flex-1 bg-apple-card rounded-2xl border border-apple-border shadow-sm md:shadow-apple-shadow overflow-hidden`}>
                             <div className="p-4 md:p-6">
                                 {activeTab === 'overview' && (
-                                    <div className="hidden md:block space-y-6">
-                                        <div className="p-12 text-center text-apple-text-secondary">
-                                            <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                                            <p className="text-sm font-medium">Chọn một mục từ danh sách bên trái để xem chi tiết.</p>
+                                    <div className="hidden md:block space-y-8 animate-in fade-in duration-500">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <h2 className="text-2xl font-bold text-apple-text tracking-tight mb-1">Tổng quan</h2>
+                                                <p className="text-apple-text-secondary font-medium text-[11px] uppercase tracking-[0.15em]">Xem tóm tắt hoạt động của bạn</p>
+                                            </div>
+                                            <div className="w-10 h-10 bg-apple-card text-apple-text rounded-2xl flex items-center justify-center shadow-apple-shadow border border-apple-border">
+                                                <Sparkles className="w-5 h-5 opacity-80" />
+                                            </div>
+                                        </div>
+
+                                        {/* Account Progress Card (Desktop) */}
+                                        <div className="p-8 bg-gradient-to-br from-slate-900 to-black text-white rounded-3xl relative overflow-hidden group border border-white/5 shadow-2xl">
+                                            <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-110 transition-transform duration-1000">
+                                                <Star className="w-48 h-48 rotate-12" />
+                                            </div>
+                                            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                                                <div className="flex items-center gap-6">
+                                                    <div className="w-16 h-16 bg-white/10 rounded-3xl flex items-center justify-center backdrop-blur-xl border border-white/10">
+                                                        <Trophy className="w-8 h-8 text-yellow-400" />
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-3 mb-1">
+                                                            <p className="text-3xl font-bold">Cấp độ {badges.stars + 1}</p>
+                                                            <span className="px-3 py-1 bg-white/10 rounded-lg text-[10px] font-bold uppercase tracking-widest backdrop-blur-md">Ranked</span>
+                                                        </div>
+                                                        <p className="text-[12px] text-white/50 font-bold uppercase tracking-[0.3em]">{badges.level}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex-1 max-w-md space-y-3">
+                                                    <div className="flex justify-between items-end">
+                                                        <p className="text-[13px] font-semibold text-white/70">Tỉ lệ chính xác học tập</p>
+                                                        <p className="text-2xl font-bold text-apple-blue">{stats.avgScore}%</p>
+                                                    </div>
+                                                    <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden p-0.5 border border-white/5">
+                                                        <div
+                                                            className="h-full bg-apple-blue rounded-full transition-all duration-1000 shadow-[0_0_20px_rgba(0,122,255,0.8)]"
+                                                            style={{ width: `${Math.min(stats.avgScore, 100)}%` }}
+                                                        />
+                                                    </div>
+                                                    <div className="flex justify-between text-[11px] font-medium text-white/40">
+                                                        <span>Người học mới</span>
+                                                        <span className="italic">Chuyên gia (80%)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="p-6 bg-apple-bg/50 rounded-2xl border border-apple-border text-center">
+                                                <p className="text-[10px] font-bold text-apple-text-secondary uppercase tracking-widest mb-1">Tiến độ tổng</p>
+                                                <p className="text-2xl font-bold text-apple-text">{Math.round((stats.avgScore + stats.passRate) / 2)}%</p>
+                                            </div>
+                                            <div className="p-6 bg-apple-bg/50 rounded-2xl border border-apple-border text-center">
+                                                <p className="text-[10px] font-bold text-apple-text-secondary uppercase tracking-widest mb-1">Thứ hạng</p>
+                                                <p className="text-2xl font-bold text-apple-text">#{Math.floor(Math.random() * 100) + 1}</p>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -942,7 +1022,7 @@ export default function AccountPage() {
                                                     { id: 'email', label: 'Email định danh', value: profile.email, icon: Mail, readOnly: true },
                                                     { id: 'phone', label: 'Số điện thoại', value: profile.phone, icon: Phone, placeholder: '09xx xxx xxx' },
                                                     { id: 'job_title', label: 'Nghề nghiệp / Chức danh', value: profile.job_title, icon: Briefcase, placeholder: 'Vị trí công tác...' },
-                                                    { id: 'company', label: 'Tên công ty / Cơ quan', value: profile.company, icon: LayoutDashboard, placeholder: 'Nơi làm việc...' },
+                                                    { id: 'company', label: 'Tên công ty / Cơ quan', value: profile.company, icon: LayoutGrid, placeholder: 'Nơi làm việc...' },
                                                     { id: 'address', label: 'Địa chỉ liên hệ', value: profile.address, icon: FileText, placeholder: 'Địa chỉ...' }
                                                 ].map((field) => (
                                                     <div key={field.id} className="space-y-1.5">
@@ -1001,41 +1081,41 @@ export default function AccountPage() {
                                 )}
 
                                 {activeTab === 'settings' && (
-                                    <div className="space-y-6 animate-in fade-in duration-500">
+                                    <div className="space-y-8 animate-in fade-in duration-500">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <h2 className="text-xl font-black text-slate-900 mb-0.5">Cài đặt</h2>
-                                                <p className="text-slate-400 font-medium text-[10px] uppercase tracking-wider">Cá nhân hóa ứng dụng của bạn</p>
+                                                <h2 className="text-2xl font-bold text-apple-text tracking-tight mb-1">Cài đặt</h2>
+                                                <p className="text-apple-text-secondary font-medium text-[11px] uppercase tracking-[0.15em]">Cá nhân hóa ứng dụng của bạn</p>
                                             </div>
-                                            <div className="w-9 h-9 bg-slate-100 text-slate-900 rounded-lg flex items-center justify-center shadow-sm border border-slate-200">
-                                                <Settings className="w-4 h-4" />
+                                            <div className="w-10 h-10 bg-apple-card text-apple-text rounded-2xl flex items-center justify-center shadow-apple-shadow border border-apple-border">
+                                                <Settings className="w-5 h-5 opacity-80" />
                                             </div>
                                         </div>
 
-                                        <div className="grid gap-6">
+                                        <div className="grid gap-8">
                                             {/* Group: Study Configuration (macOS style grouped rows) */}
-                                            <div className="space-y-2">
-                                                <h3 className="text-[10px] font-black text-apple-text-secondary uppercase tracking-[0.2em] px-1">Thiết lập Ôn tập</h3>
-                                                <div className="bg-apple-bg rounded-2xl border border-apple-border overflow-hidden divide-y divide-apple-border shadow-sm">
+                                            <div className="space-y-3">
+                                                <h3 className="text-[11px] font-semibold text-apple-text-secondary uppercase tracking-[0.15em] px-1">Thiết lập Ôn tập</h3>
+                                                <div className="bg-apple-card rounded-2xl border border-apple-border overflow-hidden divide-y divide-apple-border shadow-apple-shadow">
                                                     {/* Rank Preference Row */}
-                                                    <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 bg-orange-muted text-orange-text rounded-xl flex items-center justify-center border border-orange-500/10">
-                                                                <Target className="w-4 h-4" />
+                                                    <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-10 h-10 bg-orange-muted text-orange-text rounded-2xl flex items-center justify-center border border-orange-soft">
+                                                                <Target className="w-5 h-5" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-sm font-black text-apple-text">Hạng mục thi</p>
-                                                                <p className="text-[10px] text-apple-text-secondary font-medium whitespace-nowrap">Hạng mục ưu tiên khi vào bài thi</p>
+                                                                <p className="text-[15px] font-semibold text-apple-text">Hạng mục thi</p>
+                                                                <p className="text-[12px] text-apple-text-secondary font-medium">Hạng mục ưu tiên khi vào bài thi</p>
                                                             </div>
                                                         </div>
-                                                        <div className="flex gap-1 overflow-x-auto pb-1 sm:pb-0">
+                                                        <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
                                                             {['Hạng I', 'Hạng II', 'Hạng III'].map(rank => (
                                                                 <button
                                                                     key={rank}
                                                                     onClick={() => setPreferences({ ...preferences, rank })}
-                                                                    className={`px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all border ${preferences.rank === rank
-                                                                        ? 'bg-apple-text border-apple-text text-apple-bg'
-                                                                        : 'bg-apple-card border-apple-border text-apple-text-secondary hover:border-apple-text-secondary'
+                                                                    className={`px-4 py-2 rounded-xl font-bold text-[11px] uppercase tracking-wider transition-all border ${preferences.rank === rank
+                                                                        ? 'bg-apple-text border-apple-text text-apple-bg shadow-md'
+                                                                        : 'bg-apple-bg border-apple-border text-apple-text-secondary hover:border-apple-text-secondary active:scale-[0.98]'
                                                                         }`}
                                                                 >
                                                                     {rank}
@@ -1045,121 +1125,87 @@ export default function AccountPage() {
                                                     </div>
 
                                                     {/* Specialty Row */}
-                                                    <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 bg-apple-blue/10 text-apple-blue rounded-xl flex items-center justify-center border border-apple-blue/10">
-                                                                <Briefcase className="w-4 h-4" />
+                                                    <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-10 h-10 bg-apple-blue/10 text-apple-blue rounded-2xl flex items-center justify-center border border-apple-blue/10">
+                                                                <Briefcase className="w-5 h-5" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-sm font-black text-apple-text">Chuyên ngành mặc định</p>
-                                                                <p className="text-[10px] text-apple-text-secondary font-medium">Lĩnh vực ưu tiên ôn luyện</p>
+                                                                <p className="text-[15px] font-semibold text-apple-text">Chuyên ngành mặc định</p>
+                                                                <p className="text-[12px] text-apple-text-secondary font-medium">Lĩnh vực ưu tiên ôn luyện</p>
                                                             </div>
                                                         </div>
-                                                        <select
-                                                            value={preferences.specialty}
-                                                            onChange={(e) => setPreferences({ ...preferences, specialty: e.target.value })}
-                                                            className="px-4 py-2 bg-apple-card border border-apple-border rounded-xl focus:ring-4 focus:ring-apple-blue/10 focus:border-apple-blue transition-all outline-none font-bold text-apple-text text-[11px] max-w-[200px] appearance-none"
-                                                        >
-                                                            {[
-                                                                'Khảo sát địa hình',
-                                                                'Khảo sát địa chất công trình',
-                                                                'Thiết kế quy hoạch xây dựng',
-                                                                'Thiết kế xây dựng công trình - Kết cấu công trình',
-                                                                'Thiết kế xây dựng công trình - Công trình Khai thác mỏ',
-                                                                'Thiết kế xây dựng công trình - Công trình Đường bộ',
-                                                                'Thiết kế xây dựng công trình - Công trình Đường sắt',
-                                                                'Thiết kế xây dựng công trình - Công trình Cầu - Hầm',
-                                                                'Thiết kế xây dựng công trình - Công trình Đường thủy nội địa - Hàng hải',
-                                                                'Thiết kế xây dựng công trình - Công trình Thủy lợi, đê điều',
-                                                                'Thiết kế xây dựng công trình - Công trình Cấp nước - thoát nước',
-                                                                'Thiết kế xây dựng công trình - Công trình Xử lý chất thải rắn',
-                                                                'Thiết kế cơ - điện công trình - Hệ thống điện',
-                                                                'Thiết kế cơ - điện công trình - Hệ thống cấp - thoát nước công trình',
-                                                                'Thiết kế cơ - điện công trình - Hệ hệ thống thông gió - cấp thoát nhiệt',
-                                                                'Giám sát công tác xây dựng công trình',
-                                                                'Giám sát công tác lắp đặt thiết bị công trình',
-                                                                'Định giá xây dựng',
-                                                                'Quản lý dự án đầu tư xây dựng'
-                                                            ].map(opt => (
-                                                                <option key={opt} value={opt} className="bg-apple-card">{opt}</option>
-                                                            ))}
-                                                        </select>
+                                                        <div className="relative group w-full sm:w-auto">
+                                                            <select
+                                                                value={preferences.specialty}
+                                                                onChange={(e) => setPreferences({ ...preferences, specialty: e.target.value })}
+                                                                className="w-full sm:w-[240px] px-4 py-3 bg-apple-bg border border-apple-border rounded-xl focus:ring-4 focus:ring-apple-blue/10 focus:border-apple-blue transition-all outline-none font-semibold text-apple-text text-[13px] appearance-none cursor-pointer"
+                                                            >
+                                                                {[
+                                                                    'Khảo sát địa hình',
+                                                                    'Khảo sát địa chất công trình',
+                                                                    'Thiết kế quy hoạch xây dựng',
+                                                                    'Thiết kế xây dựng công trình - Kết cấu công trình',
+                                                                    'Thiết kế xây dựng công trình - Công trình Khai thác mỏ',
+                                                                    'Thiết kế xây dựng công trình - Công trình Đường bộ',
+                                                                    'Thiết kế xây dựng công trình - Công trình Đường sắt',
+                                                                    'Thiết kế xây dựng công trình - Công trình Cầu - Hầm',
+                                                                    'Thiết kế xây dựng công trình - Công trình Đường thủy nội địa - Hàng hải',
+                                                                    'Thiết kế xây dựng công trình - Công trình Thủy lợi, đê điều',
+                                                                    'Thiết kế xây dựng công trình - Công trình Cấp nước - thoát nước',
+                                                                    'Thiết kế xây dựng công trình - Công trình Xử lý chất thải rắn',
+                                                                    'Thiết kế cơ - điện công trình - Hệ thống điện',
+                                                                    'Thiết kế cơ - điện công trình - Hệ thống cấp - thoát nước công trình',
+                                                                    'Thiết kế cơ - điện công trình - Hệ hệ thống thông gió - cấp thoát nhiệt',
+                                                                    'Giám sát công tác xây dựng công trình',
+                                                                    'Giám sát công tác lắp đặt thiết bị công trình',
+                                                                    'Định giá xây dựng',
+                                                                    'Quản lý dự án đầu tư xây dựng'
+                                                                ].map(opt => (
+                                                                    <option key={opt} value={opt} className="bg-apple-card">{opt}</option>
+                                                                ))}
+                                                            </select>
+                                                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-apple-text-secondary">
+                                                                <ChevronRight className="w-4 h-4 rotate-90" />
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
 
                                             {/* Group: Personalization */}
-                                            <div className="space-y-2">
-                                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Cá nhân hóa</h3>
-                                                <div className="bg-slate-50/50 rounded-xl border border-slate-100 overflow-hidden divide-y divide-slate-100">
-                                                    <div className="p-4 flex items-center justify-between">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
-                                                                {preferences.theme === 'light' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                                            <div className="space-y-3">
+                                                <h3 className="text-[11px] font-semibold text-apple-text-secondary uppercase tracking-[0.15em] px-1">Cá nhân hóa</h3>
+                                                <div className="bg-apple-card rounded-2xl border border-apple-border overflow-hidden divide-y divide-apple-border shadow-apple-shadow">
+                                                    <div className="p-5 flex items-center justify-between">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center border border-purple-500/10">
+                                                                {preferences.theme === 'light' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                                                             </div>
                                                             <div>
-                                                                <p className="text-sm font-black text-slate-900 leading-tight">Giao diện (Dark Mode)</p>
-                                                                <p className="text-[10px] text-slate-400 font-medium">Chuyển đổi giữa chế độ sáng và tối</p>
+                                                                <p className="text-[15px] font-semibold text-apple-text leading-tight">Giao diện (Dark Mode)</p>
+                                                                <p className="text-[12px] text-apple-text-secondary font-medium">Chuyển đổi giữa chế độ sáng và tối</p>
                                                             </div>
                                                         </div>
                                                         <button
                                                             onClick={() => setPreferences({ ...preferences, theme: preferences.theme === 'light' ? 'dark' : 'light' })}
-                                                            className={`w-11 h-6 rounded-full relative transition-all duration-300 border ${preferences.theme === 'light' ? 'bg-slate-200 border-slate-300' : 'bg-blue-600 border-blue-700'}`}
+                                                            className={`w-12 h-7 rounded-full relative transition-all duration-300 ${preferences.theme === 'light' ? 'bg-apple-border' : 'bg-apple-blue'}`}
                                                         >
-                                                            <div className={`absolute top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow-sm transition-all duration-300 ${preferences.theme === 'light' ? 'left-0.5' : 'left-5.5'}`} />
+                                                            <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-all duration-300 ${preferences.theme === 'light' ? 'left-1' : 'left-6'}`} />
                                                         </button>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {/* Group: Account Progress (Only Star Progress) */}
-                                            <div className="space-y-2">
-                                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Tiến trình tài khoản</h3>
-                                                <div className="p-6 bg-slate-900 text-white rounded-xl relative overflow-hidden group border border-white/5">
-                                                    <Star className="absolute -top-4 -right-4 w-32 h-32 text-white/5 rotate-12 group-hover:scale-110 transition-transform duration-700" />
-                                                    <div className="relative z-10 flex flex-col gap-4">
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md">
-                                                                    <Trophy className="w-5 h-5 text-yellow-400" />
-                                                                </div>
-                                                                <div>
-                                                                    <p className="text-lg font-black leading-tight">Cấp độ {badges.stars + 1}</p>
-                                                                    <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest">{badges.level}</p>
-                                                                </div>
-                                                            </div>
-                                                            <span className="px-2 py-1 bg-white/10 rounded-md text-[8px] font-black uppercase tracking-widest">Graduation</span>
-                                                        </div>
-
-                                                        <div className="space-y-2">
-                                                            <div className="flex justify-between items-end">
-                                                                <p className="text-[10px] font-bold text-white/60">Độ chính xác hiện tại</p>
-                                                                <p className="text-[10px] font-black text-blue-400">{stats.avgScore}%</p>
-                                                            </div>
-                                                            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                                                <div
-                                                                    className="h-full bg-blue-500 transition-all duration-1000 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-                                                                    style={{ width: `${Math.min(stats.avgScore, 100)}%` }}
-                                                                />
-                                                            </div>
-                                                            <p className="text-[9px] font-medium text-white/40 italic">Đạt 80% độ chính xác để nâng hạng Chuyên gia</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
                                         </div>
 
-                                        <div className="flex items-center justify-between pt-4 border-t border-apple-border">
-                                            <div className="flex items-center gap-2 text-emerald-text">
-                                                <ShieldCheck className="w-3.5 h-3.5" />
-                                                <span className="text-[9px] font-black uppercase tracking-widest">Trạng thái: An toàn</span>
-                                            </div>
+                                        <div className="flex items-center justify-end pt-6 border-t border-apple-border mt-2">
                                             <button
                                                 onClick={handleSaveSettings}
                                                 disabled={isSavingProfile}
-                                                className="px-6 py-2.5 bg-apple-text text-apple-bg rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:bg-apple-blue hover:text-white transition-all flex items-center gap-2 disabled:opacity-50"
+                                                className="px-8 py-3.5 bg-apple-text text-apple-bg rounded-2xl font-bold text-[12px] uppercase tracking-wider shadow-xl hover:bg-apple-blue hover:text-white transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2.5"
                                             >
-                                                {isSavingProfile ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                                                {isSavingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                                                 Lưu thiết lập
                                             </button>
                                         </div>
@@ -1170,16 +1216,25 @@ export default function AccountPage() {
                     </div>
                 </div>
             </div>
-            {/* Share and Shortcut Modals */}
+            {/* Share Modal */}
             <ShareModal
                 isOpen={showShareModal}
                 onClose={() => setShowShareModal(false)}
-                url={shareUrl}
-                title={shareTitle}
+                url="https://ltccxd.com"
+                title="Luyện thi Chứng chỉ hành nghề Xây dựng"
             />
+
+            {/* Shortcut Modal */}
             <ShortcutModal
                 isOpen={showShortcutModal}
                 onClose={() => setShowShortcutModal(false)}
+            />
+
+            {/* App Feedback Modal */}
+            <AppFeedbackModal
+                isOpen={showFeedbackModal}
+                onClose={() => setShowFeedbackModal(false)}
+                user={profile}
             />
         </>
     )
