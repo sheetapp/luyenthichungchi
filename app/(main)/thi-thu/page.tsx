@@ -111,7 +111,16 @@ export default function ThiThuPage() {
                 <div className="fixed top-0 left-0 right-0 bg-apple-card/80 backdrop-blur-xl z-[60] py-3 px-4 md:px-6 border-b border-apple-border shadow-sm">
                     <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center gap-3">
                         <div className="flex items-center justify-between">
-                            <ThemeToggle />
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setIsGuideOpen(true)}
+                                    className="md:hidden flex items-center justify-center w-9 h-9 bg-apple-card border border-apple-border rounded-xl text-apple-blue shadow-sm active:scale-90 transition-all"
+                                    title="Xem hướng dẫn"
+                                >
+                                    <HelpCircle className="w-4.5 h-4.5" />
+                                </button>
+                                <ThemeToggle />
+                            </div>
                             <div className="md:hidden flex p-1 bg-apple-border rounded-[10px]">
                                 {HANG_TABS.map(hang => (
                                     <button
@@ -165,6 +174,13 @@ export default function ThiThuPage() {
                     <div className="flex items-center justify-between md:justify-start gap-4">
                         <h1 className="text-2xl md:text-3xl font-bold text-apple-text tracking-tight mb-0 md:mb-2">Hệ thống thi thử</h1>
                         <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setIsGuideOpen(true)}
+                                className="md:hidden flex items-center justify-center w-10 h-10 bg-apple-card border border-apple-border rounded-xl text-apple-blue shadow-sm active:scale-90 transition-all"
+                                title="Xem hướng dẫn"
+                            >
+                                <HelpCircle className="w-5 h-5" />
+                            </button>
                             <ThemeToggle />
                         </div>
                     </div>
@@ -175,7 +191,7 @@ export default function ThiThuPage() {
                         </p>
                         <button
                             onClick={() => setIsGuideOpen(true)}
-                            className="w-fit flex items-center gap-2 px-3 py-1.5 bg-apple-blue/5 text-apple-blue rounded-[10px] text-[11px] font-bold border border-apple-blue/10 hover:bg-apple-blue/10 transition-all active:scale-95"
+                            className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-apple-blue/5 text-apple-blue rounded-[10px] text-[11px] font-bold border border-apple-blue/10 hover:bg-apple-blue/10 transition-all active:scale-95"
                         >
                             <HelpCircle className="w-3.5 h-3.5" />
                             Xem hướng dẫn
@@ -184,8 +200,8 @@ export default function ThiThuPage() {
                 </div>
             </div>
 
-            {/* Exam Rules */}
-            <div className="mx-4 md:mx-6 bg-gradient-to-br from-[#FF9500]/5 to-[#FF9500]/10 border border-[#FF9500]/10 rounded-[20px] md:rounded-[24px] p-4 md:p-6 flex flex-col md:flex-row items-start gap-3 md:gap-4 font-sans">
+            {/* Exam Rules - Hidden on Mobile */}
+            <div className="hidden md:flex mx-4 md:mx-6 bg-apple-card border border-apple-border rounded-[20px] md:rounded-[24px] p-4 md:p-6 flex-col md:flex-row items-start gap-3 md:gap-4 font-sans">
                 <AlertCircle className="w-5 h-5 md:w-6 md:h-6 text-[#FF9500] shrink-0 md:mt-0.5" />
                 <div className="space-y-4 w-full">
                     <h4 className="font-bold text-apple-text text-base md:text-lg tracking-tight">Quy tắc thi sát hạch</h4>

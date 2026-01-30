@@ -101,6 +101,7 @@ function OnTapContent() {
     const [isPhanThiMenuOpen, setIsPhanThiMenuOpen] = useState(false)
     const phanThiMenuRef = useRef<HTMLDivElement>(null)
     const [categorySearchQuery, setCategorySearchQuery] = useState('')
+    const [showSticky, setShowSticky] = useState(false)
 
     // Handle mobile detection
     useEffect(() => {
@@ -108,6 +109,15 @@ function OnTapContent() {
         checkMobile()
         window.addEventListener('resize', checkMobile)
         return () => window.removeEventListener('resize', checkMobile)
+    }, [])
+
+    // Sticky header on scroll
+    useEffect(() => {
+        const handleScroll = () => {
+            setShowSticky(window.scrollY > 100)
+        }
+        window.addEventListener('scroll', handleScroll)
+        return () => window.removeEventListener('scroll', handleScroll)
     }, [])
 
     // Check authentication and load preferences
@@ -563,6 +573,67 @@ function OnTapContent() {
 
     return (
         <div className="min-h-screen bg-apple-bg py-4 md:py-6 space-y-4 md:space-y-6 flex flex-col font-sans transition-colors duration-300">
+            {/* Sticky Header */}
+            {showSticky && (
+                <div className="fixed top-0 left-0 right-0 bg-apple-card/80 backdrop-blur-xl z-[60] py-3 px-4 md:px-6 border-b border-apple-border shadow-sm">
+                    <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center gap-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setIsGuideOpen(true)}
+                                    className="md:hidden flex items-center justify-center w-9 h-9 bg-apple-card border border-apple-border rounded-xl text-apple-blue shadow-sm active:scale-90 transition-all"
+                                    title="Xem hướng dẫn"
+                                >
+                                    <HelpCircle className="w-4.5 h-4.5" />
+                                </button>
+                                <ThemeToggle />
+                            </div>
+                            <div className="md:hidden flex p-1 bg-apple-border rounded-[10px]">
+                                {HANG_TABS.map(hang => (
+                                    <button
+                                        key={hang}
+                                        onClick={() => setSelectedHang(hang)}
+                                        className={`px-3 py-1.5 rounded-[8px] text-[11px] font-semibold transition-all ${selectedHang === hang
+                                            ? 'bg-apple-card text-apple-blue shadow-sm'
+                                            : 'text-apple-text-secondary'
+                                            }`}
+                                    >
+                                        {hang}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* PC Hạng Tabs */}
+                        <div className="hidden md:flex p-1 bg-apple-border rounded-[12px]">
+                            {HANG_TABS.map(hang => (
+                                <button
+                                    key={hang}
+                                    onClick={() => setSelectedHang(hang)}
+                                    className={`px-6 py-2 rounded-[10px] text-sm font-semibold transition-all ${selectedHang === hang
+                                        ? 'bg-apple-card text-apple-blue shadow-sm'
+                                        : 'text-apple-text-secondary hover:text-apple-text'
+                                        }`}
+                                >
+                                    {hang}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Search */}
+                        <div className="flex-1 relative">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-apple-text-secondary w-4 h-4" />
+                            <input
+                                type="text"
+                                placeholder="Tìm kiếm chuyên ngành ôn tập..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 bg-apple-card/50 border border-apple-border rounded-[10px] outline-none focus:ring-2 focus:ring-apple-blue/20 shadow-sm text-sm"
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* Header */}
             <div className="flex-shrink-0 px-4 md:px-6 flex flex-col md:flex-row md:items-start justify-between gap-4 md:gap-6">
                 <div className="space-y-1">

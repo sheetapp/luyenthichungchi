@@ -37,7 +37,7 @@ export function FloatingActionButtons() {
 
                 {/* Buy a Coffee */}
                 <a
-                    href="/buy-me-a-coffee"
+                    href="/buy-me-coffee"
                     className="w-14 h-14 bg-gradient-to-br from-pink-500 to-red-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-pink-500/40 hover:scale-110 active:scale-95 transition-all"
                     aria-label="Buy me a coffee"
                 >
@@ -96,7 +96,7 @@ export function FloatingActionButtons() {
 
                 {/* Buy a Coffee */}
                 <a
-                    href="/buy-me-a-coffee"
+                    href="/buy-me-coffee"
                     className="group relative w-14 h-14 bg-gradient-to-br from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
                     aria-label="Buy a coffee"
                 >

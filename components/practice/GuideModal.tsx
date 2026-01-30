@@ -1,6 +1,6 @@
 'use client'
 
-import { X, Keyboard, MousePointer2, Zap, AlertTriangle, ArrowRight, ArrowLeft, ArrowUp, ArrowDown } from 'lucide-react'
+import { X, Keyboard, MousePointer2, Zap, AlertTriangle, ArrowRight, ArrowLeft, ArrowUp, ArrowDown, FileText } from 'lucide-react'
 
 interface GuideModalProps {
     isOpen: boolean
@@ -35,8 +35,42 @@ export function GuideModal({ isOpen, onClose, type = 'practice' }: GuideModalPro
                     </button>
                 </div>
 
-                {/* Content */}
                 <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
+                    {/* Section: Exam Rules (Only for Exam mode) */}
+                    {type === 'exam' && (
+                        <div className="space-y-6 animate-in slide-in-from-bottom duration-500">
+                            <h4 className="text-lg font-bold text-[#1d1d1f] px-1 tracking-tight flex items-center gap-2">
+                                <AlertTriangle className="w-5 h-5 text-[#FF9500]" />
+                                Quy tắc thi sát hạch
+                            </h4>
+                            <div className="grid grid-cols-1 gap-4">
+                                <div className="p-5 bg-[#FF9500]/5 border border-[#FF9500]/10 rounded-2xl flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0">
+                                        <FileText className="w-6 h-6 text-[#FF9500]" />
+                                    </div>
+                                    <div>
+                                        <div className="text-[10px] font-bold text-[#FF9500] uppercase tracking-wider mb-0.5">Cấu trúc đề thi</div>
+                                        <div className="text-sm font-bold text-[#1d1d1f]">30 câu hỏi (10 Pháp luật + 20 Chuyên môn)</div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-5 bg-[#007AFF]/5 border border-[#007AFF]/10 rounded-2xl flex flex-col gap-2">
+                                        <div className="text-[10px] font-bold text-[#007AFF] uppercase tracking-wider">Thời gian</div>
+                                        <div className="text-base font-bold text-[#1d1d1f]">30 Phút</div>
+                                        <div className="text-[11px] font-medium text-[#86868b]">Làm bài liên tục</div>
+                                    </div>
+                                    <div className="p-5 bg-[#34C759]/5 border border-[#34C759]/10 rounded-2xl flex flex-col gap-2">
+                                        <div className="text-[10px] font-bold text-[#34C759] uppercase tracking-wider">Điều kiện đạt</div>
+                                        <div className="text-base font-bold text-[#1d1d1f]">Tổng ≥ 21</div>
+                                        <div className="text-[11px] font-medium text-[#86868b]">Và PL ≥ 7 câu</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="h-px bg-black/5 mx-2" />
+                        </div>
+                    )}
+
                     {/* Section 1: Intro */}
                     <div className="flex gap-6 items-start">
                         <div className="w-12 h-12 bg-[#F5F5F7] rounded-full flex items-center justify-center shrink-0">
