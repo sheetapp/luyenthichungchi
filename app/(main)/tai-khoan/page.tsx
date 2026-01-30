@@ -36,7 +36,9 @@ import {
     ChevronDown,
     Clock,
     Medal,
-    PlusCircle
+    PlusCircle,
+    BookOpen,
+    HelpCircle
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -58,8 +60,9 @@ export default function AccountPage() {
         highestScore: 0,
         totalWrong: 0,
         passRate: 0,
-        totalAnswered: 0 // New for gamification
+        totalAnswered: 0
     })
+    const [practiceSummary, setPracticeSummary] = useState<any[]>([])
     const [preferences, setPreferences] = useState({
         rank: 'Hạng III',
         specialty: 'Khảo sát xây dựng',
@@ -224,7 +227,7 @@ export default function AccountPage() {
                     setGroupedWrongQuestions(groups)
                 }
 
-                // Fetch practice stats for total answered count
+                // Fetch practice stats for detailed history
                 const { data: practiceData } = await supabase
                     .from('user_practice_stats')
                     .select('history')
@@ -233,11 +236,65 @@ export default function AccountPage() {
 
                 let answeredCount = 0
                 if (practiceData?.history) {
-                    answeredCount = Object.keys(practiceData.history).length
+                    const history = practiceData.history as any
+                    const questionIds = Object.keys(history)
+                    answeredCount = questionIds.length
+
+                    if (questionIds.length > 0) {
+                        try {
+                            // Fetch question details (category) for these IDs to group
+                            const { data: answeredQs } = await supabase
+                                .from('questions')
+                                .select('id, chuyen_nganh')
+                                .in('id', questionIds)
+
+                            if (answeredQs) {
+                                // Group by chuyen_nganh
+                                const summaryMap: Record<string, { learned: number; correct: number; wrong: number }> = {}
+                                answeredQs.forEach(q => {
+                                    const cat = q.chuyen_nganh || 'Khác'
+                                    if (!summaryMap[cat]) {
+                                        summaryMap[cat] = { learned: 0, correct: 0, wrong: 0 }
+                                    }
+                                    summaryMap[cat].learned++
+                                    if (history[q.id]?.isCorrect) {
+                                        summaryMap[cat].correct++
+                                    } else {
+                                        summaryMap[cat].wrong++
+                                    }
+                                })
+
+                                // Fetch total counts per category for these categories to calculate "not learned"
+                                const categories = Object.keys(summaryMap)
+                                const { data: catCounts } = await supabase
+                                    .from('questions')
+                                    .select('chuyen_nganh')
+                                    .in('chuyen_nganh', categories)
+
+                                if (catCounts) {
+                                    const totalMap: Record<string, number> = {}
+                                    catCounts.forEach(c => {
+                                        totalMap[c.chuyen_nganh] = (totalMap[c.chuyen_nganh] || 0) + 1
+                                    })
+
+                                    const finalSummary = Object.entries(summaryMap).map(([cat, s]: [string, any]) => ({
+                                        category: cat,
+                                        learned: s.learned,
+                                        correct: s.correct,
+                                        wrong: s.wrong,
+                                        total: totalMap[cat] || s.learned,
+                                        notLearned: (totalMap[cat] || s.learned) - s.learned
+                                    }))
+                                    setPracticeSummary(finalSummary)
+                                }
+                            }
+                        } catch (err) {
+                            console.error('Error processing practice stats:', err)
+                        }
+                    }
                 }
 
                 // Calculate Badges & Stars based on precision (avgScore)
-                // stats.avgScore is available here as 'avg' from line 125
                 const currentAvg = results && results.length > 0
                     ? results.reduce((acc, r) => acc + (r.score || 0), 0) / results.length
                     : 0;
@@ -757,6 +814,74 @@ export default function AccountPage() {
                                                     <Medal className="w-6 h-6" />
                                                 </div>
                                             </div>
+                                        </div>
+
+                                        {/* Detailed Practice History (PC Only) */}
+                                        <div className="hidden md:block space-y-4 pt-4 border-t border-apple-border/50">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <div className="w-8 h-8 bg-apple-blue/10 text-apple-blue rounded-xl flex items-center justify-center">
+                                                    <BookOpen className="w-4 h-4" />
+                                                </div>
+                                                <h4 className="text-[11px] font-bold text-apple-text-secondary uppercase tracking-[0.2em]">Lịch sử Ôn tập chi tiết</h4>
+                                            </div>
+
+                                            {practiceSummary.length === 0 ? (
+                                                <div className="bg-apple-card rounded-2xl p-10 border border-apple-border text-center text-apple-text-secondary border-dashed">
+                                                    <HelpCircle className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                                                    <p className="text-sm font-medium">Bắt đầu ôn tập để theo dõi lịch sử chi tiết tại đây.</p>
+                                                </div>
+                                            ) : (
+                                                <div className="grid grid-cols-1 gap-4">
+                                                    {practiceSummary.map((item, idx) => (
+                                                        <div key={idx} className="bg-apple-card rounded-2xl p-5 border border-apple-border shadow-sm hover:shadow-apple-shadow transition-all group">
+                                                            <div className="flex items-start justify-between mb-4">
+                                                                <div className="space-y-1.5 flex-1 pr-4">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <h5 className="font-bold text-apple-text text-[15px]">{item.category}</h5>
+                                                                        <span className="px-2 py-0.5 bg-apple-bg border border-apple-border text-[9px] font-bold text-apple-text-secondary rounded-lg uppercase">
+                                                                            Chuyên ngành
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-4 text-[10px] font-bold text-apple-text-secondary uppercase tracking-wider">
+                                                                        <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Đúng: {item.correct}</span>
+                                                                        <span className="flex items-center gap-1.5"><XCircle className="w-3.5 h-3.5 text-red-500" /> Sai: {item.wrong}</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="text-right shrink-0">
+                                                                    <div className="text-[15px] font-black text-apple-blue leading-none">{Math.round((item.learned / item.total) * 100)}%</div>
+                                                                    <div className="text-[9px] font-black text-apple-text-secondary opacity-30 uppercase tracking-tighter">Tiến độ</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="grid grid-cols-4 gap-3 mb-5">
+                                                                <div className="p-3 bg-apple-bg/30 rounded-xl border border-apple-border text-center group-hover:bg-white transition-colors">
+                                                                    <p className="text-[9px] font-black text-apple-text-secondary uppercase mb-1 opacity-50">Đã học</p>
+                                                                    <p className="text-[15px] font-black text-apple-text">{item.learned}</p>
+                                                                </div>
+                                                                <div className="p-3 bg-apple-bg/30 rounded-xl border border-apple-border text-center group-hover:bg-white transition-colors">
+                                                                    <p className="text-[9px] font-black text-apple-text-secondary uppercase mb-1 opacity-50">Chưa học</p>
+                                                                    <p className="text-[15px] font-black text-apple-text">{item.notLearned}</p>
+                                                                </div>
+                                                                <div className="p-3 bg-emerald-50/30 rounded-xl border border-emerald-100 text-center group-hover:bg-emerald-50 transition-colors">
+                                                                    <p className="text-[9px] font-black text-emerald-600 uppercase mb-1 opacity-60">Số câu đúng</p>
+                                                                    <p className="text-[15px] font-black text-emerald-600">{item.correct}</p>
+                                                                </div>
+                                                                <div className="p-3 bg-red-50/30 rounded-xl border border-red-100 text-center group-hover:bg-red-50 transition-colors">
+                                                                    <p className="text-[9px] font-black text-red-600 uppercase mb-1 opacity-60">Số câu sai</p>
+                                                                    <p className="text-[15px] font-black text-red-600">{item.wrong}</p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="h-2 bg-apple-bg rounded-full overflow-hidden border border-apple-border p-[1px] shadow-inner">
+                                                                <div
+                                                                    className="h-full bg-gradient-to-r from-apple-blue to-blue-400 rounded-full transition-all duration-1000 shadow-[0_0_8px_rgba(0,102,255,0.3)]"
+                                                                    style={{ width: `${Math.round((item.learned / item.total) * 100)}%` }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 )}
