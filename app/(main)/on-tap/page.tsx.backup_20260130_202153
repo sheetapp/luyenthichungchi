@@ -629,7 +629,7 @@ function OnTapContent() {
     // Show practice content for authenticated users
 
     return (
-        <div className={`bg-apple-bg flex flex-col font-sans transition-colors duration-300 ${!isMobile ? 'h-screen overflow-hidden' : 'min-h-screen py-4 md:py-6 space-y-4 md:space-y-6'}`}>
+        <div className="min-h-screen bg-apple-bg py-4 md:py-6 space-y-4 md:space-y-6 flex flex-col font-sans transition-colors duration-300">
             {/* Sticky Header */}
             {showSticky && (
                 <div className="fixed top-0 left-0 right-0 bg-apple-card/80 backdrop-blur-xl z-[60] py-3 px-4 md:px-6 border-b border-apple-border shadow-sm">
@@ -946,7 +946,37 @@ function OnTapContent() {
 
                     {/* Navigation & Statistics - Hidden on mobile quiz view */}
                     <div className={`mx-6 bg-apple-card/80 backdrop-blur-[20px] rounded-2xl p-6 border border-apple-border shadow-apple-shadow flex-shrink-0 ${isMobile && practiceStep === 'active' ? 'hidden' : 'block'}`}>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-shrink-0">
+                        <div className="flex items-center justify-between mb-6 md:mb-6">
+                            <button
+                                onClick={handlePrevious}
+                                disabled={currentIndex === 0}
+                                className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-apple-bg border border-apple-border text-apple-text font-semibold rounded-xl hover:bg-apple-border/50 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-sm active:scale-97"
+                            >
+                                <ChevronLeft className="w-4 h-4" />
+                                Câu trước
+                            </button>
+
+                            <div className="flex-1 md:flex-none text-center">
+                                {feedback ? (
+                                    <span className={`px-4 py-1.5 rounded-full text-[11px] font-semibold border ${feedback.isCorrect ? 'bg-emerald-muted text-emerald-text border-emerald-soft' : 'bg-red-muted text-red-text border-red-soft'}`}>
+                                        {feedback.message}
+                                    </span>
+                                ) : (
+                                    <span className="text-apple-text-secondary text-[11px] font-semibold bg-apple-bg px-4 py-1.5 rounded-full border border-apple-border">Chưa trả lời</span>
+                                )}
+                            </div>
+
+                            <button
+                                onClick={handleNext}
+                                disabled={currentIndex === questions.length - 1}
+                                className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-[#007AFF] text-white font-semibold rounded-[10px] hover:bg-[#0062CC] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-md shadow-blue-500/10 active:scale-97"
+                            >
+                                Câu tiếp
+                                <ChevronRight className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-shrink-0 px-6">
                             <button
                                 onClick={() => {
                                     const firstActiveIndex = questions.findIndex(q => {
@@ -1008,10 +1038,9 @@ function OnTapContent() {
                         </div>
                     </div>
 
-                    {/* Main Content Layout - Redesigned with Navigation Pillar */}
-                    <div className="flex-1 flex flex-col md:flex-row gap-4 md:gap-4 px-4 md:px-6 pb-6 overflow-hidden mt-2">
-                        {/* 1. Left Sidebar (Question List) */}
-                        <div className={`hidden md:flex w-[320px] bg-apple-card/80 backdrop-blur-[20px] rounded-2xl p-5 shadow-apple-shadow border border-apple-border flex-col overflow-hidden`}>
+                    {/* Main Content */}
+                    <div className="grid lg:grid-cols-[300px_1fr] gap-6 flex-1 min-h-0 px-4 md:px-6 pb-6">
+                        <div className={`bg-apple-card/80 backdrop-blur-[20px] rounded-2xl p-6 shadow-apple-shadow border border-apple-border flex-col overflow-hidden ${isMobile && practiceStep === 'active' ? 'hidden' : 'flex'}`}>
                             <h3 className="font-semibold text-apple-text mb-4 flex items-center justify-between flex-shrink-0">
                                 <span className="text-[10px] text-apple-text-secondary font-semibold">Danh sách câu hỏi</span>
                                 <span className="text-[10px] font-semibold text-apple-text-secondary bg-apple-bg px-2 py-0.5 rounded-full ring-1 ring-apple-border">{questions.length}</span>
@@ -1022,7 +1051,7 @@ function OnTapContent() {
                                     <div className="w-8 h-8 border-4 border-apple-blue border-t-transparent rounded-full animate-spin" />
                                 </div>
                             ) : (
-                                <div className="overflow-y-auto overflow-x-hidden flex-1 pr-4 custom-scrollbar">
+                                <div className="overflow-y-auto flex-1 pr-2 no-scrollbar">
                                     <div className="grid grid-cols-6 gap-2">
                                         {questions.map((q, index) => (
                                             <button
@@ -1043,48 +1072,7 @@ function OnTapContent() {
                             )}
                         </div>
 
-                        {/* 2. Central Navigation Pillar (Apple Style - Top Aligned) */}
-                        {!isMobile && (
-                            <div className="hidden md:flex flex-col items-center justify-start gap-4 px-1 py-8">
-                                <button
-                                    onClick={handlePrevious}
-                                    disabled={currentIndex === 0}
-                                    className="w-12 h-12 flex items-center justify-center bg-apple-card border border-apple-border text-apple-text rounded-2xl hover:bg-apple-bg hover:border-apple-text/20 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-sm active:scale-90 group"
-                                    title="Câu trước"
-                                >
-                                    <ChevronLeft className="w-6 h-6 group-hover:-translate-x-0.5 transition-transform" />
-                                </button>
-
-                                {/* Shuffle Button - Apple Style */}
-                                <div className="flex flex-col items-center justify-center gap-4 py-4">
-                                    <button
-                                        onClick={() => setIsShuffled(!isShuffled)}
-                                        className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all shadow-lg active:scale-90 group relative ${isShuffled
-                                            ? 'bg-[#FF9500] text-white shadow-orange-500/20'
-                                            : 'bg-apple-card border border-apple-border text-apple-text hover:bg-apple-bg'
-                                            }`}
-                                        title="Trộn câu hỏi"
-                                    >
-                                        <RotateCcw className={`w-5 h-5 ${isShuffled ? 'animate-spin-slow' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
-                                        {isShuffled && (
-                                            <span className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full border-2 border-[#FF9500] animate-pulse" />
-                                        )}
-                                    </button>
-                                </div>
-
-                                <button
-                                    onClick={handleNext}
-                                    disabled={currentIndex === questions.length - 1}
-                                    className="w-12 h-12 flex items-center justify-center bg-apple-blue text-white rounded-2xl hover:bg-[#0062CC] disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-500/20 active:scale-90 group"
-                                    title="Câu tiếp"
-                                >
-                                    <ChevronRight className="w-6 h-6 group-hover:translate-x-0.5 transition-transform" />
-                                </button>
-                            </div>
-                        )}
-
-                        {/* 3. Main Question Content */}
-                        <div className={`flex-1 bg-apple-card rounded-2xl shadow-apple-shadow border border-apple-border flex flex-col overflow-hidden ${isMobile && practiceStep === 'active' ? 'p-0 border-none bg-transparent shadow-none' : ''}`}>
+                        <div className={`bg-apple-card rounded-2xl shadow-apple-shadow border border-apple-border flex flex-col overflow-hidden ${isMobile && practiceStep === 'active' ? 'p-0 border-none bg-transparent shadow-none' : ''}`}>
                             {loading ? (
                                 <div className="text-center py-20 flex-1 flex items-center justify-center">
                                     <div>
@@ -1093,7 +1081,7 @@ function OnTapContent() {
                                     </div>
                                 </div>
                             ) : currentQuestion ? (
-                                <div className={`overflow-y-auto flex-1 custom-scrollbar ${isMobile && practiceStep === 'active' ? 'p-0' : 'pl-8 pr-10 py-8'}`}>
+                                <div className={`overflow-y-auto flex-1 ${isMobile && practiceStep === 'active' ? 'p-0' : 'p-8'}`}>
                                     <div className="space-y-6">
                                         <div className="flex flex-col md:flex-row items-start gap-3 md:gap-4 pb-6 border-b border-apple-border">
                                             {/* Badge and Mobile Metadata Row */}
@@ -1377,27 +1365,6 @@ function OnTapContent() {
                     </div>
                 </div>
             )}
-            <style jsx global>{`
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 5px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: rgba(0, 0, 0, 0.1);
-                    border-radius: 10px;
-                }
-                .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: rgba(255, 255, 255, 0.1);
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: rgba(0, 0, 0, 0.2);
-                }
-                .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: rgba(255, 255, 255, 0.2);
-                }
-            `}</style>
         </div>
     )
 }
