@@ -4,20 +4,18 @@ import { useState, useEffect } from 'react'
 import {
     User, Mail, Phone, Briefcase, UserCircle, Edit2, Save, X,
     History, TrendingUp, Award, AlertTriangle, MessageSquare,
-    LogOut, ChevronRight, ChevronLeft, Calendar, CheckCircle, XCircle,
+    LogOut, ChevronRight, Calendar, CheckCircle, XCircle,
     FileText, Send, Target, LayoutDashboard, ShieldCheck,
     Share2, Loader2, RotateCcw, ChevronDown, Clock, Settings, Star, Sparkles,
-    Moon, Sun, Medal, Trophy, PlusCircle
+    Moon, Sun, Medal, Trophy
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { WelcomePopup } from '@/components/WelcomePopup'
-import { ShareModal } from '@/components/ShareModal'
-import { ShortcutModal } from '@/components/ShortcutModal'
 import { useAppStore } from '@/lib/store/useAppStore'
 
-type TabType = 'overview' | 'profile' | 'history' | 'wrong' | 'feedback' | 'settings'
+type TabType = 'profile' | 'history' | 'wrong' | 'feedback' | 'settings'
 
 export default function AccountPage() {
     const router = useRouter()
@@ -43,7 +41,7 @@ export default function AccountPage() {
     const [loading, setLoading] = useState(true)
     const [mounted, setMounted] = useState(false)
     const [showWelcome, setShowWelcome] = useState(false)
-    const [activeTab, setActiveTab] = useState<TabType>('overview')
+    const [activeTab, setActiveTab] = useState<TabType>('profile')
     const [isEditing, setIsEditing] = useState(false)
     const [editForm, setEditForm] = useState({
         display_name: '',
@@ -65,9 +63,6 @@ export default function AccountPage() {
     const [greeting, setGreeting] = useState('')
     const [sharingId, setSharingId] = useState<string | null>(null)
     const [expandedExam, setExpandedExam] = useState<string | null>(null)
-    const [showSticky, setShowSticky] = useState(false)
-    const [showShareModal, setShowShareModal] = useState(false)
-    const [showShortcutModal, setShowShortcutModal] = useState(false)
 
     useEffect(() => {
         setMounted(true)
@@ -75,15 +70,6 @@ export default function AccountPage() {
         if (hour < 12) setGreeting('buổi sáng')
         else if (hour < 18) setGreeting('buổi chiều')
         else setGreeting('buổi tối')
-    }, [])
-
-    // Sticky header on scroll
-    useEffect(() => {
-        const handleScroll = () => {
-            setShowSticky(window.scrollY > 150)
-        }
-        window.addEventListener('scroll', handleScroll)
-        return () => window.removeEventListener('scroll', handleScroll)
     }, [])
 
     useEffect(() => {
@@ -381,69 +367,22 @@ export default function AccountPage() {
         router.push('/')
     }
 
-    const shareUrl = 'https://ltccxd.com'
-    const shareTitle = 'Luyện thi Chứng chỉ hành nghề Xây dựng'
-
     if (!mounted || loading) return (
         <div className="flex items-center justify-center min-h-[60vh]">
             <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
         </div>
     )
 
-    const menuGroups = [
-        {
-            title: 'Tài khoản & Học tập',
-            items: [
-                { id: 'profile' as TabType, label: 'Thông tin cá nhân', icon: User, color: 'text-apple-blue' },
-                { id: 'history' as TabType, label: 'Lịch sử thi thử', icon: History, color: 'text-emerald-500' },
-                { id: 'wrong' as TabType, label: 'Câu hỏi đã làm sai', icon: AlertTriangle, color: 'text-red-500' }
-            ]
-        },
-        {
-            title: 'Ứng dụng & Tiện ích',
-            items: [
-                { id: 'favorite' as any, label: 'Yêu thích App', icon: Star, color: 'text-blue-500', isAction: true, actionType: 'favorite' },
-                { id: 'share' as any, label: 'Chia sẻ App', icon: Share2, color: 'text-emerald-500', isAction: true, actionType: 'share' },
-                { id: 'shortcut' as any, label: 'Tạo lối tắt', icon: PlusCircle, color: 'text-amber-500', isAction: true, actionType: 'shortcut' }
-            ]
-        },
-        {
-            title: 'Hỗ trợ & Khác',
-            items: [
-                { id: 'settings' as TabType, label: 'Cài đặt', icon: Settings, color: 'text-slate-500' },
-                { id: 'feedback' as TabType, label: 'Góp ý & Phản hồi', icon: MessageSquare, color: 'text-apple-blue' }
-            ]
-        }
+    const menuItems = [
+        { id: 'profile' as TabType, label: 'Thông tin cá nhân', icon: User },
+        { id: 'history' as TabType, label: 'Lịch sử thi thử', icon: History },
+        { id: 'wrong' as TabType, label: 'Câu hỏi đã làm sai', icon: AlertTriangle },
+        { id: 'settings' as TabType, label: 'Cài đặt', icon: Settings },
+        { id: 'feedback' as TabType, label: 'Góp ý & Phản hồi', icon: MessageSquare }
     ]
-
-    // Unauthenticated Mobile View - Professional Card
-    if (!profile && mounted) {
-        return (
-            <div className="min-h-screen bg-apple-bg px-4 py-8 flex flex-col items-center justify-center gap-6">
-                <div className="w-20 h-20 bg-apple-card rounded-3xl border border-apple-border shadow-apple-shadow flex items-center justify-center text-apple-text-secondary">
-                    <UserCircle className="w-12 h-12 opacity-20" />
-                </div>
-                <div className="text-center space-y-2">
-                    <h2 className="text-xl font-bold text-apple-text">Chào mừng bạn!</h2>
-                    <p className="text-xs text-apple-text-secondary max-w-[240px] mx-auto leading-relaxed">
-                        Hãy đăng nhập để lưu trữ kết quả thi thử và theo dõi lộ trình ôn tập của riêng bạn.
-                    </p>
-                </div>
-                <Link
-                    href="/dang-nhap"
-                    className="w-full max-w-[280px] py-4 bg-apple-blue text-white rounded-2xl font-bold text-sm shadow-lg shadow-apple-blue/20 flex items-center justify-center gap-2 active:scale-95 transition-all"
-                >
-                    <LogOut className="w-4 h-4 rotate-180" />
-                    Đăng nhập ngay
-                </Link>
-            </div>
-        )
-    }
 
     return (
         <>
-            {/* Sticky Header - Handled by Drill-down Navigation on Mobile */}
-
             {showWelcome && profile && (
                 <WelcomePopup
                     userName={profile.display_name || profile.email?.split('@')[0] || 'bạn'}
@@ -452,126 +391,87 @@ export default function AccountPage() {
             )}
 
             <div className="px-4 md:px-6 py-4 md:py-6 space-y-6 md:space-y-8 min-h-screen bg-apple-bg pb-20 md:pb-6">
-                {/* Content Header - Mobile Back Button if in sub-tab */}
-                {activeTab !== 'overview' && (
-                    <div className="md:hidden animate-in fade-in slide-in-from-left duration-300">
-                        <button
-                            onClick={() => setActiveTab('overview')}
-                            className="flex items-center gap-2 px-3 py-2 -ml-1 text-apple-blue font-semibold text-sm active:scale-95 transition-all"
-                        >
-                            <ChevronLeft className="w-5 h-5" />
-                            Quay lại
-                        </button>
-                    </div>
-                )}
+                {/* Header Greeting - Standardized style */}
+                <div className="flex flex-col gap-1">
+                    <h1 className="text-2xl md:text-3xl font-bold text-apple-text tracking-tight">
+                        Tài khoản
+                    </h1>
+                    <p className="text-xs md:text-sm text-apple-text-secondary font-medium">
+                        Quản lý hồ sơ và theo dõi lịch sử thi thử của bạn.
+                    </p>
+                </div>
 
-                {/* Header Greeting & Profile Section - Unified Branding */}
-                <div className={`${activeTab === 'overview' ? 'flex' : 'hidden md:flex'} flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8`}>
-                    <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-4">
-                            <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-                                <h1 className="text-2xl md:text-3xl font-semibold text-apple-text tracking-tight animate-in fade-in slide-in-from-left duration-500">
-                                    Chào {greeting}, {profile?.display_name || 'bạn'}
-                                </h1>
-                                <p className="text-xs md:text-sm text-apple-text-secondary font-medium flex items-center gap-2">
-                                    <Sparkles className="w-3.5 h-3.5 text-apple-blue animate-pulse" />
-                                    Bạn đã làm tốt, hãy tiếp tục phấn đấu hơn nữa.
-                                </p>
-                            </div>
-
-                            {/* Modern Mobile Logout Button - Apple Style */}
-                            <button
-                                onClick={handleLogout}
-                                className="md:hidden flex items-center justify-center w-10 h-10 rounded-2xl bg-apple-card border border-apple-border shadow-apple-shadow text-red-500 active:scale-90 transition-all duration-300 group"
-                                aria-label="Đăng xuất"
-                            >
-                                <LogOut className="w-4.5 h-4.5 group-active:-translate-x-1 transition-transform" />
-                            </button>
-                        </div>
-
-                        {/* Unified Profile Elements (Avatar, Stars, Badge) */}
-                        <div className="flex items-center gap-4 mt-3 animate-in fade-in slide-in-from-top duration-700 delay-200">
-                            <div className="relative group">
-                                <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl border-2 border-apple-card shadow-apple-shadow overflow-hidden bg-apple-bg flex items-center justify-center transition-transform hover:scale-105 duration-300">
+                <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 md:gap-8 items-stretch">
+                    {/* CV-Style Left Sidebar - High Contrast & Professional */}
+                    <div className="bg-apple-card rounded-2xl overflow-hidden shadow-sm md:shadow-apple-shadow flex flex-col border border-apple-border font-sans">
+                        {/* Header Section - Theme Aware with glass effect */}
+                        <div className="pt-8 md:pt-12 pb-6 md:pb-8 px-6 md:px-8 text-center bg-gradient-to-br from-apple-blue/10 to-transparent border-b border-apple-border">
+                            <div className="relative inline-block mb-4 md:mb-6">
+                                <div className="w-24 h-24 md:w-36 md:h-36 rounded-2xl border-4 border-apple-card shadow-apple-shadow overflow-hidden mx-auto bg-apple-bg flex items-center justify-center">
                                     {profile?.avata ? (
                                         <img src={profile.avata} alt="Avatar" className="w-full h-full object-cover" />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-apple-blue to-[#0051FF] text-white text-xl md:text-2xl font-bold">
+                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-apple-blue to-[#0051FF] text-white text-3xl md:text-4xl font-bold">
                                             {profile?.display_name?.charAt(0) || profile?.email?.charAt(0) || 'U'}
                                         </div>
                                     )}
                                 </div>
                             </div>
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center gap-1.5">
-                                    <div className="inline-flex items-center px-2.5 py-0.5 bg-apple-blue text-white rounded-lg text-[10px] md:text-[11px] font-semibold shadow-md shadow-apple-blue/10">
-                                        {badges.level}
-                                    </div>
-                                    <span className="text-[10px] md:text-[11px] text-apple-text-secondary font-bold uppercase tracking-wider">{badges.title}</span>
-                                </div>
-                                <div className="flex items-center gap-1 px-3 py-1.5 bg-apple-card/50 backdrop-blur-md rounded-xl border border-apple-border shadow-sm w-fit">
+
+                            {/* Professional Star Rating Shelf */}
+                            <div className="flex flex-col items-center gap-4 md:gap-5">
+                                <div className="flex items-center gap-1 px-4 md:px-6 py-1.5 md:py-2.5 bg-apple-bg/50 backdrop-blur-xl rounded-xl border border-apple-border shadow-sm">
                                     {[...Array(5)].map((_, i) => (
                                         <Star
                                             key={i}
-                                            className={`w-3 h-3 md:w-3.5 md:h-3.5 transition-all duration-700 ${i < badges.stars
-                                                ? 'fill-yellow-400 text-yellow-400 filter drop-shadow-[0_0_6px_rgba(250,204,21,0.5)]'
+                                            className={`w-3.5 h-3.5 md:w-4 md:h-4 transition-all duration-700 ${i < badges.stars
+                                                ? 'fill-yellow-400 text-yellow-400 filter drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]'
                                                 : 'text-apple-text-secondary/20 fill-apple-text-secondary/10 stroke-[1.5px]'
                                                 }`}
                                         />
                                     ))}
                                 </div>
+
+                                <div className="space-y-1.5 md:space-y-2">
+                                    <h3 className="text-xl md:text-2xl font-bold tracking-tight text-apple-text leading-none">
+                                        {profile?.display_name || 'Học viên'}
+                                    </h3>
+                                    <div className="inline-flex items-center px-3 py-1 bg-apple-blue text-white rounded-lg text-[9px] md:text-[10px] font-bold shadow-lg shadow-apple-blue/20">
+                                        {badges.level}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 md:gap-8 items-stretch">
-                    {/* Mobile Menu List View */}
-                    <div className={`${activeTab === 'overview' ? 'flex' : 'hidden'} md:hidden flex-col gap-6`}>
-                        {menuGroups.map((group, groupIdx) => (
-                            <div key={groupIdx} className="space-y-2">
-                                <h4 className="px-4 text-[10px] font-semibold text-apple-text-secondary uppercase tracking-wider">{group.title}</h4>
-                                <div className="bg-apple-card rounded-2xl border border-apple-border overflow-hidden shadow-sm">
-                                    {group.items.map((item, itemIdx) => (
-                                        <button
-                                            key={item.id}
-                                            onClick={() => {
-                                                if ((item as any).isAction) {
-                                                    const action = (item as any).actionType;
-                                                    if (action === 'share') setShowShareModal(true);
-                                                    else if (action === 'shortcut') setShowShortcutModal(true);
-                                                    else alert(`Chức năng ${item.label} sẽ sớm được cập nhật!`);
-                                                } else {
-                                                    setActiveTab(item.id);
-                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                                }
-                                            }}
-                                            className={`w-full flex items-center justify-between p-4 active:bg-apple-bg transition-colors ${itemIdx !== group.items.length - 1 ? 'border-b border-apple-border/50' : ''}`}
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className={`w-8 h-8 rounded-lg ${item.color.replace('text-', 'bg-')}/10 flex items-center justify-center ${item.color}`}>
-                                                    <item.icon className="w-4 h-4" />
-                                                </div>
-                                                <span className="text-sm font-medium text-apple-text">{item.label}</span>
+                        {/* White Info Section - MAXIMUM Contrast Typography */}
+                        <div className="flex-1 p-5 md:p-6 space-y-6 md:space-y-8 bg-apple-card">
+                            {/* CONTACT section */}
+                            <div className="space-y-4 md:space-y-5">
+                                <div className="flex items-center gap-2 border-b border-apple-border pb-2">
+                                    <Mail className="w-4 h-4 text-apple-blue" />
+                                    <h4 className="text-[10px] md:text-[11px] font-bold text-apple-text-secondary uppercase tracking-widest">Liên hệ</h4>
+                                </div>
+                                <div className="grid grid-cols-1 gap-3 md:gap-4 md:px-1">
+                                    {[
+                                        { icon: Phone, label: profile?.phone || 'Chưa cập nhật' },
+                                        { icon: Mail, label: profile?.email || 'user@example.com' },
+                                        { icon: Briefcase, label: profile?.job_title || 'Chưa cập nhật' }
+                                    ].map((item, i) => (
+                                        <div key={i} className="flex items-center gap-3 text-apple-text group">
+                                            <div className="w-8 h-8 md:w-9 md:h-9 bg-apple-bg rounded-xl flex items-center justify-center text-apple-text-secondary group-hover:bg-apple-blue/10 group-hover:text-apple-blue transition-all shadow-sm border border-apple-border">
+                                                <item.icon className="w-3.5 h-3.5" />
                                             </div>
-                                            <ChevronRight className="w-4 h-4 text-apple-text-secondary/50" />
-                                        </button>
+                                            <span className="text-[11px] md:text-[12px] font-bold tracking-tight truncate">{item.label}</span>
+                                        </div>
                                     ))}
                                 </div>
                             </div>
-                        ))}
 
-                        {/* Logout moved to top right */}
-                    </div>
-
-                    {/* Sidebar Cleanup - Identity section moved to header */}
-                    <div className={`${activeTab === 'overview' ? 'flex' : 'hidden'} md:flex bg-apple-card rounded-2xl overflow-hidden shadow-sm md:shadow-apple-shadow flex-col border border-apple-border font-sans`}>
-                        <div className="flex-1 p-5 md:p-6 space-y-6 md:space-y-8 bg-apple-card">
                             {/* PROGRESS section */}
                             <div className="space-y-4 md:space-y-5">
                                 <div className="flex items-center gap-2 border-b border-apple-border pb-2">
                                     <TrendingUp className="w-4 h-4 text-apple-blue" />
-                                    <h4 className="text-[10px] md:text-[11px] font-semibold text-apple-text-secondary uppercase tracking-wider">Tiến độ</h4>
+                                    <h4 className="text-[10px] md:text-[11px] font-bold text-apple-text-secondary uppercase tracking-widest">Tiến độ</h4>
                                 </div>
                                 <div className="space-y-4 md:space-y-6 md:px-1">
                                     {[
@@ -595,24 +495,24 @@ export default function AccountPage() {
                                 </div>
                             </div>
 
-                            {/* NAVIGATION - Hidden on Mobile, replaced by horizontal tabs */}
-                            <div className="hidden md:block space-y-4 md:space-y-5 pt-2 md:pt-4">
+                            {/* NAVIGATION */}
+                            <div className="space-y-4 md:space-y-5 pt-2 md:pt-4">
                                 <div className="flex items-center gap-2 border-b border-apple-border pb-2">
                                     <LayoutDashboard className="w-4 h-4 text-apple-blue" />
-                                    <h4 className="text-[10px] md:text-[11px] font-semibold text-apple-text-secondary uppercase tracking-wider">Danh mục</h4>
+                                    <h4 className="text-[10px] md:text-[11px] font-bold text-apple-text-secondary uppercase tracking-widest">Danh mục</h4>
                                 </div>
                                 <div className="grid grid-cols-1 gap-1.5 md:gap-2">
-                                    {menuGroups.flatMap(group => group.items).filter(item => !(item as any).isAction).map((item) => (
+                                    {menuItems.map((item) => (
                                         <button
                                             key={item.id}
                                             onClick={() => {
-                                                setActiveTab(item.id as TabType);
+                                                setActiveTab(item.id);
                                                 if (window.innerWidth < 1024) {
                                                     const el = document.getElementById('tab-content');
                                                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                                                 }
                                             }}
-                                            className={`w-full flex items-center gap-3 px-3 md:px-4 py-3 rounded-xl transition-all text-[11px] font-semibold border active:scale-95 ${activeTab === item.id
+                                            className={`w-full flex items-center gap-3 px-3 md:px-4 py-3 rounded-xl transition-all text-[11px] font-bold border active:scale-95 ${activeTab === item.id
                                                 ? 'bg-apple-blue border-apple-blue text-white shadow-md'
                                                 : 'bg-transparent border-transparent text-apple-text-secondary hover:bg-apple-bg'
                                                 }`}
@@ -626,7 +526,7 @@ export default function AccountPage() {
                         </div>
 
                         {/* Footer - Solid Action */}
-                        <div className="hidden md:block p-5 md:p-6 bg-apple-bg/30 border-t border-apple-border mt-auto">
+                        <div className="p-5 md:p-6 bg-apple-bg/30 border-t border-apple-border mt-auto">
                             <button
                                 onClick={handleLogout}
                                 className="w-full flex items-center justify-center gap-2 py-3 md:py-4 px-4 bg-apple-card border border-apple-border hover:bg-red-500 hover:border-red-500 hover:text-white text-red-500 rounded-xl font-bold text-[11px] tracking-wide shadow-sm transition-all active:scale-95"
@@ -640,7 +540,7 @@ export default function AccountPage() {
                     {/* Right Content Area */}
                     <div className="flex flex-col space-y-6">
                         {/* Quick Stats Grid - Sharp & Minimalist */}
-                        <div className={`${activeTab === 'overview' ? 'grid' : 'hidden'} md:grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4`}>
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                             {[
                                 { label: 'Tổng bài thi', value: stats.totalExams, icon: History, color: 'text-apple-blue', badge: 'TOTAL', bg: 'bg-apple-blue/10' },
                                 { label: 'Điểm trung bình', value: `${stats.avgScore}%`, icon: TrendingUp, color: 'text-emerald-500', badge: 'AVG', bg: 'bg-emerald-500/10' },
@@ -665,16 +565,8 @@ export default function AccountPage() {
                         </div>
 
                         {/* Main Tab Content Card */}
-                        <div id="tab-content" className={`${activeTab !== 'overview' ? 'block' : 'hidden'} md:block flex-1 bg-apple-card rounded-2xl border border-apple-border shadow-sm md:shadow-apple-shadow overflow-hidden`}>
+                        <div id="tab-content" className="flex-1 bg-apple-card rounded-2xl border border-apple-border shadow-sm md:shadow-apple-shadow overflow-hidden">
                             <div className="p-4 md:p-6">
-                                {activeTab === 'overview' && (
-                                    <div className="hidden md:block space-y-6">
-                                        <div className="p-12 text-center text-apple-text-secondary">
-                                            <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                                            <p className="text-sm font-medium">Chọn một mục từ danh sách bên trái để xem chi tiết.</p>
-                                        </div>
-                                    </div>
-                                )}
                                 {/* Other Tabs Content (History, Wrong, Feedback) - Same styling refinements applied */}
                                 {activeTab === 'history' && (
                                     <div className="space-y-6 animate-in fade-in duration-500">
@@ -870,10 +762,10 @@ export default function AccountPage() {
 
                                 {activeTab === 'profile' && profile && (
                                     <div className="space-y-8 animate-in fade-in duration-500">
-                                        <div className="flex items-center justify-between border-b border-apple-border pb-6">
+                                        <div className="flex items-center justify-between border-b border-slate-50 pb-6">
                                             <div>
-                                                <h2 className="text-xl font-bold text-apple-text mb-1">Hồ sơ cá nhân</h2>
-                                                <p className="text-apple-text-secondary font-medium text-xs">Quản lý và cập nhật thông tin liên hệ của bạn.</p>
+                                                <h2 className="text-xl font-bold text-slate-900 mb-1">Thông tin chi tiết</h2>
+                                                <p className="text-slate-400 font-medium text-xs">Cập nhật hồ sơ cá nhân để quản lý tiến độ tốt hơn.</p>
                                             </div>
                                             {!isEditing ? (
                                                 <button
@@ -888,7 +780,7 @@ export default function AccountPage() {
                                                     <button
                                                         onClick={handleSaveProfile}
                                                         disabled={isSavingProfile}
-                                                        className="px-5 py-2.5 bg-apple-blue text-white rounded-xl font-bold text-xs hover:bg-apple-blue/90 transition-all flex items-center gap-2 shadow-lg shadow-apple-blue/20 disabled:bg-apple-border disabled:shadow-none"
+                                                        className="px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-xs hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-100 disabled:bg-slate-200 disabled:shadow-none"
                                                     >
                                                         {isSavingProfile ? (
                                                             <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -900,31 +792,12 @@ export default function AccountPage() {
                                                     <button
                                                         onClick={handleEditToggle}
                                                         disabled={isSavingProfile}
-                                                        className="px-5 py-2.5 bg-apple-bg text-apple-text-secondary rounded-xl font-bold text-xs hover:bg-apple-border transition-all border border-apple-border disabled:opacity-50"
+                                                        className="px-5 py-2.5 bg-slate-50 text-slate-500 rounded-xl font-bold text-xs hover:bg-slate-100 transition-all border border-slate-100 disabled:opacity-50"
                                                     >
                                                         Hủy
                                                     </button>
                                                 </div>
                                             )}
-                                        </div>
-
-                                        {/* Professional Contact Info Grid - Now inside Profile */}
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            {[
-                                                { icon: Phone, label: 'Điện thoại', value: profile?.phone || 'Chưa cập nhật' },
-                                                { icon: Mail, label: 'Email', value: profile?.email || 'Chưa cập nhật' },
-                                                { icon: Briefcase, label: 'Công việc', value: profile?.job_title || 'Chưa cập nhật' }
-                                            ].map((item, i) => (
-                                                <div key={i} className="p-4 bg-apple-bg/50 rounded-2xl border border-apple-border flex items-center gap-4 transition-all hover:border-apple-blue/30">
-                                                    <div className="w-10 h-10 bg-apple-card rounded-xl flex items-center justify-center text-apple-blue border border-apple-border shadow-sm">
-                                                        <item.icon className="w-4 h-4" />
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <div className="text-[10px] font-bold text-apple-text-secondary uppercase tracking-widest mb-0.5">{item.label}</div>
-                                                        <div className="text-xs font-bold text-apple-text truncate">{item.value}</div>
-                                                    </div>
-                                                </div>
-                                            ))}
                                         </div>
 
                                         {profileSaveSuccess && (
@@ -1170,17 +1043,6 @@ export default function AccountPage() {
                     </div>
                 </div>
             </div>
-            {/* Share and Shortcut Modals */}
-            <ShareModal
-                isOpen={showShareModal}
-                onClose={() => setShowShareModal(false)}
-                url={shareUrl}
-                title={shareTitle}
-            />
-            <ShortcutModal
-                isOpen={showShortcutModal}
-                onClose={() => setShowShortcutModal(false)}
-            />
         </>
     )
 }
