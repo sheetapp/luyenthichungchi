@@ -43,18 +43,18 @@ export default function MainHomePage() {
     }, [searchQuery])
 
     return (
-        <div className="min-h-screen bg-apple-bg py-6 space-y-6">
+        <div className="min-h-screen bg-apple-bg py-4 md:py-6 space-y-6">
             {/* Standardized Header Section */}
-            <div className="px-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="px-4 md:px-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-apple-card border border-apple-border rounded-xl flex items-center justify-center shadow-sm">
+                    <div className="w-12 h-12 md:w-14 md:h-14 bg-apple-card border border-apple-border rounded-xl md:rounded-2xl flex items-center justify-center shadow-sm">
                         <Sparkles className="w-6 h-6 text-apple-blue" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-black text-apple-text tracking-tight">Hệ Thống Luyện Thi</h1>
-                        <p className="text-apple-text-secondary font-medium flex items-center gap-2 mt-1">
+                        <h1 className="text-2xl md:text-3xl font-bold text-apple-text tracking-tight">Hệ Thống Luyện Thi</h1>
+                        <p className="text-apple-text-secondary text-xs md:text-sm font-medium flex items-center gap-2 mt-1">
                             <Award className="w-4 h-4 text-apple-blue" />
-                            Nền tảng ôn tập chứng chỉ hành nghề xây dựng chuyên nghiệp
+                            Ôn tập chứng chỉ hành nghề xây dựng chuyên nghiệp
                         </p>
                     </div>
                 </div>
@@ -79,8 +79,8 @@ export default function MainHomePage() {
                         <button
                             key={hang}
                             onClick={() => setSelectedHang(hang)}
-                            className={`px-8 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${selectedHang === hang
-                                ? 'bg-apple-blue text-white shadow-lg shadow-apple-blue/20'
+                            className={`px-8 py-2.5 rounded-xl font-semibold text-sm transition-all ${selectedHang === hang
+                                ? 'bg-apple-blue text-white shadow-lg shadow-apple-blue/10'
                                 : 'text-apple-text-secondary hover:text-apple-text hover:bg-apple-bg'
                                 }`}
                         >
@@ -95,48 +95,48 @@ export default function MainHomePage() {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <div className="w-1.5 h-6 bg-apple-blue rounded-full" />
-                        <h2 className="text-xl font-black text-apple-text uppercase tracking-tight">
+                        <h2 className="text-xl font-bold text-apple-text tracking-tight">
                             Danh mục chứng chỉ {selectedHang}
                         </h2>
                     </div>
-                    <span className="text-[10px] font-black text-apple-text-secondary uppercase tracking-[0.2em]">
+                    <span className="text-xs font-semibold text-apple-text-secondary">
                         {filteredCategories.length} Kết quả
                     </span>
                 </div>
 
                 {/* Categories Grid - 2 columns on large screens for ERP density */}
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                     {filteredCategories.length > 0 ? (
                         filteredCategories.map((category, index) => (
                             <Link
                                 key={index}
                                 href={`/on-tap?hang=${encodeURIComponent(selectedHang)}&chuyen_nganh=${encodeURIComponent(category)}`}
-                                className="group bg-apple-card rounded-2xl p-5 border border-apple-border shadow-apple-shadow hover:shadow-xl hover:shadow-apple-blue/5 hover:border-apple-blue transition-all duration-300 relative overflow-hidden"
+                                className="group bg-apple-card rounded-2xl p-4 md:p-5 border border-apple-border shadow-sm active:scale-[0.98] md:hover:shadow-xl md:hover:shadow-apple-blue/5 md:hover:border-apple-blue transition-all duration-300 relative overflow-hidden"
                             >
                                 <div className="absolute top-0 right-0 w-24 h-24 bg-apple-blue/5 rounded-full blur-3xl -mr-12 -mt-12 group-hover:bg-apple-blue/10 transition-all" />
 
-                                <div className="relative flex items-center justify-between gap-4">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-apple-bg rounded-xl flex items-center justify-center group-hover:bg-apple-blue/5 transition-colors">
-                                            <BookOpen className="w-6 h-6 text-apple-text-secondary group-hover:text-apple-blue transition-colors" />
+                                <div className="relative flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                                        <div className="w-10 h-10 md:w-12 md:h-12 bg-apple-bg rounded-xl flex items-center justify-center shrink-0 group-active:bg-apple-blue/5 transition-colors">
+                                            <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-apple-text-secondary group-active:text-apple-blue transition-colors" />
                                         </div>
-                                        <div className="space-y-1">
-                                            <h3 className="font-bold text-[14px] text-apple-text leading-tight group-hover:text-apple-blue transition-colors">
+                                        <div className="space-y-0.5 md:space-y-1 min-w-0">
+                                            <h3 className="font-bold text-[13px] md:text-[14px] text-apple-text leading-snug group-active:text-apple-blue transition-colors truncate">
                                                 {category}
                                             </h3>
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-[10px] font-black text-apple-text-secondary uppercase tracking-widest leading-none">
+                                            <div className="flex items-center gap-3 overflow-hidden">
+                                                <span className="text-[10px] md:text-xs font-semibold text-apple-text-secondary leading-none shrink-0">
                                                     {selectedHang}
                                                 </span>
-                                                <span className="w-1 h-1 bg-apple-border rounded-full" />
-                                                <span className="text-[10px] font-black text-apple-blue uppercase tracking-widest leading-none">
+                                                <span className="hidden md:block w-1 h-1 bg-apple-border rounded-full shrink-0" />
+                                                <span className="hidden md:inline text-[10px] md:text-xs font-semibold text-apple-blue leading-none truncate">
                                                     Ôn tập thực tế
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="w-10 h-10 rounded-full border border-apple-border flex items-center justify-center group-hover:bg-apple-blue group-hover:border-apple-blue transition-all">
-                                        <ChevronRight className="w-5 h-5 text-apple-text-secondary group-hover:text-white transition-colors" />
+                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full border border-apple-border flex items-center justify-center shrink-0 group-active:bg-apple-blue group-active:border-apple-blue transition-all">
+                                        <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-apple-text-secondary group-active:text-white transition-colors" />
                                     </div>
                                 </div>
                             </Link>
@@ -146,7 +146,7 @@ export default function MainHomePage() {
                             <div className="w-20 h-20 bg-apple-bg rounded-2xl flex items-center justify-center mx-auto text-apple-text-secondary mb-6">
                                 <Search className="w-10 h-10" />
                             </div>
-                            <h3 className="text-xl font-black text-apple-text mb-1">Không tìm thấy kết quả</h3>
+                            <h3 className="text-xl font-bold text-apple-text mb-1">Không tìm thấy kết quả</h3>
                             <p className="text-apple-text-secondary font-medium">Vui lòng thử tìm kiếm bằng từ khóa khác</p>
                         </div>
                     )}

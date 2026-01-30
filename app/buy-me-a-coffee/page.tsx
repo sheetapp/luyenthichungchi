@@ -7,13 +7,13 @@ export default function BuyMeACoffeePage() {
     const [copied, setCopied] = useState(false)
 
     const bankInfo = {
-        bank: 'MBBank',
-        bankCode: '970422',
-        accountNumber: '0987726236',
+        bank: 'KienLongBank',
+        bankCode: '970452',
+        accountNumber: '33904543',
         accountName: 'VO TAN NHUONG',
         branch: 'Chi nhánh Hóc Môn',
         amount: '',
-        message: 'Buy me a coffee'
+        message: 'LTCCXD Buy A Coffee'
     }
 
     const copyToClipboard = (text: string) => {
@@ -26,18 +26,18 @@ export default function BuyMeACoffeePage() {
     const qrCodeUrl = `https://img.vietqr.io/image/${bankInfo.bankCode}-${bankInfo.accountNumber}-compact2.jpg?amount=0&addInfo=${encodeURIComponent(bankInfo.message)}&accountName=${encodeURIComponent(bankInfo.accountName)}`
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 py-12 px-4">
+        <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 py-12 px-4 text-slate-900">
             <div className="max-w-2xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full mb-4 shadow-lg">
                         <Coffee className="w-10 h-10 text-white" />
                     </div>
-                    <h1 className="text-4xl font-black text-slate-900 mb-2">
-                        Mua cà phê cho tôi ☕
+                    <h1 className="text-4xl font-black mb-2">
+                        Buy LTCCXD a Coffee ☕
                     </h1>
-                    <p className="text-slate-600 text-lg">
-                        Cảm ơn bạn đã ủng hộ! Mỗi ly cà phê giúp tôi có thêm động lực 💪
+                    <p className="text-slate-600 text-lg font-medium">
+                        Cảm ơn bạn đã đồng hành cùng LTCCXD! Mỗi ly cà phê giúp app phát triển bền vững 💪
                     </p>
                 </div>
 

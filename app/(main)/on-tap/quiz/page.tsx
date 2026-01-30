@@ -319,7 +319,7 @@ function QuizContent() {
         <div className="min-h-screen bg-slate-50 py-6 px-4">
             {/* Header */}
             <div className="mb-6">
-                <h1 className="text-2xl font-black text-slate-900 mb-2">Ôn Tập - {selectedChuyenNganh}</h1>
+                <h1 className="text-2xl font-bold text-slate-900 mb-2">Ôn Tập - {selectedChuyenNganh}</h1>
                 <p className="text-slate-600 font-medium">{selectedHang}</p>
             </div>
 
@@ -334,7 +334,7 @@ function QuizContent() {
                             setSelectedAnswer('')
                             setFeedback(null)
                         }}
-                        className={`px-6 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${selectedPhanThi === phan
+                        className={`px-6 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${selectedPhanThi === phan
                             ? 'bg-blue-600 text-white shadow-lg'
                             : 'bg-white text-slate-600 hover:bg-slate-50'
                             }`}

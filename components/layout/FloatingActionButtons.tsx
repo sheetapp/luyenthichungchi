@@ -5,8 +5,8 @@ import { MessageCircle, Heart, Phone } from 'lucide-react'
 export function FloatingActionButtons() {
     return (
         <>
-            {/* Mobile Floating Buttons - Keep existing simple circular buttons */}
-            <div className="fixed right-4 bottom-24 z-40 flex flex-col gap-3 md:hidden">
+            {/* Mobile Floating Buttons - Repositioned to center-right */}
+            <div className="fixed right-4 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-3 md:hidden">
                 {/* Facebook */}
                 <a
                     href="https://www.facebook.com/profile.php?id=61587000098094"

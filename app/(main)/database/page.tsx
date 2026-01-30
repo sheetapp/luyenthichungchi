@@ -206,7 +206,7 @@ export default function DatabasePage() {
                         <div className="flex items-center gap-3">
                             <DatabaseIcon className="w-8 h-8 text-blue-600" />
                             <div>
-                                <h1 className="text-3xl font-black text-slate-900">Database Questions</h1>
+                                <h1 className="text-3xl font-bold text-slate-900">Database Questions</h1>
                                 <p className="text-slate-600 font-medium mt-1">
                                     Tổng: <span className="text-blue-600 font-bold">{totalCount}</span> câu hỏi
                                 </p>
@@ -321,7 +321,7 @@ export default function DatabasePage() {
                                             <div className="flex-1">
                                                 {/* Tags Row */}
                                                 <div className="flex items-center gap-2 mb-3 flex-wrap">
-                                                    <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-black rounded-lg">
+                                                    <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-lg">
                                                         #{(currentPage - 1) * itemsPerPage + index + 1}
                                                     </span>
                                                     <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-lg">
@@ -343,7 +343,7 @@ export default function DatabasePage() {
                                                 {/* Correct Answer Below */}
                                                 <div className="flex items-start gap-2.5 px-4 py-3 bg-green-50 border border-green-200 rounded-lg">
                                                     <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                                                    <span className="text-base text-slate-900 font-black flex-shrink-0">
+                                                    <span className="text-base text-slate-900 font-bold flex-shrink-0">
                                                         {correctAnswerLetter}
                                                     </span>
                                                     <span className="text-sm text-slate-900 font-semibold leading-relaxed">
@@ -386,7 +386,7 @@ export default function DatabasePage() {
                                                                 }`}
                                                         >
                                                             <div className="flex items-start gap-3">
-                                                                <span className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm ${isCorrect
+                                                                <span className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${isCorrect
                                                                     ? 'bg-green-500 text-white'
                                                                     : 'bg-slate-200 text-slate-700'
                                                                     }`}>

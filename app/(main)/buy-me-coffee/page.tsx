@@ -19,7 +19,7 @@ export default function BuyMeCoffeePage() {
                     <div className="inline-flex items-center justify-center w-20 h-20 bg-orange-100 rounded-full mb-4">
                         <Coffee className="w-10 h-10 text-orange-600" />
                     </div>
-                    <h1 className="text-2xl font-black text-slate-900 mb-2">
+                    <h1 className="text-2xl font-bold text-slate-900 mb-2">
                         Buy me a Coffee ☕
                     </h1>
                     <p className="text-slate-600 text-sm">
@@ -31,25 +31,25 @@ export default function BuyMeCoffeePage() {
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                     <div className="text-center space-y-4">
                         <div>
-                            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">
+                            <p className="text-xs text-slate-500 font-semibold mb-2">
                                 Ngân hàng
                             </p>
-                            <p className="text-lg font-black text-slate-900">
+                            <p className="text-lg font-bold text-slate-900">
                                 MB BANK
                             </p>
                         </div>
 
                         <div>
-                            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">
+                            <p className="text-xs text-slate-500 font-semibold mb-2">
                                 Số tài khoản
                             </p>
-                            <p className="text-2xl font-black text-blue-600">
+                            <p className="text-2xl font-bold text-blue-600">
                                 0987726236
                             </p>
                         </div>
 
                         <div>
-                            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">
+                            <p className="text-xs text-slate-500 font-semibold mb-2">
                                 Chủ tài khoản
                             </p>
                             <p className="text-base font-bold text-slate-900">
@@ -61,7 +61,7 @@ export default function BuyMeCoffeePage() {
 
                 {/* QR Code Placeholder */}
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-4 text-center">
+                    <p className="text-xs text-slate-500 font-semibold mb-4 text-center">
                         Quét mã QR để chuyển khoản
                     </p>
                     <div className="aspect-square bg-slate-100 rounded-xl flex items-center justify-center">

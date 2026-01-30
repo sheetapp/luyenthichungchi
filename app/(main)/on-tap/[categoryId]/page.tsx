@@ -131,7 +131,7 @@ export default function PracticeDetailPage() {
 
             {/* Progress Bar */}
             <div className="space-y-2">
-                <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <div className="flex justify-between text-[10px] font-bold text-slate-400 tracking-wider">
                     <span>Câu hỏi {currentIndex + 1} / {displayQuestions.length}</span>
                     <span>Hoàn thành {Math.round((learnedIds.length / (displayQuestions.length || 1)) * 100) || 0}%</span>
                 </div>
@@ -146,10 +146,10 @@ export default function PracticeDetailPage() {
             {/* Question Card */}
             <div className="glass-card rounded-[2rem] p-8 md:p-10 shadow-2xl relative">
                 <div className="mb-6 flex items-center gap-2">
-                    <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-tighter">
+                    <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-[10px] font-bold tracking-tighter">
                         {currentQuestion.phan_thi}
                     </span>
-                    <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[10px] font-black uppercase tracking-tighter">
+                    <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[10px] font-bold tracking-tighter">
                         Mã: {currentQuestion.id_cauhoi}
                     </span>
                 </div>
@@ -177,10 +177,10 @@ export default function PracticeDetailPage() {
                                 `}
                             >
                                 <div className={`
-                                    w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm shrink-0 uppercase
+                                    w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm shrink-0
                                     ${isCorrect ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}
                                 `}>
-                                    {key}
+                                    {key.toUpperCase()}
                                 </div>
                                 <p className={`text-sm md:text-base leading-relaxed ${isCorrect ? 'text-emerald-900 font-bold' : 'text-slate-600 font-medium'}`}>
                                     {answerText}
@@ -198,7 +198,7 @@ export default function PracticeDetailPage() {
                             if (!showAnswer) markAsLearned(currentQuestion.id_cauhoi)
                         }}
                         className={`
-                            px-8 py-3 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center gap-2 transition-all
+                            px-8 py-3 rounded-2xl font-bold text-sm tracking-wide flex items-center gap-2 transition-all
                             ${showAnswer
                                 ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
                                 : 'bg-slate-900 text-white hover:scale-105 active:scale-95 shadow-xl'}

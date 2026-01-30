@@ -390,28 +390,28 @@ export default function AccountPage() {
                 />
             )}
 
-            <div className="px-6 py-6 space-y-8 min-h-screen bg-apple-bg">
+            <div className="px-4 md:px-6 py-4 md:py-6 space-y-6 md:space-y-8 min-h-screen bg-apple-bg pb-20 md:pb-6">
                 {/* Header Greeting - Standardized style */}
                 <div className="flex flex-col gap-1">
-                    <h1 className="text-3xl font-black text-apple-text tracking-tight">
-                        Quản lý tài khoản
+                    <h1 className="text-2xl md:text-3xl font-bold text-apple-text tracking-tight">
+                        Tài khoản
                     </h1>
-                    <p className="text-apple-text-secondary font-medium">
-                        Xem và cập nhật thông tin cá nhân, theo dõi kết quả thi của bạn.
+                    <p className="text-xs md:text-sm text-apple-text-secondary font-medium">
+                        Quản lý hồ sơ và theo dõi lịch sử thi thử của bạn.
                     </p>
                 </div>
 
-                <div className="grid lg:grid-cols-[300px_1fr] gap-8 items-stretch">
+                <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 md:gap-8 items-stretch">
                     {/* CV-Style Left Sidebar - High Contrast & Professional */}
-                    <div className="bg-apple-card rounded-2xl overflow-hidden shadow-apple-shadow flex flex-col border border-apple-border font-sans">
+                    <div className="bg-apple-card rounded-2xl overflow-hidden shadow-sm md:shadow-apple-shadow flex flex-col border border-apple-border font-sans">
                         {/* Header Section - Theme Aware with glass effect */}
-                        <div className="pt-12 pb-8 px-8 text-center bg-gradient-to-br from-apple-blue/10 to-transparent border-b border-apple-border">
-                            <div className="relative inline-block mb-6">
-                                <div className="w-36 h-36 rounded-2xl border-4 border-apple-card shadow-apple-shadow overflow-hidden mx-auto bg-apple-bg flex items-center justify-center">
+                        <div className="pt-8 md:pt-12 pb-6 md:pb-8 px-6 md:px-8 text-center bg-gradient-to-br from-apple-blue/10 to-transparent border-b border-apple-border">
+                            <div className="relative inline-block mb-4 md:mb-6">
+                                <div className="w-24 h-24 md:w-36 md:h-36 rounded-2xl border-4 border-apple-card shadow-apple-shadow overflow-hidden mx-auto bg-apple-bg flex items-center justify-center">
                                     {profile?.avata ? (
                                         <img src={profile.avata} alt="Avatar" className="w-full h-full object-cover" />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-apple-blue to-[#0051FF] text-white text-4xl font-black">
+                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-apple-blue to-[#0051FF] text-white text-3xl md:text-4xl font-bold">
                                             {profile?.display_name?.charAt(0) || profile?.email?.charAt(0) || 'U'}
                                         </div>
                                     )}
@@ -419,12 +419,12 @@ export default function AccountPage() {
                             </div>
 
                             {/* Professional Star Rating Shelf */}
-                            <div className="flex flex-col items-center gap-5">
-                                <div className="flex items-center gap-1.5 px-6 py-2.5 bg-apple-bg/50 backdrop-blur-xl rounded-xl border border-apple-border shadow-sm">
+                            <div className="flex flex-col items-center gap-4 md:gap-5">
+                                <div className="flex items-center gap-1 px-4 md:px-6 py-1.5 md:py-2.5 bg-apple-bg/50 backdrop-blur-xl rounded-xl border border-apple-border shadow-sm">
                                     {[...Array(5)].map((_, i) => (
                                         <Star
                                             key={i}
-                                            className={`w-4 h-4 transition-all duration-700 ${i < badges.stars
+                                            className={`w-3.5 h-3.5 md:w-4 md:h-4 transition-all duration-700 ${i < badges.stars
                                                 ? 'fill-yellow-400 text-yellow-400 filter drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]'
                                                 : 'text-apple-text-secondary/20 fill-apple-text-secondary/10 stroke-[1.5px]'
                                                 }`}
@@ -432,11 +432,11 @@ export default function AccountPage() {
                                     ))}
                                 </div>
 
-                                <div className="space-y-2">
-                                    <h3 className="text-2xl font-black tracking-tight text-apple-text drop-shadow-sm uppercase leading-none">
+                                <div className="space-y-1.5 md:space-y-2">
+                                    <h3 className="text-xl md:text-2xl font-bold tracking-tight text-apple-text leading-none">
                                         {profile?.display_name || 'Học viên'}
                                     </h3>
-                                    <div className="inline-flex items-center px-4 py-1.5 bg-apple-blue text-white rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-apple-blue/20">
+                                    <div className="inline-flex items-center px-3 py-1 bg-apple-blue text-white rounded-lg text-[9px] md:text-[10px] font-bold shadow-lg shadow-apple-blue/20">
                                         {badges.level}
                                     </div>
                                 </div>
@@ -444,49 +444,49 @@ export default function AccountPage() {
                         </div>
 
                         {/* White Info Section - MAXIMUM Contrast Typography */}
-                        <div className="flex-1 p-6 space-y-8 bg-apple-card">
-                            {/* CONTACT section - Deep Black Text */}
-                            <div className="space-y-5">
-                                <div className="flex items-center gap-2 border-b-2 border-apple-text pb-2.5">
-                                    <Mail className="w-4 h-4 text-apple-text" />
-                                    <h4 className="text-[11px] font-black text-apple-text uppercase tracking-[0.25em]">LIÊN HỆ</h4>
+                        <div className="flex-1 p-5 md:p-6 space-y-6 md:space-y-8 bg-apple-card">
+                            {/* CONTACT section */}
+                            <div className="space-y-4 md:space-y-5">
+                                <div className="flex items-center gap-2 border-b border-apple-border pb-2">
+                                    <Mail className="w-4 h-4 text-apple-blue" />
+                                    <h4 className="text-[10px] md:text-[11px] font-bold text-apple-text-secondary uppercase tracking-widest">Liên hệ</h4>
                                 </div>
-                                <div className="space-y-4 px-1">
+                                <div className="grid grid-cols-1 gap-3 md:gap-4 md:px-1">
                                     {[
                                         { icon: Phone, label: profile?.phone || 'Chưa cập nhật' },
                                         { icon: Mail, label: profile?.email || 'user@example.com' },
                                         { icon: Briefcase, label: profile?.job_title || 'Chưa cập nhật' }
                                     ].map((item, i) => (
-                                        <div key={i} className="flex items-center gap-4 text-apple-text group">
-                                            <div className="w-8 h-8 bg-apple-bg rounded-xl flex items-center justify-center text-apple-text group-hover:bg-apple-blue group-hover:text-white transition-all shadow-sm border border-apple-border">
+                                        <div key={i} className="flex items-center gap-3 text-apple-text group">
+                                            <div className="w-8 h-8 md:w-9 md:h-9 bg-apple-bg rounded-xl flex items-center justify-center text-apple-text-secondary group-hover:bg-apple-blue/10 group-hover:text-apple-blue transition-all shadow-sm border border-apple-border">
                                                 <item.icon className="w-3.5 h-3.5" />
                                             </div>
-                                            <span className="text-[12px] font-black tracking-tight truncate">{item.label}</span>
+                                            <span className="text-[11px] md:text-[12px] font-bold tracking-tight truncate">{item.label}</span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
-                            {/* PROGRESS section - Sharp Dark Bars */}
-                            <div className="space-y-5">
-                                <div className="flex items-center gap-2 border-b-2 border-apple-text pb-2.5">
-                                    <TrendingUp className="w-4 h-4 text-apple-text" />
-                                    <h4 className="text-[11px] font-black text-apple-text uppercase tracking-[0.25em]">TIẾN ĐỘ</h4>
+                            {/* PROGRESS section */}
+                            <div className="space-y-4 md:space-y-5">
+                                <div className="flex items-center gap-2 border-b border-apple-border pb-2">
+                                    <TrendingUp className="w-4 h-4 text-apple-blue" />
+                                    <h4 className="text-[10px] md:text-[11px] font-bold text-apple-text-secondary uppercase tracking-widest">Tiến độ</h4>
                                 </div>
-                                <div className="space-y-6 px-1">
+                                <div className="space-y-4 md:space-y-6 md:px-1">
                                     {[
                                         { label: 'Kiến thức chung', value: Math.min(stats.avgScore + 10, 100) },
                                         { label: 'Chuyên môn', value: stats.avgScore },
                                         { label: 'Pháp luật', value: Math.max(stats.avgScore - 5, 0) }
                                     ].map((skill, i) => (
-                                        <div key={i} className="space-y-2.5">
-                                            <div className="flex justify-between items-center text-[10px] font-black uppercase text-apple-text-secondary tracking-wider">
+                                        <div key={i} className="space-y-2">
+                                            <div className="flex justify-between items-center text-[9px] md:text-[10px] font-bold text-apple-text-secondary tracking-wider">
                                                 <span>{skill.label}</span>
-                                                <span className="text-apple-text font-mono">{Math.round(skill.value * 10) / 10}%</span>
+                                                <span className="text-apple-text">{Math.round(skill.value * 10) / 10}%</span>
                                             </div>
-                                            <div className="h-2.5 bg-apple-bg rounded-full overflow-hidden border border-apple-border">
+                                            <div className="h-2 md:h-2.5 bg-apple-bg rounded-full overflow-hidden border border-apple-border">
                                                 <div
-                                                    className="h-full bg-apple-text transition-all duration-1000 shadow-[2px_0_10px_rgba(0,0,0,0.1)]"
+                                                    className="h-full bg-apple-blue transition-all duration-1000"
                                                     style={{ width: `${skill.value}%` }}
                                                 />
                                             </div>
@@ -495,23 +495,29 @@ export default function AccountPage() {
                                 </div>
                             </div>
 
-                            {/* NAVIGATION - Premium Sharp Tabs */}
-                            <div className="space-y-5 pt-4">
-                                <div className="flex items-center gap-2 border-b-2 border-apple-text pb-2.5">
-                                    <LayoutDashboard className="w-4 h-4 text-apple-text" />
-                                    <h4 className="text-[11px] font-black text-apple-text uppercase tracking-[0.25em]">DANH MỤC</h4>
+                            {/* NAVIGATION */}
+                            <div className="space-y-4 md:space-y-5 pt-2 md:pt-4">
+                                <div className="flex items-center gap-2 border-b border-apple-border pb-2">
+                                    <LayoutDashboard className="w-4 h-4 text-apple-blue" />
+                                    <h4 className="text-[10px] md:text-[11px] font-bold text-apple-text-secondary uppercase tracking-widest">Danh mục</h4>
                                 </div>
-                                <div className="space-y-2">
+                                <div className="grid grid-cols-1 gap-1.5 md:gap-2">
                                     {menuItems.map((item) => (
                                         <button
                                             key={item.id}
-                                            onClick={() => setActiveTab(item.id)}
-                                            className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all text-[11px] font-black uppercase tracking-[0.15em] border ${activeTab === item.id
-                                                ? 'bg-apple-blue border-apple-blue text-white shadow-xl translate-x-1.5'
-                                                : 'bg-transparent border-transparent text-apple-text-secondary hover:bg-apple-bg hover:text-apple-text'
+                                            onClick={() => {
+                                                setActiveTab(item.id);
+                                                if (window.innerWidth < 1024) {
+                                                    const el = document.getElementById('tab-content');
+                                                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                                }
+                                            }}
+                                            className={`w-full flex items-center gap-3 px-3 md:px-4 py-3 rounded-xl transition-all text-[11px] font-bold border active:scale-95 ${activeTab === item.id
+                                                ? 'bg-apple-blue border-apple-blue text-white shadow-md'
+                                                : 'bg-transparent border-transparent text-apple-text-secondary hover:bg-apple-bg'
                                                 }`}
                                         >
-                                            <item.icon className={`w-4 h-4 ${activeTab === item.id ? 'text-white' : 'text-apple-text-secondary group-hover:text-apple-text'}`} />
+                                            <item.icon className={`w-4 h-4 ${activeTab === item.id ? 'text-white' : 'text-apple-text-secondary'}`} />
                                             <span>{item.label}</span>
                                         </button>
                                     ))}
@@ -520,10 +526,10 @@ export default function AccountPage() {
                         </div>
 
                         {/* Footer - Solid Action */}
-                        <div className="p-6 bg-apple-bg/30 border-t-2 border-apple-border mt-auto">
+                        <div className="p-5 md:p-6 bg-apple-bg/30 border-t border-apple-border mt-auto">
                             <button
                                 onClick={handleLogout}
-                                className="w-full flex items-center justify-center gap-3 py-4 px-4 bg-apple-card border border-apple-border hover:bg-red-600 hover:border-red-600 hover:text-white text-apple-text rounded-xl font-black text-[11px] uppercase tracking-[0.25em] shadow-sm transition-all"
+                                className="w-full flex items-center justify-center gap-2 py-3 md:py-4 px-4 bg-apple-card border border-apple-border hover:bg-red-500 hover:border-red-500 hover:text-white text-red-500 rounded-xl font-bold text-[11px] tracking-wide shadow-sm transition-all active:scale-95"
                             >
                                 <LogOut className="w-4 h-4" />
                                 Đăng xuất
@@ -534,50 +540,49 @@ export default function AccountPage() {
                     {/* Right Content Area */}
                     <div className="flex flex-col space-y-6">
                         {/* Quick Stats Grid - Sharp & Minimalist */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                             {[
                                 { label: 'Tổng bài thi', value: stats.totalExams, icon: History, color: 'text-apple-blue', badge: 'TOTAL', bg: 'bg-apple-blue/10' },
-                                { label: 'Điểm trung bình', value: `${stats.avgScore}%`, icon: TrendingUp, color: 'text-emerald-text', badge: 'AVG', bg: 'bg-emerald-muted' },
-                                { label: 'Điểm cao nhất', value: `${stats.highestScore}%`, icon: Award, color: 'text-orange-text', badge: 'BEST', bg: 'bg-orange-muted' },
-                                { label: 'Tỉ lệ đạt', value: `${stats.passRate}%`, icon: Target, color: 'text-purple-600', badge: 'RATE', bg: 'bg-purple-50' }
+                                { label: 'Điểm trung bình', value: `${stats.avgScore}%`, icon: TrendingUp, color: 'text-emerald-500', badge: 'AVG', bg: 'bg-emerald-500/10' },
+                                { label: 'Điểm cao nhất', value: `${stats.highestScore}%`, icon: Award, color: 'text-orange-500', badge: 'BEST', bg: 'bg-orange-500/10' },
+                                { label: 'Tỉ lệ đạt', value: `${stats.passRate}%`, icon: Target, color: 'text-purple-600', badge: 'RATE', bg: 'bg-purple-600/10' }
                             ].map((stat, i) => (
-                                <div key={i} className="bg-apple-card rounded-2xl p-4 border border-apple-border shadow-apple-shadow flex flex-col justify-between hover:scale-[1.02] transition-all group">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className={`w-8 h-8 ${stat.bg} ${stat.color} rounded-xl flex items-center justify-center shadow-inner`}>
-                                            <stat.icon className="w-4 h-4" />
+                                <div key={i} className="bg-apple-card rounded-2xl p-3 md:p-4 border border-apple-border shadow-sm md:shadow-apple-shadow flex flex-col justify-between active:scale-[0.98] transition-all group">
+                                    <div className="flex items-center justify-between mb-3 md:mb-4">
+                                        <div className={`w-7 h-7 md:w-8 md:h-8 ${stat.bg} ${stat.color} rounded-xl flex items-center justify-center shadow-inner`}>
+                                            <stat.icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                         </div>
-                                        <span className={`text-[7px] font-black px-1.5 py-0.5 rounded-lg bg-apple-text text-apple-bg tracking-[0.2em]`}>
-                                            {stat.badge}
+                                        <span className={`text-[8px] md:text-[9px] font-bold px-1.5 py-0.5 rounded-lg bg-apple-bg border border-apple-border text-apple-text-secondary tracking-tight`}>
+                                            {stat.label}
                                         </span>
                                     </div>
                                     <div>
-                                        <div className="text-xl font-black text-apple-text leading-none mb-1">{stat.value}</div>
-                                        <div className="text-[9px] font-bold text-apple-text-secondary uppercase tracking-widest">{stat.label}</div>
+                                        <div className="text-lg md:text-xl font-bold text-apple-text leading-none mb-1">{stat.value}</div>
+                                        <div className="text-[9px] md:text-[10px] font-bold text-apple-text-secondary tracking-widest uppercase opacity-60">Thống kê</div>
                                     </div>
                                 </div>
                             ))}
                         </div>
 
-                        {/* Main Tab Content Card - Matches sharp sidebar */}
-                        <div className="flex-1 bg-apple-card rounded-2xl border border-apple-border shadow-apple-shadow overflow-hidden">
-                            <div className="p-6">
-
+                        {/* Main Tab Content Card */}
+                        <div id="tab-content" className="flex-1 bg-apple-card rounded-2xl border border-apple-border shadow-sm md:shadow-apple-shadow overflow-hidden">
+                            <div className="p-4 md:p-6">
                                 {/* Other Tabs Content (History, Wrong, Feedback) - Same styling refinements applied */}
                                 {activeTab === 'history' && (
                                     <div className="space-y-6 animate-in fade-in duration-500">
                                         <div>
-                                            <h2 className="text-xl font-black text-slate-900 mb-1">Lịch sử bài thi thử</h2>
-                                            <p className="text-slate-400 font-medium text-xs">Theo dõi chi tiết điểm số của bạn qua từng giai đoạn.</p>
+                                            <h2 className="text-lg md:text-xl font-bold text-apple-text mb-1">Lịch sử bài thi</h2>
+                                            <p className="text-apple-text-secondary font-medium text-[10px] md:text-xs">Theo dõi chi tiết điểm số của bạn qua từng giai đoạn.</p>
                                         </div>
 
                                         {examHistory.length === 0 ? (
-                                            <div className="text-center py-20 bg-apple-bg/30 rounded-2xl border-2 border-dashed border-apple-border">
-                                                <div className="w-20 h-20 bg-apple-card rounded-2xl flex items-center justify-center mx-auto text-apple-border shadow-sm border border-apple-border mb-6">
-                                                    <FileText className="w-10 h-10" />
+                                            <div className="text-center py-12 md:py-20 bg-apple-bg/30 rounded-2xl border-2 border-dashed border-apple-border">
+                                                <div className="w-16 h-16 md:w-20 md:h-20 bg-apple-card rounded-2xl flex items-center justify-center mx-auto text-apple-border shadow-sm border border-apple-border mb-4 md:mb-6">
+                                                    <FileText className="w-8 h-8 md:w-10 md:h-10" />
                                                 </div>
-                                                <div className="space-y-2">
-                                                    <p className="text-apple-text font-black text-lg">Lịch sử đang trống</p>
-                                                    <p className="text-apple-text-secondary font-medium text-sm max-w-[240px] mx-auto">Thực hiện bài thi đầu tiên để bắt đầu ghi nhận thành tích.</p>
+                                                <div className="space-y-1 md:space-y-2">
+                                                    <p className="text-apple-text font-bold text-base md:text-lg">Trống</p>
+                                                    <p className="text-apple-text-secondary font-medium text-xs md:text-sm max-w-[200px] md:max-w-[240px] mx-auto">Bạn chưa thực hiện bài thi thử nào.</p>
                                                 </div>
                                             </div>
                                         ) : (
@@ -585,49 +590,49 @@ export default function AccountPage() {
                                                 {examHistory.slice(0, 10).map((exam, idx) => {
                                                     const isExpanded = expandedExam === exam.id
                                                     return (
-                                                        <div key={idx} className="flex flex-col p-4 bg-apple-bg/50 rounded-2xl border border-apple-border hover:border-apple-blue transition-all">
+                                                        <div key={idx} className="flex flex-col p-3 md:p-4 bg-apple-bg/50 rounded-2xl border border-apple-border hover:border-apple-blue transition-all">
                                                             <div
                                                                 className="flex items-center justify-between cursor-pointer group"
                                                                 onClick={() => setExpandedExam(isExpanded ? null : exam.id)}
                                                             >
-                                                                <div className="flex items-center gap-5">
-                                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${exam.passed ? 'bg-emerald-muted text-emerald-text' : 'bg-red-muted text-red-text'}`}>
-                                                                        {exam.passed ? <CheckCircle className="w-6 h-6" /> : <XCircle className="w-6 h-6" />}
+                                                                <div className="flex items-center gap-3 md:gap-5 min-w-0">
+                                                                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center shadow-sm shrink-0 ${exam.passed ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                                                                        {exam.passed ? <CheckCircle className="w-5 h-5 md:w-6 md:h-6" /> : <XCircle className="w-5 h-5 md:w-6 md:h-6" />}
                                                                     </div>
-                                                                    <div className="space-y-0.5">
-                                                                        <div className="font-bold text-apple-text text-sm flex items-center gap-2">
-                                                                            {exam.chuyen_nganh || 'Bài thi sát hạch'}
-                                                                            {idx === 0 && <span className="px-1.5 py-0.5 bg-emerald-500 text-[8px] text-white rounded font-black uppercase tracking-widest">Mới nhất</span>}
+                                                                    <div className="space-y-0.5 min-w-0">
+                                                                        <div className="font-bold text-apple-text text-[13px] md:text-sm flex items-center gap-2">
+                                                                            <span className="truncate">{exam.chuyen_nganh || 'Bài thi sát hạch'}</span>
+                                                                            {idx === 0 && <span className="shrink-0 px-1.5 py-0.5 bg-emerald-500 text-[7px] md:text-[8px] text-white rounded font-bold tracking-widest uppercase">Mới</span>}
                                                                         </div>
-                                                                        <div className="text-[10px] text-apple-text-secondary font-bold flex items-center gap-3">
+                                                                        <div className="text-[9px] md:text-[10px] text-apple-text-secondary font-bold flex items-center gap-2 md:gap-3">
                                                                             <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-apple-blue" /> {new Date(exam.created_at).toLocaleDateString('vi-VN')}</span>
                                                                             <span className="w-1 h-1 bg-apple-border rounded-full" />
-                                                                            <span className="uppercase tracking-tighter">{exam.hang || 'Hạng III'}</span>
+                                                                            <span className="tracking-tighter">{exam.hang || 'Hạng III'}</span>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                                <div className="flex items-center gap-6">
-                                                                    <div className="text-right hidden sm:block">
-                                                                        <div className={`text-xl font-black ${exam.passed ? 'text-emerald-text' : 'text-red-text'}`}>
+                                                                <div className="flex items-center gap-3 md:gap-6 shrink-0">
+                                                                    <div className="text-right">
+                                                                        <div className={`text-base md:text-xl font-bold ${exam.passed ? 'text-emerald-500' : 'text-red-500'}`}>
                                                                             {exam.score}/30
                                                                         </div>
-                                                                        <div className={`text-[8px] font-black uppercase tracking-widest ${exam.passed ? 'text-emerald-500/50' : 'text-red-400/50'}`}>
-                                                                            {exam.passed ? 'Đã vượt qua' : 'Chưa đạt'}
+                                                                        <div className={`hidden sm:block text-[8px] font-bold tracking-widest ${exam.passed ? 'text-emerald-500/50' : 'text-red-400/50'}`}>
+                                                                            {exam.passed ? 'ĐẠT' : 'KHÔNG ĐẠT'}
                                                                         </div>
                                                                     </div>
-                                                                    <ChevronDown className={`w-5 h-5 text-apple-text-secondary transition-transform ${isExpanded ? 'rotate-180 text-apple-blue' : ''}`} />
+                                                                    <ChevronDown className={`w-4 h-4 md:w-5 h-5 text-apple-text-secondary transition-transform ${isExpanded ? 'rotate-180 text-apple-blue' : ''}`} />
                                                                 </div>
                                                             </div>
 
                                                             {/* Detailed Breakdown */}
                                                             {isExpanded && (
-                                                                <div className="mt-4 pt-4 border-t border-apple-border grid md:grid-cols-3 gap-4 animate-in slide-in-from-top-2 duration-300">
+                                                                <div className="mt-4 pt-4 border-t border-apple-border grid grid-cols-1 md:grid-cols-3 gap-4 animate-in slide-in-from-top-2 duration-300">
                                                                     <div className="bg-apple-card p-4 rounded-xl border border-apple-border shadow-sm">
-                                                                        <p className="text-[10px] font-black text-apple-text-secondary uppercase tracking-widest mb-1">Cấu trúc điểm</p>
+                                                                        <p className="text-[9px] md:text-[10px] font-bold text-apple-text-secondary tracking-widest mb-2 uppercase">Cấu trúc điểm</p>
                                                                         <div className="flex flex-col gap-2">
                                                                             <div className="flex justify-between items-center text-xs">
                                                                                 <span className="text-apple-text-secondary font-medium">Pháp luật:</span>
-                                                                                <span className={`font-bold ${exam.law_correct >= 7 ? 'text-emerald-text' : 'text-red-text'}`}>{exam.law_correct}/10</span>
+                                                                                <span className={`font-bold ${exam.law_correct >= 7 ? 'text-emerald-500' : 'text-red-500'}`}>{exam.law_correct}/10</span>
                                                                             </div>
                                                                             <div className="flex justify-between items-center text-xs">
                                                                                 <span className="text-apple-text-secondary font-medium">Chuyên môn:</span>
@@ -636,11 +641,11 @@ export default function AccountPage() {
                                                                         </div>
                                                                     </div>
 
-                                                                    <div className="bg-apple-card p-4 rounded-xl border border-apple-border shadow-sm">
-                                                                        <p className="text-[10px] font-black text-apple-text-secondary uppercase tracking-widest mb-1">Thời gian làm</p>
+                                                                    <div className="bg-apple-card p-4 rounded-xl border border-apple-border shadow-sm flex flex-col justify-center">
+                                                                        <p className="text-[9px] md:text-[10px] font-bold text-apple-text-secondary tracking-widest mb-1 uppercase">Thời gian</p>
                                                                         <div className="flex items-center gap-2">
-                                                                            <Clock className="w-4 h-4 text-orange-text" />
-                                                                            <span className="text-lg font-black text-apple-text">
+                                                                            <Clock className="w-4 h-4 text-orange-500" />
+                                                                            <span className="text-base md:text-lg font-bold text-apple-text">
                                                                                 {Math.floor(exam.time_taken / 60)}:{String(exam.time_taken % 60).padStart(2, '0')}
                                                                             </span>
                                                                         </div>
@@ -649,10 +654,10 @@ export default function AccountPage() {
                                                                     <div className="flex flex-col gap-2">
                                                                         <Link
                                                                             href={`/thi-thu/${encodeURIComponent(exam.chuyen_nganh)}?retake=${exam.id}&hang=${encodeURIComponent(exam.hang)}`}
-                                                                            className="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-xs uppercase transition-all shadow-sm"
+                                                                            className="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl py-2.5 font-bold text-[10px] md:text-xs uppercase transition-all shadow-sm active:scale-95"
                                                                         >
                                                                             <RotateCcw className="w-3.5 h-3.5" />
-                                                                            Thi lại đề này
+                                                                            Thi lại
                                                                         </Link>
                                                                         {exam.passed && (
                                                                             <button
@@ -660,13 +665,13 @@ export default function AccountPage() {
                                                                                     if (!exam.is_public) handleShareResult(exam.id)
                                                                                 }}
                                                                                 disabled={sharingId === exam.id || exam.is_public}
-                                                                                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs transition-all ${exam.is_public
-                                                                                    ? 'bg-blue-50 text-blue-600 border border-blue-100'
-                                                                                    : 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 shadow-sm'
+                                                                                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-[10px] md:text-xs transition-all active:scale-95 ${exam.is_public
+                                                                                    ? 'bg-apple-blue/10 text-apple-blue border border-apple-blue/20'
+                                                                                    : 'bg-apple-blue text-white hover:bg-blue-600 disabled:opacity-50 shadow-sm'
                                                                                     }`}
                                                                             >
                                                                                 {sharingId === exam.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Share2 className="w-3.5 h-3.5" />}
-                                                                                {exam.is_public ? 'Đã công khai' : 'Chia sẻ hạng'}
+                                                                                {exam.is_public ? 'ĐÃ CHIA SẺ' : 'CHIA SẺ'}
                                                                             </button>
                                                                         )}
                                                                     </div>
@@ -684,65 +689,68 @@ export default function AccountPage() {
                                     <div className="space-y-6 animate-in fade-in duration-500">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <h2 className="text-xl font-black text-slate-900 mb-1">Kiến thức cần củng cố</h2>
-                                                <p className="text-slate-400 font-medium text-xs">Phân tích {wrongQuestions.length} câu hỏi bạn đã làm sai.</p>
+                                                <h2 className="text-lg md:text-xl font-bold text-apple-text mb-1">Cần củng cố</h2>
+                                                <p className="text-apple-text-secondary font-medium text-[10px] md:text-xs">Phân tích {wrongQuestions.length} câu hỏi bạn đã làm sai.</p>
                                             </div>
-                                            <div className="px-3 py-1 bg-red-50 text-red-600 rounded-lg font-black text-[10px] uppercase tracking-widest border border-red-100/50 shadow-sm">
+                                            <div className="px-2.5 py-1 bg-red-500/10 text-red-500 rounded-lg font-bold text-[10px] tracking-tight border border-red-500/10">
                                                 {wrongQuestions.length} Câu
                                             </div>
                                         </div>
 
                                         {wrongQuestions.length === 0 ? (
-                                            <div className="text-center py-20 bg-green-50/10 rounded-3xl border-2 border-dashed border-green-50">
-                                                <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto text-green-200 shadow-sm border border-green-50 mb-6">
-                                                    <CheckCircle className="w-10 h-10" />
+                                            <div className="text-center py-12 md:py-20 bg-emerald-500/5 rounded-2xl border-2 border-dashed border-emerald-500/20">
+                                                <div className="w-16 h-16 md:w-20 md:h-20 bg-apple-card rounded-2xl flex items-center justify-center mx-auto text-emerald-500 shadow-sm border border-apple-border mb-4 md:mb-6">
+                                                    <CheckCircle className="w-8 h-8 md:w-10 md:h-10" />
                                                 </div>
-                                                <p className="text-slate-900 font-black text-lg">Hoàn hảo!</p>
-                                                <p className="text-slate-400 font-medium text-sm">Bạn chưa có câu hỏi sai nào cần xử lý.</p>
+                                                <p className="text-apple-text font-bold text-base md:text-lg">Tuyệt vời!</p>
+                                                <p className="text-apple-text-secondary font-medium text-xs md:text-sm">Bạn không có câu hỏi sai nào cần xử lý.</p>
                                             </div>
                                         ) : (
                                             <div className="space-y-4">
-                                                <div className="p-8 bg-gradient-to-br from-red-600/10 to-red-600/5 rounded-2xl border border-red-500/20 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group shadow-sm">
-                                                    <div className="relative z-10 flex items-center gap-5">
-                                                        <div className="w-14 h-14 bg-apple-card rounded-2xl flex items-center justify-center text-red-text shadow-lg shadow-red-500/10 shrink-0 border border-apple-border">
-                                                            <AlertTriangle className="w-7 h-7" />
+                                                <div className="p-5 md:p-8 bg-gradient-to-br from-red-600 to-red-700 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden shadow-lg shadow-red-500/20">
+                                                    <div className="absolute top-0 right-0 p-2 opacity-10" style={{ transform: 'rotate(15deg)' }}>
+                                                        <AlertTriangle className="w-32 h-32 text-white" />
+                                                    </div>
+                                                    <div className="relative z-10 flex items-center gap-4 md:gap-5">
+                                                        <div className="w-12 h-12 md:w-14 md:h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white shrink-0 border border-white/20">
+                                                            <Target className="w-7 h-7" />
                                                         </div>
                                                         <div className="space-y-0.5">
-                                                            <p className="text-apple-text font-black text-xl leading-tight">Chế độ ôn tập cấp tốc</p>
-                                                            <p className="text-red-text/70 font-medium text-xs">Khắc phục ngay các lỗi sai để sẵn sàng cho kỳ thi thật.</p>
+                                                            <p className="text-white font-bold text-lg md:text-xl leading-tight">Ôn tập cấp tốc</p>
+                                                            <p className="text-white/70 font-medium text-[10px] md:text-xs">Tập trung sửa các lỗi sai thường gặp.</p>
                                                         </div>
                                                     </div>
                                                     <Link
                                                         href="/on-tap?mode=wrong"
-                                                        className="relative z-10 px-8 py-3.5 bg-red-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-700 transition-all shadow-xl shadow-red-500/20 whitespace-nowrap active:scale-95"
+                                                        className="relative z-10 px-6 md:px-8 py-3 bg-white text-red-600 rounded-xl font-bold text-xs tracking-tight hover:bg-apple-bg transition-all active:scale-95"
                                                     >
-                                                        Bắt đầu học ngay
+                                                        Học ngay
                                                     </Link>
                                                 </div>
 
                                                 <div className="space-y-3">
                                                     {groupedWrongQuestions.map((group, idx) => (
-                                                        <div key={idx} className="flex items-center justify-between p-4 bg-apple-bg/50 rounded-2xl border border-apple-border shadow-sm hover:border-red-500/30 transition-all group">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="w-10 h-10 bg-red-muted rounded-xl flex items-center justify-center text-red-text font-bold text-xs shadow-sm border border-red-500/10">
+                                                        <div key={idx} className="flex items-center justify-between p-3 md:p-4 bg-apple-bg/50 rounded-2xl border border-apple-border shadow-sm hover:border-red-500/30 transition-all">
+                                                            <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                                                                <div className="w-8 h-8 md:w-10 md:h-10 bg-red-500/10 rounded-xl flex items-center justify-center text-red-500 font-bold text-xs shrink-0">
                                                                     {group.count}
                                                                 </div>
-                                                                <div className="space-y-0.5">
-                                                                    <div className="font-bold text-apple-text text-sm whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px] sm:max-w-md">
+                                                                <div className="space-y-0.5 min-w-0">
+                                                                    <div className="font-bold text-apple-text text-[13px] md:text-sm truncate max-w-[150px] sm:max-w-md">
                                                                         {group.examName}
                                                                     </div>
-                                                                    <div className="text-[10px] text-apple-text-secondary font-bold flex items-center gap-2">
+                                                                    <div className="text-[9px] md:text-[10px] text-apple-text-secondary font-bold flex items-center gap-2">
                                                                         <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(group.date).toLocaleDateString('vi-VN')}</span>
                                                                         <span className="w-1 h-1 bg-apple-border rounded-full" />
-                                                                        <span>{group.hang}</span>
+                                                                        <span className="truncate">{group.hang}</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                             <Link
                                                                 href={`/on-tap?mode=exam_review&resultId=${group.resultId}`}
-                                                                className="px-4 py-2 bg-apple-text text-apple-bg rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-red-600 hover:text-white transition-all whitespace-nowrap"
+                                                                className="px-3 md:px-4 py-2 bg-apple-text text-apple-bg rounded-xl font-bold text-[9px] md:text-[10px] tracking-tight hover:bg-red-500 hover:text-white transition-all whitespace-nowrap active:scale-95"
                                                             >
-                                                                Ôn tập ngay
+                                                                Xem lại
                                                             </Link>
                                                         </div>
                                                     ))}
@@ -756,7 +764,7 @@ export default function AccountPage() {
                                     <div className="space-y-8 animate-in fade-in duration-500">
                                         <div className="flex items-center justify-between border-b border-slate-50 pb-6">
                                             <div>
-                                                <h2 className="text-xl font-black text-slate-900 mb-1">Thông tin chi tiết</h2>
+                                                <h2 className="text-xl font-bold text-slate-900 mb-1">Thông tin chi tiết</h2>
                                                 <p className="text-slate-400 font-medium text-xs">Cập nhật hồ sơ cá nhân để quản lý tiến độ tốt hơn.</p>
                                             </div>
                                             {!isEditing ? (
@@ -811,7 +819,7 @@ export default function AccountPage() {
                                                     { id: 'address', label: 'Địa chỉ liên hệ', value: profile.address, icon: FileText, placeholder: 'Địa chỉ...' }
                                                 ].map((field) => (
                                                     <div key={field.id} className="space-y-1.5">
-                                                        <label className="text-[10px] font-black text-apple-text-secondary uppercase tracking-widest px-1">
+                                                        <label className="text-[10px] font-bold text-apple-text-secondary tracking-widest px-1">
                                                             {field.label}
                                                         </label>
                                                         {isEditing && !field.readOnly ? (
@@ -840,7 +848,7 @@ export default function AccountPage() {
                                                         <div className="w-8 h-8 bg-apple-blue text-white rounded-lg flex items-center justify-center shadow-lg shadow-apple-blue/20">
                                                             <Award className="w-4 h-4" />
                                                         </div>
-                                                        <h3 className="text-[10px] font-black text-apple-text uppercase tracking-widest">Thành tựu</h3>
+                                                        <h3 className="text-[10px] font-bold text-apple-text tracking-widest">Thành tựu</h3>
                                                     </div>
 
                                                     <div className="space-y-3">

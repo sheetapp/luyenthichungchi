@@ -84,72 +84,77 @@ export default function XepHangPage() {
         return (
             <div className="min-h-screen bg-apple-bg py-6 space-y-6">
                 {/* Unified Header Section */}
-                <div className="px-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-apple-card border border-apple-border rounded-xl flex items-center justify-center shadow-sm">
-                            <Trophy className="w-6 h-6 text-apple-blue" />
+                <div className="px-4 md:px-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 md:gap-4">
+                        <div className="w-10 h-10 md:w-12 md:h-12 bg-apple-card border border-apple-border rounded-xl flex items-center justify-center shadow-sm shrink-0">
+                            <Trophy className="w-5 h-5 md:w-6 md:h-6 text-apple-blue" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-black text-apple-text tracking-tight">Bảng Xếp Hạng Thành Tích</h1>
-                            <p className="text-apple-text-secondary font-medium flex items-center gap-2 mt-1">
-                                <Award className="w-4 h-4 text-orange-500" />
-                                Hệ thống vinh danh học viên thực tế
+                            <h1 className="text-xl md:text-3xl font-bold text-apple-text tracking-tight">Bảng xếp hạng</h1>
+                            <p className="text-apple-text-secondary font-medium flex items-center gap-1.5 mt-0.5 text-[10px] md:text-sm">
+                                <Award className="w-3 h-3 md:w-4 md:h-4 text-orange-500" />
+                                Vinh danh học viên xuất sắc nhất
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <ThemeToggle />
-                        {/* Filter Tabs - Move here to align with other pages' control areas */}
-                        <div className="flex bg-apple-card p-1 rounded-xl border border-apple-border shadow-apple-shadow">
+                    <div className="flex items-center gap-3 justify-between md:justify-end">
+                        <div className="md:hidden">
+                            <ThemeToggle />
+                        </div>
+                        {/* Filter Tabs */}
+                        <div className="flex flex-1 md:flex-none bg-apple-card p-1 rounded-xl border border-apple-border shadow-sm overflow-x-auto no-scrollbar">
                             {[
                                 { id: 'all', label: 'Tất cả' },
-                                { id: 'monthly', label: 'Tháng này' },
-                                { id: 'weekly', label: 'Tuần này' }
+                                { id: 'monthly', label: 'Tháng' },
+                                { id: 'weekly', label: 'Tuần' }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id as any)}
-                                    className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === tab.id
+                                    className={`flex-1 md:flex-none px-4 md:px-6 py-1.5 md:py-2 rounded-lg text-[10px] md:text-xs font-bold transition-all whitespace-nowrap ${activeTab === tab.id
                                         ? 'bg-apple-blue text-white shadow-sm'
-                                        : 'text-apple-text-secondary hover:text-apple-text hover:bg-apple-bg'
+                                        : 'text-apple-text-secondary hover:bg-apple-bg'
                                         }`}
                                 >
                                     {tab.label}
                                 </button>
                             ))}
                         </div>
+                        <div className="hidden md:block">
+                            <ThemeToggle />
+                        </div>
                     </div>
                 </div>
 
-                {/* Main Content Area - px-6 for fluid alignment */}
-                <div className="px-6 space-y-8">
-                    {/* Podium Row - Flat & Balanced */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {/* 1st Place - Centered Focus */}
-                        <div className="md:col-start-2 order-1 md:order-2 bg-apple-card border border-apple-border rounded-2xl p-6 shadow-apple-shadow relative group overflow-hidden">
+                {/* Main Content Area */}
+                <div className="px-4 md:px-6 space-y-6 md:space-y-8 pb-20 md:pb-6">
+                    {/* Podium Row */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                        {/* 1st Place */}
+                        <div className="md:col-start-2 order-1 md:order-2 bg-apple-card border border-apple-border rounded-2xl p-4 md:p-6 shadow-apple-shadow md:shadow-apple-shadow relative group overflow-hidden active:scale-[0.98] transition-all">
                             <div className="absolute top-0 right-0 w-1.5 h-full bg-apple-blue" />
-                            <div className="flex items-center gap-5">
+                            <div className="flex items-center md:flex-col md:text-center gap-4 md:gap-5">
                                 <div className="relative shrink-0">
-                                    <div className="w-20 h-20 rounded-xl bg-apple-bg overflow-hidden border border-apple-border">
+                                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl bg-apple-bg overflow-hidden border border-apple-border">
                                         {rankings[0]?.avatar_url ? (
                                             <Image src={rankings[0].avatar_url} alt={rankings[0].display_name} fill className="object-cover" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-apple-text-secondary">
-                                                <User className="w-10 h-10" />
+                                                <User className="w-8 h-8 md:w-10 md:h-10" />
                                             </div>
                                         )}
                                     </div>
-                                    <div className="absolute -top-2 -left-2 w-7 h-7 bg-yellow-400 text-white rounded-lg flex items-center justify-center font-black text-xs shadow-md ring-2 ring-apple-card">1</div>
+                                    <div className="absolute -top-1.5 -left-1.5 w-6 h-6 bg-yellow-400 text-white rounded-lg flex items-center justify-center font-bold text-[10px] shadow-md ring-2 ring-apple-card">1</div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="text-[10px] font-black text-apple-blue uppercase tracking-[0.2em] mb-1">Quán quân</div>
-                                    <h3 className="text-base font-black text-apple-text truncate tracking-tight">{rankings[0]?.display_name}</h3>
-                                    <div className="flex items-center gap-3 mt-2">
-                                        <div className="bg-apple-blue/10 px-2 py-0.5 rounded text-[10px] font-black text-apple-blue border border-apple-blue/20 uppercase tracking-widest">
+                                <div className="flex-1 min-w-0 md:w-full">
+                                    <div className="text-[9px] md:text-[10px] font-bold text-apple-blue mb-0.5 md:mb-1 uppercase tracking-wider">Quán quân</div>
+                                    <h3 className="text-[15px] md:text-base font-bold text-apple-text truncate tracking-tight">{rankings[0]?.display_name}</h3>
+                                    <div className="flex items-center md:justify-center gap-2 md:gap-3 mt-1.5 md:mt-2">
+                                        <div className="bg-apple-blue/5 px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold text-apple-blue border border-apple-blue/10">
                                             {rankings[0]?.avg_score}% Đạt
                                         </div>
-                                        <div className="text-[10px] text-apple-text-secondary font-bold uppercase tracking-tighter">
+                                        <div className="text-[9px] md:text-[10px] text-apple-text-secondary font-bold">
                                             {rankings[0]?.total_exams} bài thi
                                         </div>
                                     </div>
@@ -158,28 +163,28 @@ export default function XepHangPage() {
                         </div>
 
                         {/* 2nd Place */}
-                        <div className="md:col-start-1 order-2 md:order-1 bg-apple-card border border-apple-border rounded-2xl p-6 shadow-apple-shadow relative group">
-                            <div className="flex items-center gap-5">
+                        <div className="md:col-start-1 order-2 md:order-1 bg-apple-card border border-apple-border rounded-2xl p-4 md:p-6 shadow-sm md:shadow-apple-shadow relative group active:scale-[0.98] transition-all">
+                            <div className="flex items-center md:flex-col md:text-center gap-4 md:gap-5">
                                 <div className="relative shrink-0">
-                                    <div className="w-20 h-20 rounded-xl bg-apple-bg overflow-hidden border border-apple-border">
+                                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl bg-apple-bg overflow-hidden border border-apple-border">
                                         {rankings[1]?.avatar_url ? (
                                             <Image src={rankings[1].avatar_url} alt={rankings[1].display_name} fill className="object-cover" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-apple-text-secondary">
-                                                <User className="w-10 h-10" />
+                                                <User className="w-8 h-8 md:w-10 md:h-10" />
                                             </div>
                                         )}
                                     </div>
-                                    <div className="absolute -top-2 -left-2 w-7 h-7 bg-slate-400 text-white rounded-lg flex items-center justify-center font-black text-xs shadow-md ring-2 ring-apple-card">2</div>
+                                    <div className="absolute -top-1.5 -left-1.5 w-6 h-6 bg-slate-400 text-white rounded-lg flex items-center justify-center font-bold text-[10px] shadow-md ring-2 ring-apple-card">2</div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="text-[10px] font-black text-apple-text-secondary uppercase tracking-widest mb-1">Á quân I</div>
-                                    <h3 className="text-base font-bold text-apple-text truncate">{rankings[1]?.display_name}</h3>
-                                    <div className="flex items-center gap-3 mt-2">
-                                        <div className="bg-apple-card px-2 py-0.5 rounded text-[10px] font-bold text-apple-text-secondary border border-apple-border">
+                                <div className="flex-1 min-w-0 md:w-full">
+                                    <div className="text-[9px] md:text-[10px] font-bold text-apple-text-secondary mb-0.5 md:mb-1 uppercase tracking-wider">Á quân I</div>
+                                    <h3 className="text-[15px] md:text-base font-bold text-apple-text truncate tracking-tight">{rankings[1]?.display_name}</h3>
+                                    <div className="flex items-center md:justify-center gap-2 md:gap-3 mt-1.5 md:mt-2">
+                                        <div className="bg-apple-bg px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold text-apple-text-secondary border border-apple-border">
                                             {rankings[1]?.avg_score}% Đạt
                                         </div>
-                                        <div className="text-[10px] text-apple-text-secondary font-medium">
+                                        <div className="text-[9px] md:text-[10px] text-apple-text-secondary font-bold">
                                             {rankings[1]?.total_exams} bài thi
                                         </div>
                                     </div>
@@ -188,28 +193,28 @@ export default function XepHangPage() {
                         </div>
 
                         {/* 3rd Place */}
-                        <div className="md:col-start-3 order-3 bg-apple-card border border-apple-border rounded-2xl p-6 shadow-apple-shadow relative group">
-                            <div className="flex items-center gap-5">
+                        <div className="md:col-start-3 order-3 bg-apple-card border border-apple-border rounded-2xl p-4 md:p-6 shadow-sm md:shadow-apple-shadow relative group active:scale-[0.98] transition-all">
+                            <div className="flex items-center md:flex-col md:text-center gap-4 md:gap-5">
                                 <div className="relative shrink-0">
-                                    <div className="w-20 h-20 rounded-xl bg-apple-bg overflow-hidden border border-apple-border">
+                                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl bg-apple-bg overflow-hidden border border-apple-border">
                                         {rankings[2]?.avatar_url ? (
                                             <Image src={rankings[2].avatar_url} alt={rankings[2].display_name} fill className="object-cover" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-apple-text-secondary">
-                                                <User className="w-10 h-10" />
+                                                <User className="w-8 h-8 md:w-10 md:h-10" />
                                             </div>
                                         )}
                                     </div>
-                                    <div className="absolute -top-2 -left-2 w-7 h-7 bg-orange-400 text-white rounded-lg flex items-center justify-center font-black text-xs shadow-md ring-2 ring-apple-card">3</div>
+                                    <div className="absolute -top-1.5 -left-1.5 w-6 h-6 bg-orange-400 text-white rounded-lg flex items-center justify-center font-bold text-[10px] shadow-md ring-2 ring-apple-card">3</div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-1">Á quân II</div>
-                                    <h3 className="text-base font-bold text-apple-text truncate">{rankings[2]?.display_name}</h3>
-                                    <div className="flex items-center gap-3 mt-2">
-                                        <div className="bg-orange-muted dark:bg-orange-50/10 px-2 py-0.5 rounded text-[10px] font-bold text-orange-600 border border-orange-200 dark:border-orange-500/20">
+                                <div className="flex-1 min-w-0 md:w-full">
+                                    <div className="text-[9px] md:text-[10px] font-bold text-orange-500 mb-0.5 md:mb-1 uppercase tracking-wider">Á quân II</div>
+                                    <h3 className="text-[15px] md:text-base font-bold text-apple-text truncate tracking-tight">{rankings[2]?.display_name}</h3>
+                                    <div className="flex items-center md:justify-center gap-2 md:gap-3 mt-1.5 md:mt-2">
+                                        <div className="bg-orange-muted/20 px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold text-orange-600 border border-orange-500/10">
                                             {rankings[2]?.avg_score}% Đạt
                                         </div>
-                                        <div className="text-[10px] text-apple-text-secondary font-medium">
+                                        <div className="text-[9px] md:text-[10px] text-apple-text-secondary font-bold">
                                             {rankings[2]?.total_exams} bài thi
                                         </div>
                                     </div>
@@ -218,81 +223,81 @@ export default function XepHangPage() {
                         </div>
                     </div>
 
-                    {/* Main Content Area - ERP Table style */}
+                    {/* Table Style List - ERP style */}
                     <div className="bg-apple-card border border-apple-border rounded-2xl shadow-sm overflow-hidden">
-                        <div className="px-6 py-5 border-b border-apple-border flex items-center justify-between bg-apple-bg/30">
+                        <div className="px-4 md:px-6 py-4 md:py-5 border-b border-apple-border flex items-center justify-between bg-apple-bg/30">
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 bg-apple-blue/10 rounded-lg flex items-center justify-center border border-apple-blue/10">
                                     <LayoutGrid className="w-4 h-4 text-apple-blue" />
                                 </div>
-                                <span className="text-sm font-black text-apple-text uppercase tracking-tight">Danh sách xếp hạng học viên</span>
+                                <span className="text-[13px] md:text-sm font-bold text-apple-text tracking-tight">Top học viên ưu tú</span>
                             </div>
-                            <div className="flex items-center gap-4 text-apple-text-secondary pr-2">
-                                <Users className="w-4 h-4" />
-                                <span className="text-[11px] font-bold uppercase tracking-wider">{rankings.length} Học viên ưu tú</span>
+                            <div className="flex items-center gap-4 text-apple-text-secondary">
+                                <Users className="w-4 h-4 hidden sm:block" />
+                                <span className="text-[10px] md:text-[11px] font-bold">{rankings.length} học viên</span>
                             </div>
                         </div>
 
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
+                            <table className="w-full text-left border-collapse min-w-[600px] md:min-w-full">
                                 <thead>
-                                    <tr className="border-b border-apple-border">
-                                        <th className="px-8 py-5 text-[10px] font-black text-apple-text-secondary uppercase tracking-[0.2em] w-24">Thứ hạng</th>
-                                        <th className="px-8 py-5 text-[10px] font-black text-apple-text-secondary uppercase tracking-[0.2em]">Học viên thực tế</th>
-                                        <th className="px-8 py-5 text-[10px] font-black text-apple-text-secondary uppercase tracking-[0.2em] w-64 text-center">Năng lực (Avg)</th>
-                                        <th className="px-8 py-5 text-[10px] font-black text-apple-text-secondary uppercase tracking-[0.2em] w-40 text-right">Bài thi đã đạt</th>
+                                    <tr className="border-b border-apple-border bg-apple-bg/10">
+                                        <th className="px-5 md:px-8 py-4 text-[10px] font-bold text-apple-text-secondary tracking-wide w-20 md:w-24">Thứ hạng</th>
+                                        <th className="px-5 md:px-8 py-4 text-[10px] font-bold text-apple-text-secondary tracking-wide">Học viên</th>
+                                        <th className="px-5 md:px-8 py-4 text-[10px] font-bold text-apple-text-secondary tracking-wide w-40 md:w-64 text-center">Năng lực (Avg)</th>
+                                        <th className="px-5 md:px-8 py-4 text-[10px] font-bold text-apple-text-secondary tracking-wide w-32 md:w-40 text-right">Thành tích</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-apple-border/50">
                                     {rankings.map((rk) => (
-                                        <tr key={rk.id} className={`group hover:bg-apple-card/50 transition-all ${rk.isCurrentUser ? 'bg-apple-blue/10 relative' : ''}`}>
-                                            <td className="px-8 py-5">
-                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shadow-sm ring-1 ring-inset ${rk.rank === 1 ? 'bg-yellow-400/10 text-yellow-600 ring-yellow-400/20' :
-                                                    rk.rank === 2 ? 'bg-apple-text-secondary/10 text-apple-text-secondary ring-apple-border' :
+                                        <tr key={rk.id} className={`group hover:bg-apple-card/50 transition-all ${rk.isCurrentUser ? 'bg-apple-blue/5' : ''}`}>
+                                            <td className="px-5 md:px-8 py-4 md:py-5">
+                                                <div className={`w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center font-bold text-[10px] md:text-xs shadow-sm ring-1 ring-inset ${rk.rank === 1 ? 'bg-yellow-400/10 text-yellow-600 ring-yellow-400/20' :
+                                                    rk.rank === 2 ? 'bg-slate-400/10 text-slate-500 ring-slate-400/20' :
                                                         rk.rank === 3 ? 'bg-orange-400/10 text-orange-600 ring-orange-400/20' :
                                                             'bg-apple-card text-apple-text-secondary ring-apple-border/50'
                                                     }`}>
                                                     {rk.rank}
                                                 </div>
                                             </td>
-                                            <td className="px-8 py-5 text-center">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-11 h-11 rounded-xl bg-apple-bg overflow-hidden relative shrink-0 border border-apple-border">
+                                            <td className="px-5 md:px-8 py-4 md:py-5">
+                                                <div className="flex items-center gap-3 md:gap-4">
+                                                    <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl bg-apple-bg overflow-hidden relative shrink-0 border border-apple-border">
                                                         {rk.avatar_url ? (
                                                             <Image src={rk.avatar_url} alt={rk.display_name} fill className="object-cover" />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center text-apple-text-secondary">
-                                                                <User className="w-6 h-6" />
+                                                                <User className="w-5 h-5 md:w-6 md:h-6" />
                                                             </div>
                                                         )}
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <div className="text-sm font-black text-apple-text flex items-center gap-2 group-hover:text-apple-blue transition-colors truncate tracking-tight">
+                                                        <div className="text-xs md:text-sm font-bold text-apple-text flex items-center gap-2 group-hover:text-apple-blue transition-colors truncate tracking-tight">
                                                             {rk.display_name}
                                                             {rk.isCurrentUser && (
-                                                                <span className="px-2 py-0.5 bg-apple-blue text-[9px] text-white rounded font-black uppercase tracking-wider">Học tập của tôi</span>
+                                                                <span className="hidden sm:block px-1.5 py-0.5 bg-apple-blue text-[8px] text-white rounded font-bold tracking-wider">Tôi</span>
                                                             )}
                                                         </div>
-                                                        <div className="text-[10px] font-black text-apple-text-secondary uppercase tracking-[0.1em] mt-1 opacity-70">CCHN Xây dựng</div>
+                                                        <div className="text-[9px] md:text-[10px] font-bold text-apple-text-secondary mt-0.5 opacity-60">CCHN Xây dựng</div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-8 py-5">
-                                                <div className="flex flex-col items-center">
-                                                    <div className="w-full max-w-[140px] h-2 bg-apple-bg rounded-full overflow-hidden border border-apple-border">
+                                            <td className="px-5 md:px-8 py-4 md:py-5">
+                                                <div className="flex flex-col items-center gap-1.5">
+                                                    <div className="w-full max-w-[100px] md:max-w-[140px] h-1.5 md:h-2 bg-apple-bg rounded-full overflow-hidden border border-apple-border">
                                                         <div
-                                                            className={`h-full rounded-full transition-all duration-1000 ${rk.avg_score >= 80 ? 'bg-emerald-500 dark:bg-emerald-600 shadow-sm' :
-                                                                rk.avg_score >= 50 ? 'bg-apple-blue shadow-sm' : 'bg-apple-text-secondary/20'
+                                                            className={`h-full rounded-full transition-all duration-1000 ${rk.avg_score >= 80 ? 'bg-emerald-500' :
+                                                                rk.avg_score >= 50 ? 'bg-apple-blue' : 'bg-apple-text-secondary/20'
                                                                 }`}
                                                             style={{ width: `${rk.avg_score}%` }}
                                                         />
                                                     </div>
-                                                    <span className="text-[11px] font-bold text-apple-text mt-2">{rk.avg_score}%</span>
+                                                    <span className="text-[10px] md:text-[11px] font-bold text-apple-text">{rk.avg_score}%</span>
                                                 </div>
                                             </td>
-                                            <td className="px-8 py-5 text-right">
-                                                <div className="text-base font-bold text-apple-text">{rk.total_exams}</div>
-                                                <div className="text-[10px] font-bold text-apple-text-secondary uppercase tracking-tighter">Bài thi</div>
+                                            <td className="px-5 md:px-8 py-4 md:py-5 text-right">
+                                                <div className="text-[14px] md:text-base font-bold text-apple-text">{rk.total_exams}</div>
+                                                <div className="text-[9px] md:text-[10px] font-bold text-apple-text-secondary tracking-tighter">Bài thi đạt</div>
                                             </td>
                                         </tr>
                                     ))}
@@ -300,9 +305,9 @@ export default function XepHangPage() {
                             </table>
                         </div>
 
-                        <div className="px-8 py-5 bg-apple-bg/30 border-t border-apple-border italic text-[11px] text-apple-text-secondary flex items-center gap-2">
+                        <div className="px-5 md:px-8 py-4 bg-apple-bg/30 border-t border-apple-border italic text-[10px] md:text-[11px] text-apple-text-secondary flex items-center gap-2">
                             <TrendingUp className="w-3.5 h-3.5" />
-                            Dữ liệu được cập nhật thời gian thực dựa trên kết quả ôn luyện của cộng đồng.
+                            Cập nhật thời gian thực dựa trên kết quả ôn luyện.
                         </div>
                     </div>
                 </div>

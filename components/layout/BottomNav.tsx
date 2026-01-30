@@ -24,8 +24,8 @@ export function BottomNav() {
     if (!mounted) return null
 
     return (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200">
-            <div className="flex justify-around items-center h-16 safe-area-bottom">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-apple-card/80 backdrop-blur-xl border-t border-apple-border">
+            <div className="flex justify-around items-center h-16 safe-area-bottom px-2">
                 {navItems.map((item) => {
                     const Icon = item.icon
                     const isActive = pathname === item.href
@@ -34,10 +34,12 @@ export function BottomNav() {
                         <Link
                             key={item.href}
                             href={item.href}
-                            className="flex flex-col items-center justify-center flex-1 py-2 transition-all active:scale-95"
+                            className="flex flex-col items-center justify-center flex-1 py-1 transition-all active:scale-90"
                         >
-                            <Icon className={`w-6 h-6 mb-0.5 ${isActive ? 'text-emerald-500 stroke-[2.5px]' : 'text-slate-400 stroke-2'}`} />
-                            <span className={`text-[11px] font-semibold ${isActive ? 'text-emerald-500' : 'text-slate-400'}`}>
+                            <div className={`p-1 rounded-xl transition-colors ${isActive ? 'bg-apple-blue/10' : ''}`}>
+                                <Icon className={`w-5 h-5 ${isActive ? 'text-apple-blue stroke-[2.5px]' : 'text-apple-text-secondary stroke-[1.8px]'}`} />
+                            </div>
+                            <span className={`text-[10px] mt-0.5 font-bold tracking-tight transition-colors ${isActive ? 'text-apple-blue' : 'text-apple-text-secondary'}`}>
                                 {item.label}
                             </span>
                         </Link>
