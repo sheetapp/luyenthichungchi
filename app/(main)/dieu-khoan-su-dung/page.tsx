@@ -41,7 +41,7 @@ export default function TermsPage() {
                     <section>
                         <h2 className="text-2xl font-bold mb-4">4. Miễn trừ trách nhiệm</h2>
                         <p className="text-lg leading-relaxed text-[#424245]">
-                            Mặc dù chúng tôi nỗ lực đảm bảo độ chính xác của bộ câu hỏi (theo Nghị định 175/2024/NĐ-CP), chúng tôi không chịu trách nhiệm cho bất kỳ sai sót nào hoặc kết quả thi thực tế của bạn. Đây là công cụ hỗ trợ ôn tập, không phải là đơn vị tổ chức thi chính thức.
+                            Mặc dù chúng tôi nỗ lực đảm bảo độ chính xác của bộ câu hỏi (theo QĐ 163/QĐ-BXD ngày 18/2/2025 của Bộ Xây dựng), chúng tôi không chịu trách nhiệm cho bất kỳ sai sót nào hoặc kết quả thi thực tế của bạn. Đây là công cụ hỗ trợ ôn tập, không phải là đơn vị tổ chức thi chính thức.
                         </p>
                     </section>
                 </div>

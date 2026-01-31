@@ -170,7 +170,7 @@ export function Sidebar() {
 
 
                     <p className="text-[10px] text-slate-500 font-medium px-2">
-                        Nghị định 175/2024/NĐ-CP
+                        QĐ 163/QĐ-BXD ngày 18/2/2025 của Bộ Xây dựng
                         <br />
                         © 2026 Admin CCHN
                     </p>

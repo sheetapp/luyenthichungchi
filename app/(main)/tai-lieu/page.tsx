@@ -52,7 +52,7 @@ export default function DocsPage() {
                         <div className="flex items-start justify-between">
                             <div className="space-y-4">
                                 <span className="inline-block px-3 py-1 bg-[#34C759]/10 text-[#34C759] text-xs font-bold uppercase rounded-full tracking-widest">Pháp lý</span>
-                                <h3 className="text-2xl font-bold group-hover:text-[#007AFF] transition-colors">Nghị định 175/2024/NĐ-CP</h3>
+                                <h3 className="text-2xl font-bold group-hover:text-[#007AFF] transition-colors">QĐ 163/QĐ-BXD ngày 18/2/2025 của Bộ Xây dựng</h3>
                                 <p className="text-[#86868b] max-w-xl">
                                     (Cập nhật mới) Sửa đổi, bổ sung một số điều của Nghị định số 15/2021/NĐ-CP.
                                 </p>

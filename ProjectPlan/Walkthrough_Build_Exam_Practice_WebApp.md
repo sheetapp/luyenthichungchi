@@ -1,6 +1,6 @@
 Phase 1 Walkthrough: Nền tảng & Layout
 📋 Overview
-Successfully completed Phase 1 of the "Luyện thi Chứng chỉ hành nghề Xây dựng" web application according to Nghị định 175/2024/NĐ-CP. This phase established the foundation with Next.js 14+, Tailwind CSS, Supabase, and created responsive layouts for both PC and Mobile.
+Successfully completed Phase 1 of the "Luyện thi Chứng chỉ hành nghề Xây dựng" web application according to QĐ 163/QĐ-BXD ngày 18/2/2025 của Bộ Xây dựng. This phase established the foundation with Next.js 14+, Tailwind CSS, Supabase, and created responsive layouts for both PC and Mobile.
 
 ✅ Completed Tasks
 1. Project Initialization
@@ -189,7 +189,7 @@ Project README:
 README.md
 Complete tech stack
 Design system specification
-Features list (Nghị định 175/2024/NĐ-CP)
+Features list (QĐ 163/QĐ-BXD ngày 18/2/2025 của Bộ Xây dựng)
 Setup instructions
 Project structure overview
 Development status
@@ -244,7 +244,7 @@ Practice Mode:
 Show correct answers
 Bookmark functionality UI
 Feedback modal
-🎯 Compliance with Nghị định 175/2024/NĐ-CP
+🎯 Compliance with QĐ 163/QĐ-BXD ngày 18/2/2025 của Bộ Xây dựng
 ✅ Exam Structure: 10 Pháp luật + 20 Chuyên môn = 30 câu ✅ Time Limit: 30 phút (1800 seconds timer) ✅ Passing Criteria: Total ≥ 21 AND Law ≥ 7 (logic ready in schema) ✅ Ranking System: Based on score + time (database structure supports this)
 
 🚀 How to Continue Development

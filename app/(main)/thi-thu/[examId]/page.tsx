@@ -365,7 +365,7 @@ export default function ExamSessionPage() {
 
 
     if (!mounted || loading) return (
-        <div className="min-h-screen bg-[#F5F5F7] flex flex-col items-center justify-center p-6 font-sans">
+        <div className="min-h-0 md:h-[calc(100vh-70px)] bg-[#F5F5F7] flex flex-col items-center justify-center p-6 font-sans">
             <div className="relative">
                 <div className="w-16 h-16 border-[5px] border-black/5 rounded-full" />
                 <div className="w-16 h-16 border-[5px] border-[#007AFF] border-t-transparent rounded-full animate-spin absolute top-0 left-0" />
@@ -375,7 +375,7 @@ export default function ExamSessionPage() {
     )
 
     if (!questions.length) return (
-        <div className="min-h-screen bg-[#F5F5F7] flex flex-col items-center justify-center px-6 font-sans">
+        <div className="min-h-0 md:h-[calc(100vh-70px)] bg-[#F5F5F7] flex flex-col items-center justify-center px-6 font-sans">
             <div className="w-20 h-20 bg-white rounded-[24px] shadow-sm border border-black/5 flex items-center justify-center mb-6">
                 <FileText className="w-10 h-10 text-[#86868b]" />
             </div>
@@ -433,7 +433,7 @@ export default function ExamSessionPage() {
         }
 
         return (
-            <div className="min-h-screen bg-[#F5F5F7] py-8 px-6 font-sans">
+            <div className="min-h-0 md:h-[calc(100vh-70px)] bg-[#F5F5F7] py-6 px-6 font-sans overflow-hidden">
                 <div className="max-w-5xl mx-auto space-y-8">
                     {/* Result Header - Premium Sonoma Style */}
                     <div className={`relative p-12 rounded-[32px] overflow-hidden text-center shadow-2xl ${passed ? 'shadow-green-500/10' : 'shadow-red-500/10'
@@ -896,7 +896,7 @@ export default function ExamSessionPage() {
 
     // Exam Interface
     return (
-        <div className="min-h-screen bg-[#F5F5F7] flex flex-col font-sans md:py-6 md:space-y-6">
+        <div className="min-h-0 md:h-[calc(100vh-70px)] bg-[#F5F5F7] flex flex-col font-sans md:pt-4 md:pb-1 md:space-y-4 overflow-hidden">
             {/* Desktop Header (Hidden on Mobile) */}
             <div className="hidden md:flex flex-shrink-0 px-6 items-center justify-between">
                 <button

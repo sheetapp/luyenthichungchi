@@ -187,7 +187,7 @@ export default function ThiThuPage() {
                     <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mt-2">
                         <p className="text-apple-text-secondary flex items-center gap-2 text-xs md:text-sm">
                             <FileText className="w-4 h-4" />
-                            Mô phỏng kỳ thi thực tế theo Nghị định 175/2024/NĐ-CP
+                            Mô phỏng kỳ thi thực tế theo QĐ 163/QĐ-BXD ngày 18/2/2025 của Bộ Xây dựng
                         </p>
                         <button
                             onClick={() => setIsGuideOpen(true)}

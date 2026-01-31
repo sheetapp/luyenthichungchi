@@ -3,7 +3,6 @@
 import { Sidebar } from '@/components/layout/Sidebar'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { MobileHeader } from '@/components/layout/MobileHeader'
-import { AnnouncementBanner } from '@/components/layout/AnnouncementBanner'
 import { FloatingActionButtons } from '@/components/layout/FloatingActionButtons'
 import { SidebarProvider, useSidebar } from '@/contexts/SidebarContext'
 
@@ -29,7 +28,6 @@ function MainLayoutContent({
 
             {/* Main Content */}
             <main className={`flex-1 pb-20 md:pb-16 transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-72'}`}>
-                <AnnouncementBanner />
                 {children}
             </main>
 

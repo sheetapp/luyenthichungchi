@@ -214,7 +214,7 @@ export default function DatabasePage() {
                                         Tổng: {totalCount} câu hỏi
                                     </span>
                                     <span className="text-[11px] font-bold text-apple-text-secondary uppercase tracking-widest opacity-50">
-                                        Nghị định 175/2024/NĐ-CP
+                                        QĐ 163/QĐ-BXD ngày 18/2/2025 của Bộ Xây dựng
                                     </span>
                                 </div>
                             </div>

@@ -1,6 +1,6 @@
 # Luyện thi Chứng chỉ hành nghề Xây dựng
 
-Web application ôn luyện và thi thử Chứng chỉ hành nghề Xây dựng theo Nghị định 175/2024/NĐ-CP.
+Web application ôn luyện và thi thử Chứng chỉ hành nghề Xây dựng theo QĐ 163/QĐ-BXD ngày 18/2/2025 của Bộ Xây dựng.
 
 ## 🚀 Tech Stack
 
@@ -17,7 +17,7 @@ Web application ôn luyện và thi thử Chứng chỉ hành nghề Xây dựng
 - **Typography**: Minimum 16px for mobile readability
 - **Style**: Modern, professional, responsive (PC & Mobile)
 
-## 📋 Features (Theo Nghị định 175/2024/NĐ-CP)
+## 📋 Features (Theo QĐ 163/QĐ-BXD ngày 18/2/2025)
 
 ### Cấu trúc đề thi:
 - 10 câu Pháp luật

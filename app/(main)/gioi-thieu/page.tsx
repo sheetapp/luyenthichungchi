@@ -21,7 +21,7 @@ export default function AboutPage() {
                     </h1>
 
                     <p className="text-xl md:text-2xl font-medium text-[#86868b] max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-                        Hệ thống ôn luyện thông minh, cập nhật theo Nghị định 175/2024/NĐ-CP. Thiết kế tối ưu cho trải nghiệm người dùng.
+                        Hệ thống ôn luyện thông minh, cập nhật theo QĐ 163/QĐ-BXD ngày 18/2/2025 của Bộ Xây dựng. Thiết kế tối ưu cho trải nghiệm người dùng.
                     </p>
 
                     <div className="pt-8 flex flex-col md:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">

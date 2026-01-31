@@ -10,7 +10,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
     title: 'Luyện thi Chứng chỉ hành nghề Xây dựng',
-    description: 'Ôn luyện và thi thử theo Nghị định 175/2024/NĐ-CP',
+    description: 'Ôn luyện và thi thử theo QĐ 163/QĐ-BXD ngày 18/2/2025 của Bộ Xây dựng',
 }
 
 export default function RootLayout({

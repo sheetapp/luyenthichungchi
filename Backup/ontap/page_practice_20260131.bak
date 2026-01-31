@@ -657,7 +657,7 @@ function OnTapContent() {
     // Show practice content for authenticated users
 
     return (
-        <div className={`bg-apple-bg flex flex-col font-sans transition-colors duration-300 ${!isMobile ? 'md:h-[calc(100vh-70px)] md:pb-1 overflow-hidden' : 'min-h-screen py-4 md:py-6 space-y-4 md:space-y-6'}`}>
+        <div className={`bg-apple-bg flex flex-col font-sans transition-colors duration-300 ${!isMobile ? 'h-screen overflow-hidden' : 'min-h-screen py-4 md:py-6 space-y-4 md:space-y-6'}`}>
             {/* Sticky Header */}
             {showSticky && (
                 <div className="fixed top-0 left-0 right-0 bg-apple-card/80 backdrop-blur-xl z-[60] py-3 px-4 md:px-6 border-b border-apple-border shadow-sm">
