@@ -279,14 +279,11 @@ export default function ExamSessionPage() {
     // Question navigation
     const goNext = () => currentIndex < questions.length - 1 && setCurrentIndex(currentIndex + 1)
     const goPrev = () => currentIndex > 0 && setCurrentIndex(currentIndex - 1)
-    const jumpTo = (index: number) => {
-        setCurrentIndex(index)
-        if (!isMobile) setKbFocusIndex(index) // Sync keyboard focus for PC
-    }
+    const jumpTo = (index: number) => setCurrentIndex(index)
 
     // Standardized Keyboard Navigation Logic
     useEffect(() => {
-        if (isFinished || loading || isMobile) return
+        if (isFinished || loading) return
 
         const handleKeyDown = (e: KeyboardEvent) => {
             // Disable when typing
@@ -329,7 +326,7 @@ export default function ExamSessionPage() {
                             break
                         case ' ':
                         case 'Enter':
-                            jumpTo(kbFocusIndex)
+                            setCurrentIndex(kbFocusIndex)
                             setKbArea('main')
                             setKbFocusIndex(0)
                             break
@@ -361,7 +358,7 @@ export default function ExamSessionPage() {
 
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [kbArea, kbFocusIndex, questions, currentIndex, isFinished, loading, isMobile])
+    }, [kbArea, kbFocusIndex, questions, currentIndex, isFinished, loading])
 
 
     if (!mounted || loading) return (
@@ -970,18 +967,15 @@ export default function ExamSessionPage() {
                             <div className="space-y-3">
                                 <div className="text-[10px] font-bold text-[#FF9500] uppercase tracking-widest opacity-80">Pháp luật (10 câu)</div>
                                 <div className="grid grid-cols-5 gap-2">
-                                    {questions.slice(0, 10).map((q, idx) => {
-                                        const isKbFocused = !isMobile && kbArea === 'sidebar' && kbFocusIndex === idx
-                                        return (
-                                            <button
-                                                key={q.id}
-                                                onClick={() => jumpTo(idx)}
-                                                className={`w-10 h-10 rounded-[10px] font-semibold transition-all text-xs flex items-center justify-center active:scale-90 relative ${currentIndex === idx ? 'bg-[#007AFF] text-white shadow-md' : !!userAnswers[q.id] ? 'bg-[#34C759] text-white' : 'bg-black/5 text-[#1d1d1f] hover:bg-black/10'} ${isKbFocused ? 'ring-[3px] ring-apple-blue/30 z-10 scale-110' : ''}`}
-                                            >
-                                                {idx + 1}
-                                            </button>
-                                        )
-                                    })}
+                                    {questions.slice(0, 10).map((q, idx) => (
+                                        <button
+                                            key={q.id}
+                                            onClick={() => jumpTo(idx)}
+                                            className={`w-10 h-10 rounded-[10px] font-semibold transition-all text-xs flex items-center justify-center active:scale-90 ${currentIndex === idx ? 'bg-[#007AFF] text-white shadow-md' : !!userAnswers[q.id] ? 'bg-[#34C759] text-white' : 'bg-black/5 text-[#1d1d1f] hover:bg-black/10'}`}
+                                        >
+                                            {idx + 1}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
                             <div className="space-y-3">
@@ -989,12 +983,11 @@ export default function ExamSessionPage() {
                                 <div className="grid grid-cols-5 gap-2">
                                     {questions.slice(10, 30).map((q, idx) => {
                                         const actualIdx = idx + 10
-                                        const isKbFocused = !isMobile && kbArea === 'sidebar' && kbFocusIndex === actualIdx
                                         return (
                                             <button
                                                 key={q.id}
                                                 onClick={() => jumpTo(actualIdx)}
-                                                className={`w-10 h-10 rounded-[10px] font-semibold transition-all text-xs flex items-center justify-center active:scale-90 relative ${currentIndex === actualIdx ? 'bg-[#007AFF] text-white shadow-md' : !!userAnswers[q.id] ? 'bg-[#34C759] text-white' : 'bg-black/5 text-[#1d1d1f] hover:bg-black/10'} ${isKbFocused ? 'ring-[3px] ring-apple-blue/30 z-10 scale-110' : ''}`}
+                                                className={`w-10 h-10 rounded-[10px] font-semibold transition-all text-xs flex items-center justify-center active:scale-90 ${currentIndex === actualIdx ? 'bg-[#007AFF] text-white shadow-md' : !!userAnswers[q.id] ? 'bg-[#34C759] text-white' : 'bg-black/5 text-[#1d1d1f] hover:bg-black/10'}`}
                                             >
                                                 {actualIdx + 1}
                                             </button>
@@ -1055,11 +1048,10 @@ export default function ExamSessionPage() {
                                 {['a', 'b', 'c', 'd'].map((option, index) => {
                                     const optionText = currentQ[`dap_an_${option}` as keyof Question] as string
                                     const isSelected = userAnswers[currentQ.id] === option
-                                    const isKbFocused = !isMobile && kbArea === 'main' && kbFocusIndex === index
                                     return (
                                         <label
                                             key={option}
-                                            className={`flex items-start gap-3 md:gap-4 p-4 md:p-5 rounded-xl md:rounded-[12px] border transition-all relative cursor-pointer group ${isSelected ? 'border-[#007AFF] bg-[#007AFF]/5' : 'border-black/5 bg-[#F5F5F7]/50 md:bg-[#F5F5F7]/50 hover:bg-white hover:border-black/10'} ${isKbFocused ? 'ring-[3px] ring-apple-blue/50 z-10' : ''}`}
+                                            className={`flex items-start gap-3 md:gap-4 p-4 md:p-5 rounded-xl md:rounded-[12px] border transition-all relative cursor-pointer group ${isSelected ? 'border-[#007AFF] bg-[#007AFF]/5' : 'border-black/5 bg-[#F5F5F7]/50 md:bg-[#F5F5F7]/50 hover:bg-white hover:border-black/10'}`}
                                         >
                                             <input
                                                 type="radio"
