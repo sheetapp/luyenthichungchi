@@ -8,8 +8,6 @@ import { SidebarProvider, useSidebar } from '@/contexts/SidebarContext'
 
 import { ThemeProvider } from '@/components/theme/ThemeContext'
 
-import { Footer } from '@/components/layout/Footer'
-
 function MainLayoutContent({
     children,
 }: {
@@ -17,7 +15,7 @@ function MainLayoutContent({
 }) {
     const { collapsed } = useSidebar()
     return (
-        <div className="min-h-screen bg-apple-bg transition-colors duration-300 flex flex-col">
+        <div className="min-h-screen bg-apple-bg transition-colors duration-300">
             {/* PC Sidebar */}
             <Sidebar />
 
@@ -27,12 +25,9 @@ function MainLayoutContent({
             </div>
 
             {/* Main Content */}
-            <main className={`flex-1 pb-20 md:pb-16 transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-72'}`}>
+            <main className={`pb-20 md:pb-4 transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-72'}`}>
                 {children}
             </main>
-
-            {/* PC Footer */}
-            <Footer />
 
             {/* Floating Action Buttons */}
             <FloatingActionButtons />
