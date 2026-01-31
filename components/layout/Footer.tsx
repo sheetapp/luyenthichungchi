@@ -29,6 +29,7 @@ export function Footer() {
         { label: 'Giới thiệu', href: '/gioi-thieu', icon: Info },
         { label: 'Chính sách bảo mật', href: '/chinh-sach-bao-mat', icon: Shield },
         { label: 'Điều khoản sử dụng', href: '/dieu-khoan-su-dung', icon: FileText },
+        { label: 'Liên hệ', href: '/lien-he', icon: MessageSquare },
         { label: 'Tài liệu', href: '/tai-lieu', icon: BookOpen },
     ]
 
