@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Star, Send, X, MessageSquare, Loader2 } from 'lucide-react'
+import { Star, Send, X, MessageSquare, Loader2, ShieldCheck } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
+import { useRef } from 'react'
 
 interface AppFeedbackModalProps {
     isOpen: boolean
@@ -16,11 +18,26 @@ export function AppFeedbackModal({ isOpen, onClose, user }: AppFeedbackModalProp
     const [content, setContent] = useState('')
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
+    const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+    const [honeypot, setHoneypot] = useState('')
+    const turnstileRef = useRef<TurnstileInstance>(null)
 
     if (!isOpen) return null
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        // Anti-spam checks
+        if (honeypot) {
+            console.warn('Bot detected via honeypot')
+            return
+        }
+
+        if (!turnstileToken) {
+            alert('Vui lòng hoàn thành xác minh bảo mật!')
+            return
+        }
+
         if (rating === 0) {
             alert('Vui lòng chọn số sao để đánh giá!')
             return
@@ -42,11 +59,14 @@ export function AppFeedbackModal({ isOpen, onClose, user }: AppFeedbackModalProp
                 setSuccess(false)
                 setRating(0)
                 setContent('')
+                setTurnstileToken(null)
                 onClose()
             }, 2500)
         } catch (error: any) {
             console.error('Error submitting feedback:', error)
-            const errorMsg = error.message || 'Có lỗi xảy ra khi gửi góp ý.'
+            const errorMsg = error.message.includes('Rate limit exceeded')
+                ? 'Bạn gửi góp ý quá nhanh. Vui lòng đợi 1 phút.'
+                : (error.message || 'Có lỗi xảy ra khi gửi góp ý.')
             alert(`${errorMsg} Vui lòng thử lại sau.`)
         } finally {
             setLoading(false)
@@ -117,11 +137,48 @@ export function AppFeedbackModal({ isOpen, onClose, user }: AppFeedbackModalProp
                             />
                         </div>
 
+                        {/* Security Verification */}
+                        <div className="space-y-4">
+                            {/* Honeypot field - Hidden from users */}
+                            <div className="hidden" aria-hidden="true">
+                                <input
+                                    type="text"
+                                    name="full_name_verification"
+                                    value={honeypot}
+                                    onChange={(e) => setHoneypot(e.target.value)}
+                                    tabIndex={-1}
+                                    autoComplete="off"
+                                />
+                            </div>
+
+                            <div className="flex flex-col items-center gap-2">
+                                <div className="scale-90 origin-center min-h-[65px]">
+                                    <Turnstile
+                                        ref={turnstileRef}
+                                        siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
+                                        onSuccess={setTurnstileToken}
+                                        onExpire={() => setTurnstileToken(null)}
+                                        onError={() => setTurnstileToken(null)}
+                                        options={{
+                                            theme: 'light',
+                                            size: 'normal',
+                                        }}
+                                    />
+                                </div>
+                                {!turnstileToken && (
+                                    <p className="text-[10px] text-orange-500 font-semibold flex items-center gap-1 animate-pulse">
+                                        <ShieldCheck className="w-3 h-3" />
+                                        Vui lòng xác minh để bảo mật hệ thống
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
                         {/* Actions */}
                         <div className="pt-2">
                             <button
                                 type="submit"
-                                disabled={loading || rating === 0}
+                                disabled={loading || rating === 0 || !turnstileToken}
                                 className="w-full py-4 bg-apple-text text-apple-bg rounded-2xl font-bold text-sm uppercase tracking-widest shadow-xl hover:bg-apple-blue hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                             >
                                 {loading ? (

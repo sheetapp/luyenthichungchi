@@ -6,8 +6,8 @@ import { usePathname } from 'next/navigation'
 import { Home, BookOpen, Heart, FileText, User, LayoutGrid } from 'lucide-react'
 
 const navItems = [
-    { icon: Home, label: 'Trang chủ', href: '/gioi-thieu' },
-    // { icon: LayoutGrid, label: 'Danh mục', href: '/' },
+    { icon: Home, label: 'Trang chủ', href: 'https://luyenthichungchi.vercel.app/' },
+    { icon: LayoutGrid, label: 'Danh mục', href: '/' },
     { icon: BookOpen, label: 'Ôn tập', href: '/on-tap' },
     { icon: Heart, label: '', href: '/buy-me-coffee', special: true },
     { icon: FileText, label: 'Thi thử', href: '/thi-thu' },

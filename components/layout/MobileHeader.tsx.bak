@@ -1,11 +1,10 @@
 'use client'
 
-import { Search, Phone, Menu, X, User, LogOut, Coffee, ChevronRight, HelpCircle, Shield, FileText, Mail, Library } from 'lucide-react'
+import { Search, Phone, Menu, X, User, LogOut, Coffee, ChevronRight, HelpCircle, Shield, FileText, Mail } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { ThemeToggle } from '@/components/theme/ThemeContext'
 
 const SEARCH_CATEGORIES = [
     'Thiết kế cơ - điện công trình - Hệ thống điện',
@@ -56,20 +55,17 @@ export function MobileHeader() {
 
     return (
         <>
-            <header className="sticky top-0 z-50 bg-white dark:bg-apple-card shadow-sm border-b border-apple-border">
+            <header className="sticky top-0 z-50 bg-white shadow-sm">
                 {/* Top Bar */}
-                <div className="px-4 py-2.5 flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-2 text-apple-blue">
-                        <div className="w-10 h-10 bg-apple-blue rounded-xl flex items-center justify-center shadow-lg shadow-apple-blue/20">
-                            <Library className="w-6 h-6 text-white" />
-                        </div>
-                        <span className="text-lg font-black tracking-tighter text-apple-text">CCXD</span>
+                <div className="px-4 py-3 flex items-center justify-between border-b border-apple-border">
+                    <Link href="/" className="text-xl font-bold tracking-tight text-apple-blue">
+                        Luyện thi CCXD
                     </Link>
 
                     <div className="flex items-center gap-2">
-                        <ThemeToggle />
-                        <a href="tel:0989256894" className="w-10 h-10 bg-red-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-red-500/20 active:scale-95 transition-all">
-                            <Phone className="w-5 h-5" />
+                        <a href="tel:0989256894" className="flex items-center gap-1.5 bg-red-500 text-white px-3 py-2 rounded-full text-[10px] font-bold shadow-lg shadow-red-500/20 active:scale-95 transition-all">
+                            <Phone className="w-3.5 h-3.5" />
+                            0989.256.894
                         </a>
                         <button
                             onClick={() => setIsMenuOpen(true)}

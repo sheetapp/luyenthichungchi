@@ -535,6 +535,29 @@ export default function AccountPage() {
                             </div>
                         </div>
 
+                        {/* Agreement Checkbox */}
+                        <div className="mb-6 flex items-start gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 select-none group cursor-pointer" onClick={() => setAgreed(!agreed)}>
+                            <div className="flex items-center h-5 mt-0.5">
+                                <input
+                                    type="checkbox"
+                                    checked={agreed}
+                                    onChange={(e) => setAgreed(e.target.checked)}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer transition-all"
+                                />
+                            </div>
+                            <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                                Tôi đã đọc và đồng ý với{' '}
+                                <Link href="/dieu-khoan-su-dung" className="text-blue-600 hover:underline font-bold" onClick={(e) => e.stopPropagation()}>
+                                    Điều khoản sử dụng
+                                </Link>
+                                {' '}và{' '}
+                                <Link href="/chinh-sach-bao-mat" className="text-blue-600 hover:underline font-bold" onClick={(e) => e.stopPropagation()}>
+                                    Chính sách bảo mật
+                                </Link>
+                            </p>
+                        </div>
+
                         {/* Google Login Button */}
                         <button
                             onClick={handleGoogleLogin}
@@ -558,29 +581,6 @@ export default function AccountPage() {
                                 </>
                             )}
                         </button>
-
-                        {/* Agreement Checkbox */}
-                        <div className="mt-8 flex items-start gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 select-none group cursor-pointer" onClick={() => setAgreed(!agreed)}>
-                            <div className="flex items-center h-5 mt-0.5">
-                                <input
-                                    type="checkbox"
-                                    checked={agreed}
-                                    onChange={(e) => setAgreed(e.target.checked)}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer transition-all"
-                                />
-                            </div>
-                            <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
-                                Tôi đã đọc và đồng ý với{' '}
-                                <Link href="/dieu-khoan-su-dung" className="text-blue-600 hover:underline font-bold" onClick={(e) => e.stopPropagation()}>
-                                    Điều khoản sử dụng
-                                </Link>
-                                {' '}và{' '}
-                                <Link href="/chinh-sach-bao-mat" className="text-blue-600 hover:underline font-bold" onClick={(e) => e.stopPropagation()}>
-                                    Chính sách bảo mật
-                                </Link>
-                            </p>
-                        </div>
                     </div>
 
                     {/* Extra Info */}

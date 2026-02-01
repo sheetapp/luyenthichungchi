@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, BookOpen, Heart, FileText, User, LayoutGrid } from 'lucide-react'
+import { Home, BookOpen, Coffee, FileText, User, LayoutGrid } from 'lucide-react'
 
 const navItems = [
-    { icon: Home, label: 'Trang chủ', href: '/gioi-thieu' },
-    // { icon: LayoutGrid, label: 'Danh mục', href: '/' },
+    { icon: Home, label: 'Trang chủ', href: 'https://luyenthichungchi.vercel.app/' },
+    { icon: LayoutGrid, label: 'Danh mục', href: '/' },
     { icon: BookOpen, label: 'Ôn tập', href: '/on-tap' },
-    { icon: Heart, label: '', href: '/buy-me-coffee', special: true },
+    { icon: Coffee, label: 'Coffê', href: '/buy-me-coffee' },
     { icon: FileText, label: 'Thi thử', href: '/thi-thu' },
     { icon: User, label: 'Tài khoản', href: '/tai-khoan' },
 ]
@@ -30,20 +30,6 @@ export function BottomNav() {
                 {navItems.map((item) => {
                     const Icon = item.icon
                     const isActive = pathname === item.href
-
-                    if (item.special) {
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className="flex flex-col items-center justify-center flex-1 py-1 transition-all active:scale-90"
-                            >
-                                <div className="p-2 bg-red-500/10 rounded-full shadow-lg shadow-red-500/20 border border-red-500/20">
-                                    <Icon className="w-6 h-6 text-red-500 fill-red-500 stroke-[2.5px]" />
-                                </div>
-                            </Link>
-                        )
-                    }
 
                     return (
                         <Link

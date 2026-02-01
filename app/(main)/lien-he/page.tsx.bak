@@ -73,7 +73,7 @@ export default function ContactPage() {
                             <div className="absolute inset-0 opacity-50 bg-[url('https://upload.wikimedia.org/wikipedia/commons/e/ec/Ho_Chi_Minh_City_Map.png')] bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-500" />
 
                             <a
-                                href="https://maps.app.goo.gl/4QL1Ua6dkRifnbnj7"
+                                href="https://maps.app.goo.gl/example" // Recommend updating with real link later
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="relative z-10 px-6 py-3 bg-white/90 backdrop-blur-md text-[#1d1d1f] font-bold rounded-full shadow-lg flex items-center gap-2 hover:scale-105 active:scale-95 transition-all"

@@ -3,17 +3,16 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, BookOpen, FileText, Trophy, User, Coffee, LayoutGrid, Database, ChevronLeft, ChevronRight, LogOut, LogIn, UserCircle, HelpCircle } from 'lucide-react'
+import { Home, BookOpen, FileText, Trophy, User, Coffee, LayoutGrid, Database, ChevronLeft, ChevronRight, LogOut, LogIn, UserCircle } from 'lucide-react'
 import { useSidebar } from '@/contexts/SidebarContext'
 import { supabase } from '@/lib/supabase/client'
 
 const navItems = [
-    { icon: HelpCircle, label: 'Giới thiệu', href: '/gioi-thieu', requireAuth: false },
-    { icon: Home, label: 'Danh mục', href: '/', requireAuth: false },
+    { icon: Home, label: 'Trang chủ', href: '/', requireAuth: false },
     { icon: BookOpen, label: 'Ôn tập', href: '/on-tap', requireAuth: true },
     { icon: FileText, label: 'Thi thử', href: '/thi-thu', requireAuth: true },
     { icon: Trophy, label: 'Xếp hạng', href: '/xep-hang', requireAuth: true },
-    { icon: Database, label: 'Cơ sở dữ liệu', href: '/database', requireAuth: true },
+    { icon: Database, label: 'Cơ sở dữ liệu', href: '/database', requireAuth: false },
 ]
 
 export function Sidebar() {
@@ -123,7 +122,7 @@ export function Sidebar() {
                 {!collapsed && (
                     <div className="px-4 mb-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Menu chính</div>
                 )}
-                {navItems.filter(item => item.href !== '/database' || user).map((item) => {
+                {navItems.map((item) => {
                     const Icon = item.icon
                     const isActive = pathname === item.href
 

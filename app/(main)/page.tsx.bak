@@ -2,8 +2,10 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { ChevronRight, BookOpen, Search, Filter, Award, Sparkles } from 'lucide-react'
+import { ChevronRight, BookOpen, Search, Filter, Award, Sparkles, HelpCircle } from 'lucide-react'
 import { removeVietnameseTones } from '@/lib/utils/vietnamese'
+import { ThemeToggle } from '@/components/theme/ThemeContext'
+import { useEffect } from 'react'
 
 const CATEGORIES = [
     'Khảo sát địa hình',
@@ -32,6 +34,16 @@ const HANG_OPTIONS = ['Hạng I', 'Hạng II', 'Hạng III']
 export default function MainHomePage() {
     const [selectedHang, setSelectedHang] = useState('Hạng I')
     const [searchQuery, setSearchQuery] = useState('')
+    const [showSticky, setShowSticky] = useState(false)
+
+    // Sticky header on scroll
+    useEffect(() => {
+        const handleScroll = () => {
+            setShowSticky(window.scrollY > 100)
+        }
+        window.addEventListener('scroll', handleScroll)
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
 
     const filteredCategories = useMemo(() => {
         if (!searchQuery.trim()) return CATEGORIES
@@ -44,6 +56,42 @@ export default function MainHomePage() {
 
     return (
         <div className="min-h-screen bg-apple-bg py-4 md:py-6 space-y-6">
+            {/* Sticky Header - Mobile Only */}
+            {showSticky && (
+                <div className="fixed top-0 left-0 right-0 bg-apple-card/80 backdrop-blur-xl z-[60] py-3 px-4 md:hidden border-b border-apple-border shadow-sm animate-in fade-in slide-in-from-top duration-300">
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                            <ThemeToggle />
+                            <div className="flex p-1 bg-apple-border rounded-[10px]">
+                                {HANG_OPTIONS.map(hang => (
+                                    <button
+                                        key={hang}
+                                        onClick={() => setSelectedHang(hang)}
+                                        className={`px-3 py-1.5 rounded-[8px] text-[11px] font-semibold transition-all ${selectedHang === hang
+                                            ? 'bg-apple-card text-apple-blue shadow-sm'
+                                            : 'text-apple-text-secondary'
+                                            }`}
+                                    >
+                                        {hang}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Search */}
+                        <div className="flex-1 relative">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-apple-text-secondary w-4 h-4" />
+                            <input
+                                type="text"
+                                placeholder="Tìm kiếm chuyên ngành..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 bg-apple-card/50 border border-apple-border rounded-[10px] outline-none focus:ring-2 focus:ring-apple-blue/20 shadow-sm text-[13px] font-bold text-apple-text"
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* Standardized Header Section */}
             <div className="px-4 md:px-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
