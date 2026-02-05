@@ -10,6 +10,8 @@ interface AppFeedbackModalProps {
     isOpen: boolean
     onClose: () => void
     user: any
+    initialType?: string
+    restrictedRating?: boolean
 }
 
 const FEEDBACK_TYPES = [
@@ -52,8 +54,8 @@ interface Question {
     chuyen_nganh: string | null
 }
 
-export function AppFeedbackModal({ isOpen, onClose, user }: AppFeedbackModalProps) {
-    const [feedbackType, setFeedbackType] = useState('app_rating')
+export function AppFeedbackModal({ isOpen, onClose, user, initialType, restrictedRating }: AppFeedbackModalProps) {
+    const [feedbackType, setFeedbackType] = useState(initialType || 'app_rating')
     const [rating, setRating] = useState(0)
     const [hoverRating, setHoverRating] = useState(0)
     const [content, setContent] = useState('')
@@ -62,6 +64,13 @@ export function AppFeedbackModal({ isOpen, onClose, user }: AppFeedbackModalProp
     const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
     const [honeypot, setHoneypot] = useState('')
     const turnstileRef = useRef<TurnstileInstance>(null)
+
+    // Update type if prop changes
+    useEffect(() => {
+        if (initialType) {
+            setFeedbackType(initialType)
+        }
+    }, [initialType, isOpen])
 
     // Question selector states
     const [selectedHang, setSelectedHang] = useState('Hạng I')
@@ -328,23 +337,30 @@ export function AppFeedbackModal({ isOpen, onClose, user }: AppFeedbackModalProp
                         <div className="space-y-3">
                             <label className="text-sm font-bold text-apple-text">Đánh giá của bạn</label>
                             <div className="flex gap-2 justify-center">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                    <button
-                                        key={star}
-                                        type="button"
-                                        onClick={() => setRating(star)}
-                                        onMouseEnter={() => setHoverRating(star)}
-                                        onMouseLeave={() => setHoverRating(0)}
-                                        className="transition-transform hover:scale-110 active:scale-95"
-                                    >
-                                        <Star
-                                            className={`w-10 h-10 ${star <= (hoverRating || rating)
-                                                ? 'fill-yellow-400 text-yellow-400'
-                                                : 'text-apple-text-secondary/20'
-                                                }`}
-                                        />
-                                    </button>
-                                ))}
+                                {[1, 2, 3, 4, 5].map((star) => {
+                                    // If restrictedRating is true, only show stars 4 and 5
+                                    if (restrictedRating && feedbackType === 'app_rating' && star < 4) {
+                                        return null;
+                                    }
+
+                                    return (
+                                        <button
+                                            key={star}
+                                            type="button"
+                                            onClick={() => setRating(star)}
+                                            onMouseEnter={() => setHoverRating(star)}
+                                            onMouseLeave={() => setHoverRating(0)}
+                                            className="transition-transform hover:scale-110 active:scale-95"
+                                        >
+                                            <Star
+                                                className={`w-10 h-10 ${star <= (hoverRating || rating)
+                                                    ? 'fill-yellow-400 text-yellow-400'
+                                                    : 'text-apple-text-secondary/20'
+                                                    }`}
+                                            />
+                                        </button>
+                                    )
+                                })}
                             </div>
                         </div>
                     )}

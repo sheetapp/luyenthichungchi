@@ -83,8 +83,8 @@ export function Sidebar() {
                         </div>
                         <h1 className="flex flex-col">
                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] leading-none mb-1">Luyện thi</span>
-                            <span className="text-xl font-black tracking-tight leading-none text-blue-400">
-                                CCXD
+                            <span className="text-xl font-black tracking-tight leading-none text-white">
+                                CCXD <span className="text-blue-400">Xây dựng</span>
                             </span>
                         </h1>
                     </div>

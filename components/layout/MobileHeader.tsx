@@ -56,14 +56,17 @@ export function MobileHeader() {
 
     return (
         <>
-            <header className="sticky top-0 z-50 bg-white dark:bg-apple-card shadow-sm border-b border-apple-border">
+            <header className="sticky top-0 z-50 bg-apple-bg/80 dark:bg-apple-card/80 backdrop-blur-md border-b border-apple-border">
                 {/* Top Bar */}
                 <div className="px-4 py-2.5 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2 text-apple-blue">
-                        <div className="w-10 h-10 bg-apple-blue rounded-xl flex items-center justify-center shadow-lg shadow-apple-blue/20">
+                        <div className="w-10 h-10 bg-apple-blue rounded-xl flex items-center justify-center shadow-lg shadow-apple-blue/20 transition-transform active:scale-95">
                             <Library className="w-6 h-6 text-white" />
                         </div>
-                        <span className="text-lg font-black tracking-tighter text-apple-text">CCXD</span>
+                        <div className="flex flex-col leading-none">
+                            <span className="text-[10px] font-bold text-apple-text-secondary uppercase tracking-wider">Luyện thi</span>
+                            <span className="text-lg font-black tracking-tighter text-apple-blue">CCXD</span>
+                        </div>
                     </Link>
 
                     <div className="flex items-center gap-2">
@@ -73,7 +76,7 @@ export function MobileHeader() {
                         </a>
                         <button
                             onClick={() => setIsMenuOpen(true)}
-                            className="p-2.5 hover:bg-apple-bg rounded-xl transition-colors active:scale-95"
+                            className="p-2.5 hover:bg-apple-input-bg rounded-xl transition-colors active:scale-95"
                         >
                             <Menu className="w-6 h-6 text-apple-text" />
                         </button>
@@ -91,15 +94,15 @@ export function MobileHeader() {
                     />
 
                     {/* Menu Content */}
-                    <div className="relative w-[300px] h-full bg-white shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
+                    <div className="relative w-[300px] h-full bg-apple-bg shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col border-l border-apple-border/50">
                         {/* Menu Header */}
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-                            <span className="font-bold text-lg text-gray-900">Menu</span>
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-apple-border">
+                            <span className="font-bold text-lg text-apple-text">Menu</span>
                             <button
                                 onClick={() => setIsMenuOpen(false)}
-                                className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+                                className="p-2 bg-apple-input-bg rounded-lg hover:border-apple-border transition-colors active:scale-95"
                             >
-                                <X className="w-5 h-5 text-gray-600" />
+                                <X className="w-5 h-5 text-apple-text-secondary" />
                             </button>
                         </div>
 
@@ -113,22 +116,22 @@ export function MobileHeader() {
                         </div>
 
                         {/* Auth Section */}
-                        <div className="p-4 border-t border-gray-100 bg-gray-50/50 space-y-3">
+                        <div className="p-4 border-t border-apple-border bg-apple-input-bg space-y-3">
                             {user ? (
                                 <>
-                                    <div className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-xl shadow-sm">
-                                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                                    <div className="flex items-center gap-3 p-3 bg-apple-card border border-apple-border rounded-xl shadow-sm">
+                                        <div className="w-10 h-10 rounded-full bg-apple-blue/10 flex items-center justify-center text-apple-blue font-bold border border-apple-blue/20">
                                             {user.email?.charAt(0).toUpperCase()}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="text-sm font-bold text-gray-900 truncate">{user.email}</div>
-                                            <div className="text-xs text-gray-500">Thành viên</div>
+                                            <div className="text-sm font-bold text-apple-text truncate">{user.email}</div>
+                                            <div className="text-xs text-apple-text-secondary font-medium">Thành viên</div>
                                         </div>
                                     </div>
 
                                     <Link
                                         href="/buy-me-coffee"
-                                        className="flex items-center gap-3 w-full p-3 text-sm font-medium text-pink-600 bg-pink-50 hover:bg-pink-100 rounded-xl transition-colors"
+                                        className="flex items-center gap-3 w-full p-3 text-sm font-bold text-pink-600 bg-pink-500/5 hover:bg-pink-500/10 rounded-xl transition-colors border border-pink-500/10"
                                         onClick={() => setIsMenuOpen(false)}
                                     >
                                         <Coffee className="w-5 h-5" />
@@ -137,7 +140,7 @@ export function MobileHeader() {
 
                                     <button
                                         onClick={handleLogout}
-                                        className="flex items-center gap-3 w-full p-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                                        className="flex items-center gap-3 w-full p-3 text-sm font-bold text-red-500 hover:bg-red-500/5 rounded-xl transition-colors border border-transparent hover:border-red-500/10"
                                     >
                                         <LogOut className="w-5 h-5" />
                                         Đăng xuất
@@ -146,7 +149,7 @@ export function MobileHeader() {
                             ) : (
                                 <Link
                                     href="/login"
-                                    className="flex items-center justify-center gap-2 w-full p-3 bg-[#007AFF] text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 active:scale-95 transition-all"
+                                    className="flex items-center justify-center gap-2 w-full p-3 bg-apple-blue text-white font-bold rounded-xl shadow-lg shadow-apple-blue/30 active:scale-95 transition-all"
                                     onClick={() => setIsMenuOpen(false)}
                                 >
                                     <User className="w-5 h-5" />
@@ -166,15 +169,15 @@ function MenuItem({ href, icon: Icon, label, onClick }: any) {
         <Link
             href={href}
             onClick={onClick}
-            className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+            className="flex items-center justify-between p-3 rounded-xl hover:bg-apple-input-bg transition-colors group border border-transparent hover:border-apple-border"
         >
             <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-apple-input-bg flex items-center justify-center text-apple-text-secondary group-hover:bg-apple-blue/10 group-hover:text-apple-blue transition-colors">
                     <Icon className="w-5 h-5" />
                 </div>
-                <span className="font-medium text-gray-700 group-hover:text-gray-900">{label}</span>
+                <span className="font-semibold text-apple-text tracking-tight">{label}</span>
             </div>
-            <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-400" />
+            <ChevronRight className="w-4 h-4 text-apple-text-secondary/30 group-hover:text-apple-blue transition-colors" />
         </Link>
     )
 }

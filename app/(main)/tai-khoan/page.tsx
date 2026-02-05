@@ -100,6 +100,10 @@ export default function AccountPage() {
     const [showShareModal, setShowShareModal] = useState(false)
     const [showShortcutModal, setShowShortcutModal] = useState(false)
     const [showFeedbackModal, setShowFeedbackModal] = useState(false)
+    const [feedbackModalConfig, setFeedbackModalConfig] = useState({
+        initialType: 'app_rating',
+        restrictedRating: false
+    })
     const [motivationalMessage, setMotivationalMessage] = useState('')
     const [agreed, setAgreed] = useState(false)
     const [isLoginLoading, setIsLoginLoading] = useState(false)
@@ -136,6 +140,20 @@ export default function AccountPage() {
             setIsLoginLoading(false)
         }
     }
+
+    // Handle external actions from URL
+    useEffect(() => {
+        if (!loading && profile) {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('action') === 'review') {
+                setFeedbackModalConfig({ initialType: 'app_rating', restrictedRating: true });
+                setShowFeedbackModal(true);
+                // Clean up URL
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, '', newUrl);
+            }
+        }
+    }, [loading, profile])
 
     // Sticky header on scroll
     useEffect(() => {
@@ -497,7 +515,7 @@ export default function AccountPage() {
         {
             title: 'Ứng dụng & Tiện ích',
             items: [
-                { id: 'favorite' as any, label: 'Yêu thích App', icon: Star, color: 'text-orange-500', isAction: true, actionType: 'favorite' },
+                { id: 'favorite' as any, label: 'Yêu thích & Đánh giá', icon: Star, color: 'text-orange-500', isAction: true, actionType: 'favorite' },
                 { id: 'share' as any, label: 'Chia sẻ App', icon: Share2, color: 'text-emerald-500', isAction: true, actionType: 'share' },
                 { id: 'shortcut' as any, label: 'Tạo lối tắt', icon: LayoutGrid, color: 'text-orange-600', isAction: true, actionType: 'shortcut' },
                 { id: 'feedback' as any, label: 'Góp ý ứng dụng', icon: MessageSquare, color: 'text-blue-500', isAction: true, actionType: 'feedback' },
@@ -729,7 +747,14 @@ export default function AccountPage() {
                                                     const action = itemAny.actionType;
                                                     if (action === 'share') setShowShareModal(true);
                                                     else if (action === 'shortcut') setShowShortcutModal(true);
-                                                    else if (action === 'feedback') setShowFeedbackModal(true);
+                                                    else if (action === 'feedback') {
+                                                        setFeedbackModalConfig({ initialType: 'app_feedback', restrictedRating: false });
+                                                        setShowFeedbackModal(true);
+                                                    }
+                                                    else if (action === 'favorite') {
+                                                        setFeedbackModalConfig({ initialType: 'app_rating', restrictedRating: true });
+                                                        setShowFeedbackModal(true);
+                                                    }
                                                     else alert(`Chức năng ${itemAny.label} sẽ sớm được cập nhật!`);
                                                 } else {
                                                     setActiveTab(itemAny.id as TabType);
@@ -1475,6 +1500,8 @@ export default function AccountPage() {
                 isOpen={showFeedbackModal}
                 onClose={() => setShowFeedbackModal(false)}
                 user={profile}
+                initialType={feedbackModalConfig.initialType}
+                restrictedRating={feedbackModalConfig.restrictedRating}
             />
         </>
     )

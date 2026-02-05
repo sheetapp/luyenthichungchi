@@ -39,7 +39,6 @@
   --apple-card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 
   /* Status Colors Dark */
-  --color-muted-bg: #111111;
   --status-emerald-bg: var(--apple-card-bg);
   --status-emerald-text: #34C759;
   --status-emerald-border: var(--apple-border);
@@ -57,10 +56,6 @@
   --color-apple-card: var(--apple-card-bg);
   --color-apple-text: var(--apple-text);
   --color-apple-text-secondary: var(--apple-text-secondary);
-  --color-apple-input: var(--apple-input-bg);
-  --color-apple-border: var(--apple-border);
-  --color-apple-glass: var(--apple-glass-bg);
-  --color-apple-bg-secondary: var(--color-muted-bg);
 
   --color-emerald-500: #34C759;
   --color-emerald-600: #28CD41;

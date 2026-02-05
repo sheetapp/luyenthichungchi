@@ -81,11 +81,8 @@ export function Sidebar() {
                         <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                             <LayoutGrid className="w-6 h-6 text-white" />
                         </div>
-                        <h1 className="flex flex-col">
-                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] leading-none mb-1">Luyện thi</span>
-                            <span className="text-xl font-black tracking-tight leading-none text-blue-400">
-                                CCXD
-                            </span>
+                        <h1 className="text-xl font-black tracking-tight leading-tight text-white">
+                            CCHN <span className="text-blue-400">Xây dựng</span>
                         </h1>
                     </div>
                 )}

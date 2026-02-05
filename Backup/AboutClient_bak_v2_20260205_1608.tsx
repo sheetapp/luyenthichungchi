@@ -6,40 +6,40 @@ import { Rocket, Shield, Zap, BookOpen, Star, CheckCircle, Users, Award, Trendin
 
 export default function AboutPage() {
     return (
-        <div className="min-h-screen bg-apple-bg font-sans text-apple-text selection:bg-[#007AFF]/20 transition-colors duration-300">
+        <div className="min-h-screen bg-white dark:bg-apple-bg font-sans text-[#1d1d1f] dark:text-apple-text selection:bg-[#007AFF]/20">
             {/* 1. Hero Section */}
             <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 px-6 overflow-hidden">
                 <div className="max-w-5xl mx-auto text-center space-y-6 md:space-y-8 relative z-10">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-apple-blue/10 text-apple-blue text-[11px] font-bold uppercase tracking-widest animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#007AFF]/10 dark:bg-apple-blue/10 text-[#007AFF] dark:text-apple-blue text-[11px] font-bold uppercase tracking-widest animate-in fade-in slide-in-from-bottom-4 duration-700">
                         <Star className="w-3 h-3 fill-current" />
                         <span>Nền tảng ôn luyện chứng chỉ xây dựng tin cậy và hoàn toàn miễn phí</span>
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-apple-text animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
+                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-[#1d1d1f] dark:text-apple-text animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
                         Luyện thi chứng chỉ<br />
-                        <span className="text-apple-text-secondary">thật dễ dàng.</span>
+                        <span className="text-[#86868b] dark:text-apple-text-secondary">thật dễ dàng.</span>
                     </h1>
 
-                    <p className="text-xl md:text-2xl font-medium text-apple-text-secondary max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
+                    <p className="text-xl md:text-2xl font-medium text-[#86868b] dark:text-apple-text-secondary max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
                         Hệ thống ôn luyện thông minh, cập nhật theo QĐ 163/QĐ-BXD ngày 18/2/2025 của Bộ Xây dựng. Thiết kế tối ưu cho trải nghiệm người dùng.
                     </p>
 
                     <div className="pt-8 flex flex-col md:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-                        <Link href="/on-tap" className="px-8 py-4 bg-apple-blue text-white rounded-full font-semibold text-lg hover:bg-blue-600 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-apple-blue/30 flex items-center gap-2">
+                        <Link href="/on-tap" className="px-8 py-4 bg-[#007AFF] dark:bg-apple-blue text-white rounded-full font-semibold text-lg hover:bg-[#0077ED] dark:hover:bg-blue-600 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/30 flex items-center gap-2">
                             <Rocket className="w-5 h-5" /> Trải nghiệm ngay
                         </Link>
-                        <Link href="/thi-thu" className="px-8 py-4 bg-apple-input text-apple-text rounded-full font-semibold text-lg hover:bg-apple-border transition-all hover:scale-105 active:scale-95 flex items-center gap-2 border border-apple-border">
+                        <Link href="/thi-thu" className="px-8 py-4 bg-[#F5F5F7] dark:bg-apple-card text-[#1d1d1f] dark:text-apple-text rounded-full font-semibold text-lg hover:bg-[#E8E8ED] dark:hover:bg-apple-card-hover transition-all hover:scale-105 active:scale-95 flex items-center gap-2 border border-black/5 dark:border-white/5">
                             <MonitorPlay className="w-5 h-5" /> Xem Demo
                         </Link>
                     </div>
                 </div>
 
                 {/* Background Decoration */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-tr from-apple-blue/5 to-purple-500/5 rounded-full blur-3xl -z-10 opacity-50 dark:opacity-20" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-tr from-[#007AFF]/5 to-purple-500/5 rounded-full blur-3xl -z-10 opacity-50 dark:opacity-20" />
             </section>
 
             {/* 2. Stats Section (Trust Indicators) */}
-            <section className="py-12 bg-apple-bg-secondary border-y border-apple-border transition-colors">
+            <section className="py-12 bg-[#fafafa] dark:bg-apple-bg-secondary border-y border-black/5 dark:border-white/5 transition-colors">
                 <div className="max-w-6xl mx-auto px-6">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
                         <StatItem value="3000+" label="Câu hỏi cập nhật" icon={BookOpen} color="text-orange-500" />
@@ -51,22 +51,22 @@ export default function AboutPage() {
             </section>
 
             {/* 3. Features (Bento Grid) */}
-            <section className="py-24 px-6 md:px-12 bg-apple-bg transition-colors">
+            <section className="py-24 px-6 md:px-12 bg-white dark:bg-apple-bg transition-colors">
                 <div className="max-w-6xl mx-auto space-y-16">
                     <div className="text-center space-y-4">
-                        <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-apple-text">Tại sao chọn chúng tôi?</h2>
-                        <p className="text-xl text-apple-text-secondary font-medium">Những tính năng độc quyền giúp bạn học nhanh hơn, nhớ lâu hơn.</p>
+                        <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-[#1d1d1f] dark:text-apple-text">Tại sao chọn chúng tôi?</h2>
+                        <p className="text-xl text-[#86868b] dark:text-apple-text-secondary font-medium">Những tính năng độc quyền giúp bạn học nhanh hơn, nhớ lâu hơn.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                         {/* Large Card */}
-                        <div className="md:col-span-2 p-8 md:p-12 rounded-[32px] bg-apple-input hover:bg-apple-border transition-colors relative overflow-hidden group border border-apple-border/50 shadow-sm shadow-black/5 dark:shadow-none">
+                        <div className="md:col-span-2 p-8 md:p-12 rounded-[32px] bg-[#F5F5F7] dark:bg-apple-card hover:bg-[#F0F0F2] dark:hover:bg-apple-card-hover transition-colors relative overflow-hidden group border border-transparent dark:border-white/5">
                             <div className="space-y-4 relative z-10 max-w-lg">
-                                <div className="w-16 h-16 bg-apple-bg rounded-2xl flex items-center justify-center shadow-sm mb-4 border border-apple-border">
-                                    <MousePointer2 className="w-8 h-8 text-apple-text" />
+                                <div className="w-16 h-16 bg-white dark:bg-apple-bg rounded-2xl flex items-center justify-center shadow-sm mb-4 border border-black/5 dark:border-white/5">
+                                    <MousePointer2 className="w-8 h-8 text-[#1d1d1f] dark:text-apple-text" />
                                 </div>
-                                <h3 className="text-3xl font-bold text-apple-text">Hands-free Navigation.</h3>
-                                <p className="text-apple-text-secondary text-lg font-medium leading-relaxed">
+                                <h3 className="text-3xl font-bold text-[#1d1d1f] dark:text-apple-text">Hands-free Navigation.</h3>
+                                <p className="text-[#86868b] dark:text-apple-text-secondary text-lg font-medium leading-relaxed">
                                     Công nghệ điều hướng "Rảnh tay" tiên tiến. Cho phép bạn duyệt câu hỏi, chọn đáp án và nộp bài hoàn toàn bằng bàn phím. Tối ưu tốc độ làm bài gấp 2 lần.
                                 </p>
                             </div>
@@ -76,37 +76,37 @@ export default function AboutPage() {
                         </div>
 
                         {/* Tall Card */}
-                        <div className="md:row-span-2 p-8 md:p-12 rounded-[32px] bg-apple-text text-apple-bg relative overflow-hidden flex flex-col justify-between group border border-apple-border/50">
+                        <div className="md:row-span-2 p-8 md:p-12 rounded-[32px] bg-[#1d1d1f] dark:bg-apple-card text-white relative overflow-hidden flex flex-col justify-between group border border-transparent dark:border-white/5">
                             <div className="space-y-4 relative z-10">
-                                <div className="w-16 h-16 bg-apple-bg/10 rounded-2xl flex items-center justify-center backdrop-blur-md mb-4 border border-white/10">
-                                    <Layout className="w-8 h-8 text-apple-blue dark:text-cyan-400" />
+                                <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md mb-4 border border-white/10">
+                                    <Layout className="w-8 h-8 text-cyan-400" />
                                 </div>
-                                <h3 className="text-3xl font-bold text-apple-bg leading-tight">Tối ưu trải nghiệm.</h3>
-                                <p className="text-apple-bg/70 text-lg font-medium leading-relaxed">
+                                <h3 className="text-3xl font-bold text-white leading-tight">Tối ưu trải nghiệm.</h3>
+                                <p className="text-gray-400 dark:text-apple-text-secondary text-lg font-medium leading-relaxed">
                                     Sử dụng công nghệ mới nhất, giao diện được thiết kế tỉ mỉ cho cả PC và Mobile. Mang lại cảm giác thoải mái, tiện dụng và mượt mà tối đa cho người dùng.
                                 </p>
                             </div>
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-apple-blue rounded-full blur-[100px] opacity-20 group-hover:opacity-30 transition-opacity" />
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-cyan-500 rounded-full blur-[100px] opacity-20 group-hover:opacity-30 transition-opacity" />
                         </div>
 
                         {/* Small Card 1 */}
-                        <div className="p-8 rounded-[32px] bg-apple-input hover:bg-apple-border transition-colors space-y-4 border border-apple-border/50">
-                            <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
+                        <div className="p-8 rounded-[32px] bg-[#F5F5F7] dark:bg-apple-card hover:bg-[#F0F0F2] dark:hover:bg-apple-card-hover transition-colors space-y-4 border border-transparent dark:border-white/5">
+                            <div className="w-12 h-12 bg-green-100 dark:bg-green-500/10 rounded-xl flex items-center justify-center">
                                 <Gift className="w-6 h-6 text-green-600 dark:text-green-400" />
                             </div>
-                            <h3 className="text-xl font-bold text-apple-text">Hoàn toàn miễn phí.</h3>
-                            <p className="text-apple-text-secondary text-sm font-medium">
+                            <h3 className="text-xl font-bold text-[#1d1d1f] dark:text-apple-text">Hoàn toàn miễn phí.</h3>
+                            <p className="text-[#86868b] dark:text-apple-text-secondary text-sm font-medium">
                                 Cam kết không thu phí trọn đời. Mọi tính năng đều được mở khóa sẵn cho cộng đồng.
                             </p>
                         </div>
 
                         {/* Small Card 2 */}
-                        <div className="p-8 rounded-[32px] bg-apple-input hover:bg-apple-border transition-colors space-y-4 border border-apple-border/50">
-                            <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center">
+                        <div className="p-8 rounded-[32px] bg-[#F5F5F7] dark:bg-apple-card hover:bg-[#F0F0F2] dark:hover:bg-apple-card-hover transition-colors space-y-4 border border-transparent dark:border-white/5">
+                            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-500/10 rounded-xl flex items-center justify-center">
                                 <Award className="w-6 h-6 text-orange-600 dark:text-orange-400" />
                             </div>
-                            <h3 className="text-xl font-bold text-apple-text">Mô phỏng thi thật.</h3>
-                            <p className="text-apple-text-secondary text-sm font-medium">
+                            <h3 className="text-xl font-bold text-[#1d1d1f] dark:text-apple-text">Mô phỏng thi thật.</h3>
+                            <p className="text-[#86868b] dark:text-apple-text-secondary text-sm font-medium">
                                 Giao diện và áp lực thời gian giống 100% kỳ thi sát hạch thực tế.
                             </p>
                         </div>
@@ -115,7 +115,7 @@ export default function AboutPage() {
             </section>
 
             {/* 4. Expert Reviews (Infinite Marquee) */}
-            <section className="py-10 md:py-16 bg-apple-input border-t border-apple-border transition-colors overflow-hidden">
+            <section className="py-10 md:py-16 bg-[#F5F5F7] dark:bg-[#1a1a1c] border-t border-black/5 dark:border-white/5 transition-colors overflow-hidden">
                 <style jsx>{`
                     @keyframes scroll {
                         0% { transform: translateX(0); }
@@ -131,11 +131,11 @@ export default function AboutPage() {
 
                 <div className="space-y-12">
                     <div className="max-w-6xl mx-auto px-6 text-center space-y-4">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-apple-bg text-apple-text shadow-sm border border-apple-border text-[11px] font-bold uppercase tracking-widest">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-apple-card text-[#1d1d1f] dark:text-apple-text shadow-sm border border-black/5 dark:border-white/5 text-[11px] font-bold uppercase tracking-widest">
                             <Users className="w-3 h-3" />
                             <span>Cộng đồng chuyên gia</span>
                         </div>
-                        <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-apple-text">Được tin dùng bởi các kỹ sư.</h2>
+                        <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-[#1d1d1f] dark:text-apple-text">Được tin dùng bởi các kỹ sư.</h2>
                     </div>
 
                     <div className="w-full">
@@ -197,18 +197,18 @@ const REVIEWS = NAMES.map((name, i) => {
 function StatItem({ value, label, icon: Icon, color }: any) {
     return (
         <div className="flex flex-col items-center gap-2 group cursor-default">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center bg-apple-bg shadow-sm border border-apple-border mb-2 group-hover:scale-110 transition-transform duration-300`}>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center bg-white dark:bg-apple-card shadow-sm border border-black/5 dark:border-white/5 mb-2 group-hover:scale-110 transition-transform duration-300`}>
                 <Icon className={`w-6 h-6 ${color}`} />
             </div>
-            <div className="text-3xl md:text-4xl font-extrabold tracking-tight text-apple-text group-hover:text-apple-blue transition-colors">{value}</div>
-            <div className="text-xs font-bold text-apple-text-secondary uppercase tracking-widest">{label}</div>
+            <div className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#1d1d1f] dark:text-apple-text group-hover:text-[#007AFF] dark:group-hover:text-apple-blue transition-colors">{value}</div>
+            <div className="text-xs font-bold text-[#86868b] dark:text-apple-text-secondary uppercase tracking-widest">{label}</div>
         </div>
     )
 }
 
 function ReviewCard({ name, content, avatar, stars, badgeLabel, badgeColor }: any) {
     return (
-        <div className="p-4 md:p-6 rounded-[20px] md:rounded-[24px] bg-apple-bg border border-apple-border shadow-sm space-y-3 md:space-y-4 flex flex-col justify-between w-[260px] md:w-[300px] shrink-0 hover:scale-105 transition-transform duration-300">
+        <div className="p-4 md:p-6 rounded-[20px] md:rounded-[24px] bg-white dark:bg-apple-card border border-black/5 dark:border-white/5 shadow-sm space-y-3 md:space-y-4 flex flex-col justify-between w-[260px] md:w-[300px] shrink-0 hover:scale-105 transition-transform duration-300">
             <div className="space-y-3">
                 <div className="flex justify-between items-center">
                     <div className="flex gap-0.5 md:gap-1">
@@ -217,15 +217,15 @@ function ReviewCard({ name, content, avatar, stars, badgeLabel, badgeColor }: an
                         ))}
                     </div>
                 </div>
-                <p className="text-apple-text text-xs md:text-sm font-medium leading-relaxed italic line-clamp-3">"{content}"</p>
+                <p className="text-[#1d1d1f] dark:text-apple-text text-xs md:text-sm font-medium leading-relaxed italic line-clamp-3">"{content}"</p>
             </div>
 
-            <div className="flex items-center gap-3 md:gap-4 pt-3 md:pt-4 border-t border-apple-border">
-                <div className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center font-bold text-white text-xs shadow-md bg-gradient-to-br from-gray-700 to-black shrink-0`}>
+            <div className="flex items-center gap-3 md:gap-4 pt-3 md:pt-4 border-t border-black/5 dark:border-white/5">
+                <div className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center font-bold text-white text-xs shadow-md bg-gradient-to-br from-gray-700 to-black`}>
                     {avatar}
                 </div>
-                <div className="min-w-0 flex-1">
-                    <div className="font-bold text-[12px] md:text-sm text-apple-text truncate">{name}</div>
+                <div>
+                    <div className="font-bold text-[12px] md:text-sm text-[#1d1d1f] dark:text-apple-text">{name}</div>
                     <div className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] md:text-[9px] font-bold uppercase tracking-wider mt-0.5 ${badgeColor}`}>
                         <Medal className="w-2.5 h-2.5" />
                         {badgeLabel}

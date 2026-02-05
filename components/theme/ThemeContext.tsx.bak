@@ -42,7 +42,7 @@ export function ThemeToggle() {
     return (
         <button
             onClick={toggleTheme}
-            className="w-10 h-10 rounded-[12px] bg-apple-input-bg/70 dark:bg-apple-card/30 backdrop-blur-md border border-apple-border flex items-center justify-center text-apple-text hover:bg-apple-input-bg dark:hover:bg-apple-card/50 transition-all shadow-sm active:scale-95 group"
+            className="w-10 h-10 rounded-[12px] bg-white/70 dark:bg-white/10 backdrop-blur-md border border-white/20 dark:border-white/10 flex items-center justify-center text-apple-text hover:bg-white/90 dark:hover:bg-white/20 transition-all shadow-sm active:scale-95 group"
             title={isDark ? 'Chuyển sang Chế độ Sáng' : 'Chuyển sang Chế độ Tối'}
         >
             {isDark ? (
