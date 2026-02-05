@@ -6,6 +6,7 @@ const inter = Inter({
     subsets: ['latin', 'vietnamese'],
     weight: ['400', '500', '600', '700', '800', '900'],
     display: 'swap',
+    variable: '--font-inter',
 })
 
 export const metadata: Metadata = {
@@ -59,7 +60,7 @@ export default function RootLayout({
     children: React.ReactNode
 }>) {
     return (
-        <html lang="vi">
+        <html lang="vi" className={inter.variable}>
             <body className={`${inter.className} antialiased`}>
                 {children}
             </body>

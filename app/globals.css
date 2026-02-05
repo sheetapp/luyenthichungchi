@@ -75,14 +75,15 @@
 
   --color-apple-shadow: var(--apple-card-shadow);
 
-  --font-apple: 'SF Pro Text', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-inter: var(--font-inter);
+  --font-apple: var(--font-inter), 'SF Pro Text', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-sans: var(--font-apple);
 }
 
 @layer base {
   * {
     border-color: var(--apple-border);
-    letter-spacing: -0.022em;
+    letter-spacing: -0.011em;
   }
 
   body {
@@ -103,7 +104,7 @@
   h5,
   h6 {
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
     color: var(--apple-text);
   }
 }

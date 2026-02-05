@@ -20,7 +20,7 @@ module.exports = {
                 },
             },
             fontFamily: {
-                sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+                sans: ['var(--font-inter)', 'var(--font-sans)', 'system-ui', 'sans-serif'],
             },
         },
     },
