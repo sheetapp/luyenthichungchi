@@ -164,7 +164,6 @@ export default function ThiThuPage() {
                                 >
                                     <HelpCircle className="w-4.5 h-4.5" />
                                 </button>
-                                <ThemeToggle />
                             </div>
                             <div className="md:hidden flex p-1 bg-apple-border rounded-[10px]">
                                 {HANG_TABS.map(hang => (
@@ -226,7 +225,6 @@ export default function ThiThuPage() {
                             >
                                 <HelpCircle className="w-5 h-5" />
                             </button>
-                            <ThemeToggle />
                         </div>
                     </div>
                     <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mt-2">

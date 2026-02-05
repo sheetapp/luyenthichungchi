@@ -157,7 +157,7 @@ export default function DatabasePage() {
     }
 
     return (
-        <div className="min-h-screen bg-apple-bg py-6 transition-colors duration-300">
+        <div className="min-h-screen bg-slate-50 py-6">
             <div className="max-w-[1600px] mx-auto py-8">
                 {/* Header Section */}
                 <div className="mb-8 px-4">
@@ -197,7 +197,7 @@ export default function DatabasePage() {
                                         flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-sm whitespace-nowrap transition-all
                                         ${isActive
                                             ? 'bg-apple-blue text-white shadow-lg shadow-apple-blue/30'
-                                            : 'bg-apple-card text-apple-text-secondary hover:bg-apple-input border border-transparent hover:border-apple-border shadow-sm'
+                                            : 'bg-white text-apple-text-secondary hover:bg-apple-bg border border-transparent hover:border-apple-border shadow-sm'
                                         }
                                     `}
                                 >
@@ -224,30 +224,30 @@ export default function DatabasePage() {
                                         placeholder="Tìm kiếm..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-12 pr-4 py-3 bg-apple-card border border-apple-border rounded-xl text-sm font-medium text-apple-text focus:outline-none focus:ring-2 focus:ring-apple-blue/20 focus:border-apple-blue transition-all"
+                                        className="w-full pl-12 pr-4 py-3 bg-white border border-apple-border rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-apple-blue/20 focus:border-apple-blue transition-all"
                                     />
                                 </div>
                                 <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <select
                                         value={selectedHang}
                                         onChange={(e) => setSelectedHang(e.target.value)}
-                                        className="w-full px-4 py-3 bg-apple-card border border-apple-border rounded-xl text-sm font-bold text-apple-text focus:outline-none focus:ring-2 focus:ring-apple-blue/20"
+                                        className="w-full px-4 py-3 bg-white border border-apple-border rounded-xl text-sm font-bold text-apple-text focus:outline-none focus:ring-2 focus:ring-apple-blue/20"
                                     >
-                                        {HANG_OPTIONS.map(opt => <option key={opt} value={opt} className="bg-apple-card">{opt}</option>)}
+                                        {HANG_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                                     </select>
                                     <select
                                         value={selectedChuyenNganh}
                                         onChange={(e) => setSelectedChuyenNganh(e.target.value)}
-                                        className="w-full px-4 py-3 bg-apple-card border border-apple-border rounded-xl text-sm font-bold text-apple-text focus:outline-none focus:ring-2 focus:ring-apple-blue/20"
+                                        className="w-full px-4 py-3 bg-white border border-apple-border rounded-xl text-sm font-bold text-apple-text focus:outline-none focus:ring-2 focus:ring-apple-blue/20"
                                     >
-                                        {CHUYEN_NGANH_OPTIONS.map(opt => <option key={opt} value={opt} className="bg-apple-card">{opt}</option>)}
+                                        {CHUYEN_NGANH_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                                     </select>
                                     <select
                                         value={selectedPhanThi}
                                         onChange={(e) => setSelectedPhanThi(e.target.value)}
-                                        className="w-full px-4 py-3 bg-apple-card border border-apple-border rounded-xl text-sm font-bold text-apple-text focus:outline-none focus:ring-2 focus:ring-apple-blue/20"
+                                        className="w-full px-4 py-3 bg-white border border-apple-border rounded-xl text-sm font-bold text-apple-text focus:outline-none focus:ring-2 focus:ring-apple-blue/20"
                                     >
-                                        {PHAN_THI_OPTIONS.map(opt => <option key={opt} value={opt} className="bg-apple-card">{opt}</option>)}
+                                        {PHAN_THI_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                                     </select>
                                 </div>
                             </div>
@@ -266,7 +266,7 @@ export default function DatabasePage() {
                                         const correctAnswerContent = answerMap[correctAnswerLetter] || ''
 
                                         return (
-                                            <div key={q.id} className="bg-apple-card rounded-2xl border border-apple-border shadow-sm overflow-hidden group hover:shadow-md transition-all">
+                                            <div key={q.id} className="bg-white rounded-2xl border border-apple-border shadow-sm overflow-hidden group hover:shadow-md transition-all">
                                                 <div
                                                     onClick={() => setExpandedId(isExpanded ? null : q.id)}
                                                     className="p-6 cursor-pointer"
@@ -277,34 +277,34 @@ export default function DatabasePage() {
                                                         </span>
                                                         <div className="flex-1 space-y-3">
                                                             <div className="flex gap-2 flex-wrap">
-                                                                <span className="text-[10px] font-bold px-2 py-1 bg-apple-bg text-apple-text-secondary rounded">
+                                                                <span className="text-[10px] font-bold px-2 py-1 bg-slate-100 text-slate-600 rounded">
                                                                     {q.hang}
                                                                 </span>
-                                                                <span className="text-[10px] font-bold px-2 py-1 bg-apple-bg text-apple-text-secondary rounded">
+                                                                <span className="text-[10px] font-bold px-2 py-1 bg-slate-100 text-slate-600 rounded">
                                                                     {q.phan_thi}
                                                                 </span>
                                                             </div>
                                                             <p className="font-bold text-apple-text text-lg">{q.cau_hoi}</p>
 
-                                                            <div className="flex items-center gap-3 p-3 bg-emerald-muted rounded-xl border border-emerald-soft">
+                                                            <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
                                                                 <div className="w-6 h-6 bg-emerald-500 text-white rounded-lg flex items-center justify-center text-xs font-bold">
                                                                     {correctAnswerLetter}
                                                                 </div>
-                                                                <p className="text-sm font-bold text-emerald-text">{correctAnswerContent}</p>
+                                                                <p className="text-sm font-bold text-emerald-700">{correctAnswerContent}</p>
                                                             </div>
                                                         </div>
-                                                        <ChevronDown className={`w-5 h-5 text-apple-text-secondary transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                                                        <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                                                     </div>
                                                 </div>
 
                                                 {isExpanded && (
-                                                    <div className="border-t border-apple-border bg-apple-bg/50 p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="border-t border-slate-100 bg-slate-50 p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         {[
                                                             { l: 'A', v: q.dap_an_a }, { l: 'B', v: q.dap_an_b },
                                                             { l: 'C', v: q.dap_an_c }, { l: 'D', v: q.dap_an_d }
                                                         ].map(opt => (
-                                                            <div key={opt.l} className={`p-4 rounded-xl border ${opt.l === correctAnswerLetter ? 'bg-emerald-muted border-emerald-soft text-emerald-text' : 'bg-apple-card border-apple-border text-apple-text'}`}>
-                                                                <span className="font-bold text-apple-blue mr-2">{opt.l}.</span> {opt.v}
+                                                            <div key={opt.l} className={`p-4 rounded-xl border ${opt.l === correctAnswerLetter ? 'bg-emerald-100 border-emerald-200 text-emerald-800' : 'bg-white border-slate-200'}`}>
+                                                                <span className="font-bold mr-2">{opt.l}.</span> {opt.v}
                                                             </div>
                                                         ))}
                                                     </div>
@@ -319,7 +319,7 @@ export default function DatabasePage() {
                                             <button
                                                 onClick={() => { setCurrentPage(p => Math.max(1, p - 1)); scrollToTop() }}
                                                 disabled={currentPage === 1}
-                                                className="px-4 py-2 bg-apple-card border border-apple-border text-apple-text rounded-xl font-bold text-sm disabled:opacity-50"
+                                                className="px-4 py-2 bg-white border border-apple-border rounded-xl font-bold text-sm disabled:opacity-50"
                                             >
                                                 Trước
                                             </button>
@@ -329,7 +329,7 @@ export default function DatabasePage() {
                                             <button
                                                 onClick={() => { setCurrentPage(p => Math.min(totalPages, p + 1)); scrollToTop() }}
                                                 disabled={currentPage === totalPages}
-                                                className="px-4 py-2 bg-apple-card border border-apple-border text-apple-text rounded-xl font-bold text-sm disabled:opacity-50"
+                                                className="px-4 py-2 bg-white border border-apple-border rounded-xl font-bold text-sm disabled:opacity-50"
                                             >
                                                 Sau
                                             </button>
@@ -354,10 +354,10 @@ export default function DatabasePage() {
                                         <div
                                             key={post.id}
                                             onClick={() => setSelectedPost(post)}
-                                            className="bg-apple-card rounded-2xl border border-apple-border shadow-sm overflow-hidden hover:shadow-lg transition-all group flex flex-col h-full cursor-pointer hover:border-apple-blue/50"
+                                            className="bg-white rounded-2xl border border-apple-border shadow-sm overflow-hidden hover:shadow-lg transition-all group flex flex-col h-full cursor-pointer hover:border-apple-blue/50"
                                         >
-                                            <div className="h-40 bg-apple-bg relative bg-gradient-to-br from-apple-bg to-apple-input">
-                                                <div className="w-full h-full flex items-center justify-center text-apple-text-secondary group-hover:text-apple-blue transition-colors">
+                                            <div className="h-40 bg-slate-100 relative bg-gradient-to-br from-slate-50 to-slate-200">
+                                                <div className="w-full h-full flex items-center justify-center text-slate-400 group-hover:text-apple-blue transition-colors">
                                                     {post.type === 'guide' ? <BookOpen size={48} /> : <FileText size={48} />}
                                                 </div>
                                             </div>
@@ -370,8 +370,8 @@ export default function DatabasePage() {
                                                         {post.excerpt}
                                                     </p>
                                                 </div>
-                                                <div className="flex items-center justify-between pt-4 border-t border-apple-border">
-                                                    <span className="flex items-center gap-1 text-xs font-bold text-apple-text-secondary">
+                                                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                                                    <span className="flex items-center gap-1 text-xs font-bold text-slate-400">
                                                         <Calendar size={12} />
                                                         {new Date(post.created_at).toLocaleDateString('vi-VN')}
                                                     </span>
@@ -396,21 +396,21 @@ export default function DatabasePage() {
                 {/* Post Detail Modal */}
                 {selectedPost && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-                        <div className="bg-apple-card w-full max-w-3xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200 border border-apple-border">
+                        <div className="bg-white w-full max-w-3xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
                             {/* Header */}
-                            <div className="p-6 border-b border-apple-border flex items-start justify-between gap-4 bg-apple-bg/50">
+                            <div className="p-6 border-b border-slate-100 flex items-start justify-between gap-4 bg-slate-50/50">
                                 <div>
                                     <h2 className="text-2xl font-black text-apple-text leading-tight mb-2">
                                         {selectedPost.title}
                                     </h2>
                                     <div className="flex items-center gap-3">
                                         <span className={`px-2 py-1 text-[10px] font-bold uppercase rounded-lg border ${selectedPost.type === 'guide'
-                                            ? 'bg-apple-blue/10 text-apple-blue border-apple-blue/20'
-                                            : 'bg-orange-500/10 text-orange-600 border-orange-500/20'
+                                                ? 'bg-blue-50 text-blue-600 border-blue-100'
+                                                : 'bg-orange-50 text-orange-600 border-orange-100'
                                             }`}>
                                             {selectedPost.type === 'guide' ? 'Hướng dẫn' : 'Tài liệu'}
                                         </span>
-                                        <span className="text-xs font-medium text-apple-text-secondary flex items-center gap-1">
+                                        <span className="text-xs font-medium text-slate-400 flex items-center gap-1">
                                             <Calendar size={12} />
                                             {new Date(selectedPost.created_at).toLocaleDateString('vi-VN')}
                                         </span>
@@ -418,25 +418,25 @@ export default function DatabasePage() {
                                 </div>
                                 <button
                                     onClick={() => setSelectedPost(null)}
-                                    className="p-2 hover:bg-apple-bg rounded-full transition-colors text-apple-text-secondary"
+                                    className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-500"
                                 >
                                     <X size={24} />
                                 </button>
                             </div>
 
                             {/* Content */}
-                            <div className="overflow-y-auto p-6 md:p-8 bg-apple-card">
+                            <div className="overflow-y-auto p-6 md:p-8">
                                 <div
-                                    className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:text-apple-text prose-p:text-apple-text-secondary prose-a:text-apple-blue hover:prose-a:text-blue-600 dark:prose-invert"
+                                    className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:text-apple-text prose-p:text-slate-600 prose-a:text-apple-blue hover:prose-a:text-blue-600"
                                     dangerouslySetInnerHTML={{ __html: selectedPost.content }}
                                 />
                             </div>
 
                             {/* Footer */}
-                            <div className="p-4 border-t border-apple-border bg-apple-bg/50 flex justify-end">
+                            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
                                 <button
                                     onClick={() => setSelectedPost(null)}
-                                    className="px-6 py-2.5 bg-apple-bg text-apple-text font-bold rounded-xl hover:bg-apple-input transition-colors border border-apple-border"
+                                    className="px-6 py-2.5 bg-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-300 transition-colors"
                                 >
                                     Đóng
                                 </button>

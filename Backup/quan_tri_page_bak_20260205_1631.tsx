@@ -56,9 +56,9 @@ const FEEDBACK_TYPE_LABELS: Record<string, { label: string; icon: any; color: st
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-    pending: { label: 'Chờ xử lý', color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20' },
-    reviewed: { label: 'Đã xem', color: 'bg-apple-blue/10 text-apple-blue border-apple-blue/20' },
-    resolved: { label: 'Đã xử lý', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' },
+    pending: { label: 'Chờ xử lý', color: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
+    reviewed: { label: 'Đã xem', color: 'bg-blue-100 text-blue-800 border-blue-300' },
+    resolved: { label: 'Đã xử lý', color: 'bg-green-100 text-green-800 border-green-300' },
 }
 
 export default function QuanTriPage() {
@@ -239,24 +239,24 @@ export default function QuanTriPage() {
                                         <button
                                             onClick={() => setFeedbackFilter('pending')}
                                             className={`px-4 py-2 text-sm font-bold rounded-xl transition-all border ${feedbackFilter === 'pending'
-                                                ? 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20'
-                                                : 'bg-apple-card text-apple-text-secondary border-apple-border hover:border-apple-text/30'
+                                                ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                                : 'bg-white text-apple-text-secondary border-apple-border hover:border-apple-text/30'
                                                 }`}
                                         >
                                             Chờ xử lý
-                                            <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] bg-yellow-500/20 text-yellow-700">
+                                            <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] bg-yellow-200 text-yellow-900">
                                                 {generalFeedbacks.filter(f => f.status !== 'resolved').length}
                                             </span>
                                         </button>
                                         <button
                                             onClick={() => setFeedbackFilter('resolved')}
                                             className={`px-4 py-2 text-sm font-bold rounded-xl transition-all border ${feedbackFilter === 'resolved'
-                                                ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-                                                : 'bg-apple-card text-apple-text-secondary border-apple-border hover:border-apple-text/30'
+                                                ? 'bg-green-50 text-green-700 border-green-200'
+                                                : 'bg-white text-apple-text-secondary border-apple-border hover:border-apple-text/30'
                                                 }`}
                                         >
                                             Đã xử lý
-                                            <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-700">
+                                            <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] bg-green-200 text-green-900">
                                                 {generalFeedbacks.filter(f => f.status === 'resolved').length}
                                             </span>
                                         </button>
@@ -266,29 +266,29 @@ export default function QuanTriPage() {
                                         <select
                                             value={selectedEmail}
                                             onChange={(e) => setSelectedEmail(e.target.value)}
-                                            className="min-w-[240px] px-3 py-2 bg-apple-card border border-apple-border rounded-xl text-xs font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-colors"
+                                            className="min-w-[240px] px-3 py-2 bg-white border border-apple-border rounded-xl text-xs font-bold text-apple-text outline-none focus:border-apple-blue/30"
                                         >
-                                            <option value="Tất cả" className="bg-apple-card">Tất cả Email</option>
+                                            <option value="Tất cả">Tất cả Email</option>
                                             {Array.from(new Set(generalFeedbacks.map(fb => fb.email).filter(Boolean)))
                                                 .sort()
                                                 .map((email) => (
-                                                    <option key={email} value={email!} className="bg-apple-card">{email}</option>
+                                                    <option key={email} value={email!}>{email}</option>
                                                 ))}
                                         </select>
                                         <select
                                             value={searchType}
                                             onChange={(e) => setSearchType(e.target.value)}
-                                            className="px-3 py-2 bg-apple-card border border-apple-border rounded-xl text-xs font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-colors"
+                                            className="px-3 py-2 bg-white border border-apple-border rounded-xl text-xs font-bold text-apple-text outline-none focus:border-apple-blue/30"
                                         >
-                                            <option value="Tất cả" className="bg-apple-card">Tất cả loại góp ý</option>
+                                            <option value="Tất cả">Tất cả loại góp ý</option>
                                             {Object.entries(FEEDBACK_TYPE_LABELS).map(([key, info]) => (
-                                                <option key={key} value={key} className="bg-apple-card">{info.label}</option>
+                                                <option key={key} value={key}>{info.label}</option>
                                             ))}
                                         </select>
                                     </div>
                                 </div>
 
-                                <div className="bg-apple-card border border-apple-border rounded-2xl overflow-x-auto shadow-sm">
+                                <div className="bg-white border border-apple-border rounded-2xl overflow-x-auto shadow-sm">
                                     <table className="w-full text-left border-collapse">
                                         <thead className="bg-apple-bg border-b border-apple-border">
                                             <tr>
@@ -565,12 +565,12 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
                                 className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${activeTab === tab.id
-                                    ? 'bg-apple-card text-apple-text shadow-sm'
+                                    ? 'bg-white text-apple-text shadow-sm'
                                     : 'text-apple-text-secondary hover:text-apple-text'
                                     }`}
                             >
                                 {tab.label}
-                                <span className="text-apple-blue">({tab.count})</span>
+                                <span className="text-red-500">({tab.count})</span>
                             </button>
                         ))}
                     </div>
@@ -612,9 +612,9 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                                     setSelectedHang(e.target.value)
                                     setCurrentPage(1)
                                 }}
-                                className="px-3 py-2 bg-apple-bg border border-apple-border rounded-lg text-sm text-apple-text outline-none focus:border-apple-blue/30"
+                                className="px-3 py-2 bg-apple-bg border border-apple-border rounded-lg text-sm outline-none"
                             >
-                                {FILTER_HANG_OPTIONS.map(h => <option key={h} value={h} className="bg-apple-card">{h}</option>)}
+                                {FILTER_HANG_OPTIONS.map(h => <option key={h} value={h}>{h}</option>)}
                             </select>
                             <select
                                 value={selectedPhanThi}
@@ -622,9 +622,9 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                                     setSelectedPhanThi(e.target.value)
                                     setCurrentPage(1)
                                 }}
-                                className="px-3 py-2 bg-apple-bg border border-apple-border rounded-lg text-sm text-apple-text outline-none focus:border-apple-blue/30"
+                                className="px-3 py-2 bg-apple-bg border border-apple-border rounded-lg text-sm outline-none"
                             >
-                                {FILTER_PHAN_THI_OPTIONS.map(p => <option key={p} value={p} className="bg-apple-card">{p}</option>)}
+                                {FILTER_PHAN_THI_OPTIONS.map(p => <option key={p} value={p}>{p}</option>)}
                             </select>
                             <select
                                 value={selectedChuyenNganh}
@@ -632,9 +632,9 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                                     setSelectedChuyenNganh(e.target.value)
                                     setCurrentPage(1)
                                 }}
-                                className="px-3 py-2 bg-apple-bg border border-apple-border rounded-lg text-sm text-apple-text outline-none focus:border-apple-blue/30"
+                                className="px-3 py-2 bg-apple-bg border border-apple-border rounded-lg text-sm outline-none"
                             >
-                                {FILTER_CHUYEN_NGANH_OPTIONS.map(c => <option key={c} value={c} className="bg-apple-card">{c}</option>)}
+                                {FILTER_CHUYEN_NGANH_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
                         </div>
                     </div>
@@ -651,7 +651,7 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                             </div>
                         ) : (
                             <>
-                                <div className="bg-apple-card border border-apple-border rounded-2xl overflow-hidden shadow-sm">
+                                <div className="bg-white border border-apple-border rounded-2xl overflow-hidden shadow-sm">
                                     <table className="w-full text-left border-collapse">
                                         <thead className="bg-apple-bg border-b border-apple-border">
                                             <tr>
@@ -668,7 +668,7 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                                                     <td className="px-6 py-4">
                                                         <p className="text-sm font-bold text-apple-text line-clamp-2 mb-1">{q.cau_hoi}</p>
                                                         <div className="flex items-center gap-2">
-                                                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600`}>
+                                                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700`}>
                                                                 Đáp án: {q.dap_an_dung}
                                                             </span>
                                                         </div>
@@ -709,7 +709,7 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                                         <button
                                             disabled={currentPage === 1}
                                             onClick={() => setCurrentPage(p => p - 1)}
-                                            className="p-2 bg-apple-card border border-apple-border text-apple-text rounded-lg disabled:opacity-30"
+                                            className="p-2 bg-white border border-apple-border rounded-lg disabled:opacity-30"
                                         >
                                             <ChevronDown className="w-4 h-4 rotate-90" />
                                         </button>
@@ -717,7 +717,7 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                                             // Simple check: if we got full itemsPerPage, assume there might be next page or rely on total count
                                             disabled={questions.length < itemsPerPage && currentPage * itemsPerPage >= totalCount}
                                             onClick={() => setCurrentPage(p => p + 1)}
-                                            className="p-2 bg-apple-card border border-apple-border text-apple-text rounded-lg disabled:opacity-30"
+                                            className="p-2 bg-white border border-apple-border rounded-lg disabled:opacity-30"
                                         >
                                             <ChevronDown className="w-4 h-4 -rotate-90" />
                                         </button>
@@ -728,7 +728,7 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                     </div>
                 </>
             ) : (
-                <div className="bg-apple-card border border-apple-border rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-white border border-apple-border rounded-2xl overflow-hidden shadow-sm">
                     {displayFeedbacks.length === 0 ? (
                         <div className="text-center py-20">
                             <p className="text-apple-text-secondary font-bold">Không có yêu cầu nào</p>
@@ -755,7 +755,7 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                                         <td className="px-6 py-4">
                                             <button
                                                 onClick={() => openEditModal(parseInt(fb.question_id!), fb)}
-                                                className="flex items-center gap-1 px-3 py-1.5 bg-apple-blue/10 text-apple-blue rounded-lg text-xs font-bold hover:bg-apple-blue/20 transition-all"
+                                                className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-100 transition-all"
                                             >
                                                 ID: {fb.question_id}
                                                 <Edit className="w-3 h-3" />
@@ -774,12 +774,12 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                                                 {activeTab === 'pending' ? (
                                                     <button
                                                         onClick={() => updateFeedbackStatus(fb.id, 'resolved', 'Đã kiểm tra và xử lý.')}
-                                                        className="px-3 py-1.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 rounded-lg text-xs font-bold hover:bg-emerald-500/20"
+                                                        className="px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-lg text-xs font-bold hover:bg-green-100"
                                                     >
                                                         Xử lý xong
                                                     </button>
                                                 ) : (
-                                                    <span className="px-3 py-1.5 bg-apple-input text-apple-text-secondary rounded-lg text-xs font-bold">Đã xong</span>
+                                                    <span className="px-3 py-1.5 bg-gray-100 text-gray-500 rounded-lg text-xs font-bold">Đã xong</span>
                                                 )}
 
                                                 <button
@@ -800,8 +800,8 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
 
             {/* Edit/Add Modal */}
             {isModalOpen && editingQuestion && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-apple-card w-full max-w-4xl max-h-[90vh] rounded-[32px] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200 border border-apple-border">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-[32px] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
                         {/* Modal Header */}
                         <div className="px-8 py-6 border-b border-apple-border flex items-center justify-between bg-apple-bg/50">
                             <div>
@@ -859,24 +859,24 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                         )}
 
                         {/* Modal Content */}
-                        <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-8 bg-apple-bg/30">
+                        <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-8 bg-apple-bg/10">
                             {/* Tab 1: Feedback Content */}
                             {editingFeedback && activeModalTab === 'feedback' && (
                                 <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                                    <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-6">
+                                    <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6">
                                         <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
-                                                <AlertTriangle className="w-5 h-5 text-orange-500" />
+                                            <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                                                <AlertTriangle className="w-5 h-5 text-orange-600" />
                                             </div>
                                             <div>
-                                                <p className="text-xs font-bold text-orange-500 uppercase tracking-wide">Người dùng báo cáo</p>
+                                                <p className="text-xs font-bold text-orange-800 uppercase tracking-wide">Người dùng báo cáo</p>
                                                 <p className="text-sm font-bold text-apple-text">{editingFeedback.email || 'Ẩn danh'}</p>
                                             </div>
-                                            <div className="ml-auto text-xs text-apple-text-secondary">
+                                            <div className="ml-auto text-xs text-orange-700">
                                                 {formatDistanceToNow(new Date(editingFeedback.created_at), { addSuffix: true, locale: vi })}
                                             </div>
                                         </div>
-                                        <div className="bg-apple-card p-4 rounded-xl border border-apple-border shadow-sm">
+                                        <div className="bg-white p-4 rounded-xl border border-orange-100 shadow-sm">
                                             <p className="text-apple-text text-sm italic">"{editingFeedback.content}"</p>
                                         </div>
                                     </div>
@@ -904,7 +904,7 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                                             <h4 className="text-sm font-black uppercase tracking-wider">Nội dung câu hỏi & Đáp án</h4>
                                         </div>
 
-                                        <div className="bg-apple-card border border-apple-border rounded-2xl p-6 shadow-sm space-y-6">
+                                        <div className="bg-white border border-apple-border rounded-2xl p-6 shadow-sm space-y-6">
                                             <div className="space-y-2">
                                                 <label className="text-[11px] font-black text-apple-text-secondary uppercase tracking-[0.2em]">Câu hỏi</label>
                                                 <textarea
@@ -967,16 +967,16 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                                             <h4 className="text-sm font-black uppercase tracking-wider">Thông tin phân loại</h4>
                                         </div>
 
-                                        <div className="bg-apple-blue/5 border border-apple-blue/10 rounded-2xl p-6 shadow-sm">
+                                        <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-6 shadow-sm">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div className="space-y-2">
                                                     <label className="text-[11px] font-black text-apple-text-secondary uppercase tracking-[0.2em]">Hạng mục</label>
                                                     <select
                                                         value={editingQuestion.hang}
                                                         onChange={(e) => setEditingQuestion({ ...editingQuestion, hang: e.target.value })}
-                                                        className="w-full px-5 py-4 bg-apple-card border border-apple-border rounded-xl text-[14px] font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-all"
+                                                        className="w-full px-5 py-4 bg-white border border-blue-200 rounded-xl text-[14px] font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-all"
                                                     >
-                                                        {HANG_OPTIONS.map(h => <option key={h} value={h} className="bg-apple-card">{h}</option>)}
+                                                        {HANG_OPTIONS.map(h => <option key={h} value={h}>{h}</option>)}
                                                     </select>
                                                 </div>
                                                 <div className="space-y-2">
@@ -984,9 +984,9 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                                                     <select
                                                         value={editingQuestion.phan_thi}
                                                         onChange={(e) => setEditingQuestion({ ...editingQuestion, phan_thi: e.target.value })}
-                                                        className="w-full px-5 py-4 bg-apple-card border border-apple-border rounded-xl text-[14px] font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-all"
+                                                        className="w-full px-5 py-4 bg-white border border-blue-200 rounded-xl text-[14px] font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-all"
                                                     >
-                                                        {PHAN_THI_OPTIONS.map(p => <option key={p} value={p} className="bg-apple-card">{p}</option>)}
+                                                        {PHAN_THI_OPTIONS.map(p => <option key={p} value={p}>{p}</option>)}
                                                     </select>
                                                 </div>
                                                 <div className="space-y-2 md:col-span-2">
@@ -994,9 +994,9 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                                                     <select
                                                         value={editingQuestion.chuyen_nganh}
                                                         onChange={(e) => setEditingQuestion({ ...editingQuestion, chuyen_nganh: e.target.value })}
-                                                        className="w-full px-5 py-4 bg-apple-card border border-apple-border rounded-xl text-[14px] font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-all"
+                                                        className="w-full px-5 py-4 bg-white border border-blue-200 rounded-xl text-[14px] font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-all"
                                                     >
-                                                        {CHUYEN_NGANH_OPTIONS.map(c => <option key={c} value={c} className="bg-apple-card">{c}</option>)}
+                                                        {CHUYEN_NGANH_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
                                                     </select>
                                                 </div>
                                             </div>
@@ -1011,7 +1011,7 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                             <button
                                 type="button"
                                 onClick={() => setIsModalOpen(false)}
-                                className="px-6 py-3 bg-apple-card border border-apple-border text-apple-text text-sm font-bold rounded-2xl hover:bg-apple-input transition-all"
+                                className="px-6 py-3 bg-white border border-apple-border text-apple-text text-sm font-bold rounded-2xl hover:bg-apple-bg transition-all"
                             >
                                 Hủy bỏ
                             </button>
@@ -1075,12 +1075,12 @@ function AdminFeedbackRow({ feedback, onUpdateStatus, onDelete }: { feedback: Fe
                         <p className="text-sm text-apple-text line-clamp-2 max-w-[400px]">{feedback.content}</p>
 
                         {feedback.answer && (
-                            <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                                <p className="text-[10px] font-bold text-emerald-600 mb-0.5 flex items-center gap-1">
+                            <div className="p-2 bg-emerald-50 border border-emerald-100 rounded-lg">
+                                <p className="text-[10px] font-bold text-emerald-700 mb-0.5 flex items-center gap-1">
                                     <Check className="w-3 h-3" />
                                     Admin đã trả lời:
                                 </p>
-                                <p className="text-xs text-emerald-700 line-clamp-2 italic">
+                                <p className="text-xs text-emerald-900 line-clamp-2 italic">
                                     "{feedback.answer.content}"
                                 </p>
                             </div>
@@ -1108,16 +1108,16 @@ function AdminFeedbackRow({ feedback, onUpdateStatus, onDelete }: { feedback: Fe
                         <div className="flex flex-col md:flex-row gap-8">
                             <div className="flex-1 space-y-4">
                                 <h4 className="text-[11px] font-black text-apple-text-secondary uppercase tracking-wider">Nội dung từ người dùng</h4>
-                                <div className="p-4 bg-apple-card border border-apple-border rounded-2xl shadow-sm italic text-sm text-apple-text">
+                                <div className="p-4 bg-white border border-apple-border rounded-2xl shadow-sm italic text-sm text-apple-text">
                                     {feedback.content}
                                 </div>
                                 {feedback.question_id && (
-                                    <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-xl text-xs">
+                                    <div className="p-3 bg-orange-50 border border-orange-100 rounded-xl text-xs">
                                         <div className="flex flex-wrap gap-2 items-center">
-                                            <span className="font-bold text-orange-500">📌 Câu hỏi:</span>
-                                            <span className="bg-orange-500/10 px-1.5 py-0.5 rounded text-apple-text">{feedback.hang}</span>
-                                            <span className="bg-orange-500/10 px-1.5 py-0.5 rounded text-apple-text">{feedback.phan_thi}</span>
-                                            <span className="bg-orange-500/10 px-1.5 py-0.5 rounded text-apple-text">STT: {feedback.stt}</span>
+                                            <span className="font-bold text-orange-600">📌 Câu hỏi:</span>
+                                            <span className="bg-orange-100 px-1.5 py-0.5 rounded text-apple-text">{feedback.hang}</span>
+                                            <span className="bg-orange-100 px-1.5 py-0.5 rounded text-apple-text">{feedback.phan_thi}</span>
+                                            <span className="bg-orange-100 px-1.5 py-0.5 rounded text-apple-text">STT: {feedback.stt}</span>
                                         </div>
                                     </div>
                                 )}
@@ -1125,18 +1125,18 @@ function AdminFeedbackRow({ feedback, onUpdateStatus, onDelete }: { feedback: Fe
                             <div className="flex-1 space-y-4">
                                 <h4 className="text-[11px] font-black text-apple-text-secondary uppercase tracking-wider">Phản hồi của Admin</h4>
                                 {feedback.answer ? (
-                                    <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
-                                        <p className="text-xs text-emerald-600 font-bold mb-1 italic">
+                                    <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl">
+                                        <p className="text-xs text-emerald-700 font-bold mb-1 italic">
                                             Đã phản hồi vào {new Date(feedback.answer.responded_at).toLocaleDateString('vi-VN')}
                                         </p>
-                                        <p className="text-sm text-emerald-700">{feedback.answer.content}</p>
+                                        <p className="text-sm text-emerald-900">{feedback.answer.content}</p>
                                     </div>
                                 ) : (
                                     <div className="space-y-3">
                                         <textarea
                                             value={adminResponse}
                                             onChange={(e) => setAdminResponse(e.target.value)}
-                                            className="w-full p-3 bg-apple-card border border-apple-border rounded-xl text-sm text-apple-text outline-none focus:ring-2 focus:ring-apple-blue/20 min-h-[100px]"
+                                            className="w-full p-3 bg-white border border-apple-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-apple-blue/20 min-h-[100px]"
                                             placeholder="Nhập nội dung phản hồi..."
                                         />
                                         <div className="flex gap-2">
@@ -1145,7 +1145,7 @@ function AdminFeedbackRow({ feedback, onUpdateStatus, onDelete }: { feedback: Fe
                                             </button>
                                             <button
                                                 onClick={() => onUpdateStatus(feedback.id, 'reviewed')}
-                                                className="px-4 py-2 bg-apple-card border border-apple-border text-apple-text text-xs font-bold rounded-lg hover:bg-apple-input transition-all"
+                                                className="px-4 py-2 bg-white border border-apple-border text-apple-text text-xs font-bold rounded-lg hover:bg-apple-bg transition-all"
                                             >
                                                 Đánh dấu đã xem
                                             </button>

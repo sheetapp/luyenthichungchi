@@ -1,11 +1,16 @@
 'use client'
 
 import { Info } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme/ThemeContext'
 
 export function AnnouncementBanner() {
     return (
         <div className="hidden md:block w-full bg-apple-bg/80 backdrop-blur-md border-b border-apple-border sticky top-0 z-50 overflow-hidden">
-            <div className="px-4 md:px-6 h-10 flex items-center">
+            <div className="px-4 md:px-6 h-12 flex items-center gap-4">
+                <div className="flex-shrink-0 scale-75 -ml-2">
+                    <ThemeToggle />
+                </div>
+
                 <div className="flex items-center gap-2 px-3 py-1 bg-apple-blue/10 text-apple-blue rounded-full text-[10px] font-bold shrink-0 uppercase tracking-wider">
                     <Info className="w-3 h-3" />
                     <span>Cập nhật</span>

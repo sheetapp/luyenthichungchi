@@ -649,7 +649,6 @@ function OnTapContent() {
                                 >
                                     <HelpCircle className="w-4.5 h-4.5" />
                                 </button>
-                                <ThemeToggle />
                             </div>
                             <div className="md:hidden flex p-1 bg-apple-border rounded-[10px]">
                                 {HANG_TABS.map(hang => (
@@ -738,7 +737,6 @@ function OnTapContent() {
                                     <AlertTriangle className="w-4 h-4" />
                                 </button>
                             )}
-                            <ThemeToggle />
                         </div>
                     </div>
                     {(practiceStep === 'setup' || !isMobile) && (
@@ -757,9 +755,6 @@ function OnTapContent() {
 
                 {/* Desktop Buttons */}
                 <div className="hidden md:flex items-center gap-3 justify-between md:justify-end">
-                    <div className="hidden md:block">
-                        <ThemeToggle />
-                    </div>
                     <button
                         onClick={handleClearHistory}
                         className="hidden md:flex flex-1 md:flex-none items-center justify-center gap-2 px-4 md:px-6 py-2.5 md:py-3 rounded-[10px] text-xs md:text-sm font-bold transition-all border bg-apple-card text-red-500 border-apple-border hover:bg-red-50 shadow-sm active:scale-97"

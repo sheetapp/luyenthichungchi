@@ -9,7 +9,7 @@ const navItems = [
     { icon: Home, label: 'Trang chủ', href: '/gioi-thieu' },
     // { icon: LayoutGrid, label: 'Danh mục', href: '/' },
     { icon: BookOpen, label: 'Ôn tập', href: '/on-tap' },
-    { icon: Heart, label: 'Ủng hộ', href: '/buy-me-coffee', special: true },
+    { icon: Heart, label: 'Yêu thích', href: '/tai-khoan?action=review', special: true },
     { icon: FileText, label: 'Thi thử', href: '/thi-thu' },
     { icon: User, label: 'Tài khoản', href: '/tai-khoan' },
 ]
