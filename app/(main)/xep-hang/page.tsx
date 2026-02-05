@@ -48,8 +48,8 @@ export default function XepHangPage() {
     const fetchRankings = async (currentUserId: string) => {
         try {
             const { data: profiles, error } = await supabase
-                .from('profiles')
-                .select('id, display_name, avata, stats')
+                .from('leaderboard_view')
+                .select('*')
                 .order('stats->highest_score', { ascending: false })
                 .limit(20)
 

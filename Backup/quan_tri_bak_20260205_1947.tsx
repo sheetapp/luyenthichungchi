@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Star, MessageSquare, Plus, Loader2, AlertTriangle, Shield, Database, Search, Filter, Edit, Trash2, ChevronDown, ChevronUp, Check, X, FileText, Info, TrendingUp, Target, Users, BarChart3, BookOpen, Phone, Briefcase, User } from 'lucide-react'
+import { Star, MessageSquare, Plus, Loader2, AlertTriangle, Shield, Database, Search, Filter, Edit, Trash2, ChevronDown, ChevronUp, Check, X, FileText, Info } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { formatDistanceToNow, format } from 'date-fns'
+import { formatDistanceToNow } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { isAdmin } from '@/constants/admin'
 import { removeVietnameseTones } from '@/lib/utils/vietnamese'
@@ -28,7 +28,6 @@ interface Feedback {
     stt: number | null
     chuyen_nganh: string | null
     email: string | null
-    displayName?: string | null
     answer: {
         content: string
         responded_at: string
@@ -68,7 +67,7 @@ export default function QuanTriPage() {
     const [isUserAdmin, setIsUserAdmin] = useState(false)
     const [loading, setLoading] = useState(true)
 
-    const [activeAdminTab, setActiveAdminTab] = useState<'feedback' | 'questions' | 'practice' | 'exams' | 'profiles'>('feedback')
+    const [activeAdminTab, setActiveAdminTab] = useState<'feedback' | 'questions'>('feedback')
     const [allFeedbacks, setAllFeedbacks] = useState<Feedback[]>([])
     const [adminLoading, setAdminLoading] = useState(false)
 
@@ -76,17 +75,6 @@ export default function QuanTriPage() {
     const [feedbackFilter, setFeedbackFilter] = useState<'pending' | 'resolved'>('pending')
     const [selectedEmail, setSelectedEmail] = useState('Tất cả')
     const [searchType, setSearchType] = useState('Tất cả')
-    const [feedbackSortConfig, setFeedbackSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' | null }>({ key: 'created_at', direction: 'desc' })
-
-    const requestFeedbackSort = (key: string) => {
-        let direction: 'asc' | 'desc' | null = 'desc'
-        if (feedbackSortConfig.key === key && feedbackSortConfig.direction === 'desc') {
-            direction = 'asc'
-        } else if (feedbackSortConfig.key === key && feedbackSortConfig.direction === 'asc') {
-            direction = null
-        }
-        setFeedbackSortConfig({ key, direction })
-    }
 
     useEffect(() => {
         checkUser()
@@ -114,22 +102,13 @@ export default function QuanTriPage() {
     async function fetchAllFeedbacks() {
         setAdminLoading(true)
         try {
-            const [feedbackRes, profilesRes] = await Promise.all([
-                supabase.from('user_feedback').select('*').order('created_at', { ascending: false }),
-                supabase.from('profiles').select('id, email, display_name, user_name')
-            ])
+            const { data, error } = await supabase
+                .from('user_feedback')
+                .select('*')
+                .order('created_at', { ascending: false })
 
-            if (feedbackRes.error) throw feedbackRes.error
-            if (profilesRes.error) throw profilesRes.error
-
-            const profilesMap = new Map(profilesRes.data.map(p => [p.id, p.display_name || p.user_name || p.email]))
-
-            const feedbacksWithNames = (feedbackRes.data || []).map(fb => ({
-                ...fb,
-                displayName: profilesMap.get(fb.user_id) || fb.email || 'Người dùng ẩn danh'
-            }))
-
-            setAllFeedbacks(feedbacksWithNames)
+            if (error) throw error
+            setAllFeedbacks(data || [])
         } catch (error) {
             console.error('Error fetching all feedbacks:', error)
         } finally {
@@ -242,45 +221,6 @@ export default function QuanTriPage() {
                         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-apple-blue" />
                     )}
                 </button>
-                <button
-                    onClick={() => setActiveAdminTab('practice')}
-                    className={`pb-3 px-2 text-sm font-bold transition-all relative flex items-center gap-2 ${activeAdminTab === 'practice'
-                        ? 'text-apple-blue'
-                        : 'text-apple-text-secondary hover:text-apple-text'
-                        }`}
-                >
-                    <BookOpen className="w-4 h-4" />
-                    Quản trị ôn tập
-                    {activeAdminTab === 'practice' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-apple-blue" />
-                    )}
-                </button>
-                <button
-                    onClick={() => setActiveAdminTab('exams')}
-                    className={`pb-3 px-2 text-sm font-bold transition-all relative flex items-center gap-2 ${activeAdminTab === 'exams'
-                        ? 'text-apple-blue'
-                        : 'text-apple-text-secondary hover:text-apple-text'
-                        }`}
-                >
-                    <BarChart3 className="w-4 h-4" />
-                    Quản trị Thi thử
-                    {activeAdminTab === 'exams' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-apple-blue" />
-                    )}
-                </button>
-                <button
-                    onClick={() => setActiveAdminTab('profiles')}
-                    className={`pb-3 px-2 text-sm font-bold transition-all relative flex items-center gap-2 ${activeAdminTab === 'profiles'
-                        ? 'text-apple-blue'
-                        : 'text-apple-text-secondary hover:text-apple-text'
-                        }`}
-                >
-                    <Users className="w-4 h-4" />
-                    Quản trị Tài khoản
-                    {activeAdminTab === 'profiles' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-apple-blue" />
-                    )}
-                </button>
             </div>
 
             {/* Content */}
@@ -293,7 +233,7 @@ export default function QuanTriPage() {
                             </div>
                         ) : (
                             <div className="space-y-6">
-                                {/* ... (previous filters and table) */}
+                                {/* Management Filters */}
                                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                     <div className="flex gap-4">
                                         <button
@@ -352,35 +292,11 @@ export default function QuanTriPage() {
                                     <table className="w-full text-left border-collapse">
                                         <thead className="bg-apple-bg border-b border-apple-border">
                                             <tr>
-                                                <th
-                                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary cursor-pointer hover:text-apple-blue transition-colors group"
-                                                    onClick={() => requestFeedbackSort('displayName')}
-                                                >
-                                                    <div className="flex items-center gap-1">
-                                                        Người gửi
-                                                        <ChevronDown className={`w-3 h-3 transition-transform ${feedbackSortConfig.key === 'displayName' ? (feedbackSortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                                    </div>
-                                                </th>
-                                                <th
-                                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary cursor-pointer hover:text-apple-blue transition-colors group"
-                                                    onClick={() => requestFeedbackSort('created_at')}
-                                                >
-                                                    <div className="flex items-center gap-1">
-                                                        Ngày gửi
-                                                        <ChevronDown className={`w-3 h-3 transition-transform ${feedbackSortConfig.key === 'created_at' ? (feedbackSortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                                    </div>
-                                                </th>
-                                                <th
-                                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary cursor-pointer hover:text-apple-blue transition-colors group"
-                                                    onClick={() => requestFeedbackSort('feedback_type')}
-                                                >
-                                                    <div className="flex items-center gap-1">
-                                                        Phân loại
-                                                        <ChevronDown className={`w-3 h-3 transition-transform ${feedbackSortConfig.key === 'feedback_type' ? (feedbackSortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                                    </div>
-                                                </th>
-                                                <th className="px-6 py-4 text-xs font-semibold text-apple-text-secondary">Nội dung</th>
-                                                <th className="px-6 py-4 text-xs font-semibold text-apple-text-secondary text-center">Thao tác</th>
+                                                <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider">Người gửi</th>
+                                                <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider">Ngày gửi</th>
+                                                <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider">Phân loại</th>
+                                                <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider">Nội dung</th>
+                                                <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider text-center">Thao tác</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -390,26 +306,6 @@ export default function QuanTriPage() {
                                                     const typeMatch = searchType === 'Tất cả' || fb.feedback_type === searchType
                                                     const emailMatch = selectedEmail === 'Tất cả' || fb.email === selectedEmail
                                                     return statusMatch && typeMatch && emailMatch
-                                                })
-                                                .sort((a, b) => {
-                                                    if (!feedbackSortConfig.direction) return 0
-                                                    const key = feedbackSortConfig.key as keyof Feedback
-                                                    const isAsc = feedbackSortConfig.direction === 'asc'
-
-                                                    let valA: any = a[key]
-                                                    let valB: any = b[key]
-
-                                                    if (key === 'displayName') {
-                                                        valA = (a.displayName || '').toLowerCase()
-                                                        valB = (b.displayName || '').toLowerCase()
-                                                    } else if (key === 'created_at') {
-                                                        valA = new Date(a.created_at).getTime()
-                                                        valB = new Date(b.created_at).getTime()
-                                                    }
-
-                                                    if (valA < valB) return isAsc ? -1 : 1
-                                                    if (valA > valB) return isAsc ? 1 : -1
-                                                    return 0
                                                 })
                                                 .map((fb) => (
                                                     <AdminFeedbackRow
@@ -425,14 +321,8 @@ export default function QuanTriPage() {
                             </div>
                         )}
                     </>
-                ) : activeAdminTab === 'questions' ? (
-                    <AdminQuestionManager onDataChange={fetchAllFeedbacks} allFeedbacks={allFeedbacks} />
-                ) : activeAdminTab === 'practice' ? (
-                    <AdminPracticeManager />
-                ) : activeAdminTab === 'exams' ? (
-                    <AdminExamManager />
                 ) : (
-                    <AdminProfilesManager />
+                    <AdminQuestionManager onDataChange={fetchAllFeedbacks} allFeedbacks={allFeedbacks} />
                 )}
             </div>
         </div>
@@ -765,10 +655,10 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                                     <table className="w-full text-left border-collapse">
                                         <thead className="bg-apple-bg border-b border-apple-border">
                                             <tr>
-                                                <th className="px-6 py-4 text-xs font-semibold text-apple-text-secondary w-16 text-center">ID</th>
-                                                <th className="px-6 py-4 text-xs font-semibold text-apple-text-secondary">Nội dung câu hỏi</th>
-                                                <th className="px-6 py-4 text-xs font-semibold text-apple-text-secondary w-40">Phân loại</th>
-                                                <th className="px-6 py-4 text-xs font-semibold text-apple-text-secondary w-32 text-center">Thao tác</th>
+                                                <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider w-16 text-center">ID</th>
+                                                <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider">Nội dung câu hỏi</th>
+                                                <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider w-40">Phân loại</th>
+                                                <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider w-32 text-center">Thao tác</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -983,7 +873,7 @@ function AdminQuestionManager({ onDataChange, allFeedbacks }: { onDataChange: ()
                                                 <p className="text-sm font-bold text-apple-text">{editingFeedback.email || 'Ẩn danh'}</p>
                                             </div>
                                             <div className="ml-auto text-xs text-apple-text-secondary">
-                                                {format(new Date(editingFeedback.created_at), 'dd/MM/yyyy HH:mm:ss')}
+                                                {formatDistanceToNow(new Date(editingFeedback.created_at), { addSuffix: true, locale: vi })}
                                             </div>
                                         </div>
                                         <div className="bg-apple-card p-4 rounded-xl border border-apple-border shadow-sm">
@@ -1167,12 +1057,12 @@ function AdminFeedbackRow({ feedback, onUpdateStatus, onDelete }: { feedback: Fe
             <tr className={`border-b border-apple-border hover:bg-apple-bg/50 transition-colors ${isExpanded ? 'bg-apple-blue/[0.02]' : ''}`}>
                 <td className="px-6 py-4">
                     <div className="flex flex-col">
-                        <span className="font-bold text-apple-text">{feedback.displayName || feedback.email || 'N/A'}</span>
-                        <span className="text-[10px] text-apple-text-secondary">{feedback.email} • UID: {feedback.user_id.substring(0, 8)}...</span>
+                        <span className="font-bold text-apple-text">{feedback.email || 'N/A'}</span>
+                        <span className="text-[10px] text-apple-text-secondary">UID: {feedback.user_id.substring(0, 8)}...</span>
                     </div>
                 </td>
                 <td className="px-6 py-4 text-xs text-apple-text-secondary">
-                    {format(new Date(feedback.created_at), 'dd/MM/yyyy HH:mm:ss')}
+                    {formatDistanceToNow(new Date(feedback.created_at), { addSuffix: true, locale: vi })}
                 </td>
                 <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
@@ -1237,7 +1127,7 @@ function AdminFeedbackRow({ feedback, onUpdateStatus, onDelete }: { feedback: Fe
                                 {feedback.answer ? (
                                     <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
                                         <p className="text-xs text-emerald-600 font-bold mb-1 italic">
-                                            Đã phản hồi vào {format(new Date(feedback.answer.responded_at), 'dd/MM/yyyy HH:mm:ss')}
+                                            Đã phản hồi vào {new Date(feedback.answer.responded_at).toLocaleDateString('vi-VN')}
                                         </p>
                                         <p className="text-sm text-emerald-700">{feedback.answer.content}</p>
                                     </div>
@@ -1268,891 +1158,5 @@ function AdminFeedbackRow({ feedback, onUpdateStatus, onDelete }: { feedback: Fe
                 </tr>
             )}
         </>
-    )
-}
-
-// --- New Activity Tracking Components ---
-
-function AdminProfilesManager() {
-    const [loading, setLoading] = useState(true)
-    const [profiles, setProfiles] = useState<any[]>([])
-    const [searchQuery, setSearchQuery] = useState('')
-    const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' | null }>({ key: 'created_at', direction: 'desc' })
-    const [selectedUsers, setSelectedUsers] = useState<string[]>([])
-
-    useEffect(() => {
-        fetchProfiles()
-    }, [])
-
-    async function fetchProfiles() {
-        setLoading(true)
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .order('created_at', { ascending: false })
-
-            if (error) throw error
-            setProfiles(data || [])
-        } catch (error) {
-            console.error('Error fetching profiles:', error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const requestSort = (key: string) => {
-        let direction: 'asc' | 'desc' | null = 'desc'
-        if (sortConfig.key === key && sortConfig.direction === 'desc') {
-            direction = 'asc'
-        } else if (sortConfig.key === key && sortConfig.direction === 'asc') {
-            direction = null
-        }
-        setSortConfig({ key, direction })
-    }
-
-    const deleteUser = async (userId: string) => {
-        if (!confirm('Bạn có chắc chắn muốn xóa tài khoản này? Toàn bộ dữ liệu liên quan sẽ bị xóa.')) return
-        try {
-            const { error } = await supabase.from('profiles').delete().eq('id', userId)
-            if (error) throw error
-            setProfiles(prev => prev.filter(p => p.id !== userId))
-            setSelectedUsers(prev => prev.filter(id => id !== userId))
-            alert('Đã xóa thành công!')
-        } catch (error) {
-            console.error('Error deleting user:', error)
-            alert('Có lỗi xảy ra khi xóa.')
-        }
-    }
-
-    const deleteSelectedUsers = async () => {
-        if (!confirm(`Bạn có chắc muốn xóa ${selectedUsers.length} tài khoản đã chọn không?`)) return
-        try {
-            const { error } = await supabase.from('profiles').delete().in('id', selectedUsers)
-            if (error) throw error
-            setProfiles(prev => prev.filter(p => !selectedUsers.includes(p.id)))
-            setSelectedUsers([])
-            alert('Đã xóa thành công!')
-        } catch (error) {
-            console.error('Error deleting users:', error)
-            alert('Có lỗi xảy ra khi xóa.')
-        }
-    }
-
-    const toggleSelectAll = () => {
-        if (selectedUsers.length === filteredProfiles.length) {
-            setSelectedUsers([])
-        } else {
-            setSelectedUsers(filteredProfiles.map(p => p.id))
-        }
-    }
-
-    const toggleSelectUser = (id: string) => {
-        if (selectedUsers.includes(id)) {
-            setSelectedUsers(prev => prev.filter(uid => uid !== id))
-        } else {
-            setSelectedUsers(prev => [...prev, id])
-        }
-    }
-
-    const filteredProfiles = profiles.filter(p => {
-        const query = searchQuery.toLowerCase()
-        return (
-            p.email?.toLowerCase().includes(query) ||
-            p.display_name?.toLowerCase().includes(query) ||
-            p.user_name?.toLowerCase().includes(query) ||
-            p.phone?.toLowerCase().includes(query)
-        )
-    }).sort((a, b) => {
-        if (!sortConfig.direction) return 0
-        const key = sortConfig.key
-        const isAsc = sortConfig.direction === 'asc'
-
-        let valA: any
-        let valB: any
-
-        if (key === 'displayName') {
-            valA = (a.display_name || a.user_name || '').toLowerCase()
-            valB = (b.display_name || b.user_name || '').toLowerCase()
-        } else if (key === 'specialty') {
-            valA = (a.preferences?.specialty || '').toLowerCase()
-            valB = (b.preferences?.specialty || '').toLowerCase()
-        } else if (key === 'rank') {
-            valA = (a.preferences?.rank || '').toLowerCase()
-            valB = (b.preferences?.rank || '').toLowerCase()
-        } else if (key === 'created_at') {
-            valA = new Date(a.created_at).getTime()
-            valB = new Date(b.created_at).getTime()
-        } else {
-            valA = a[key]
-            valB = b[key]
-        }
-
-        if (valA < valB) return isAsc ? -1 : 1
-        if (valA > valB) return isAsc ? 1 : -1
-        return 0
-    })
-
-    return (
-        <div className="space-y-6">
-            <div className="bg-apple-card border border-apple-border rounded-2xl p-4 md:p-6 shadow-sm space-y-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-secondary" />
-                        <input
-                            type="text"
-                            placeholder="Tìm tên, email, username, SĐT..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-apple-bg border border-apple-border rounded-xl text-sm font-medium text-apple-text outline-none focus:border-apple-blue/30 transition-colors"
-                        />
-                    </div>
-
-                    {selectedUsers.length > 0 && (
-                        <div className="flex items-center gap-3">
-                            <span className="text-sm font-bold text-apple-text-secondary">
-                                Đã chọn {selectedUsers.length}
-                            </span>
-                            <button
-                                onClick={deleteSelectedUsers}
-                                className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition-colors shadow-sm shadow-red-500/20"
-                            >
-                                <Trash2 className="w-4 h-4" />
-                                Xóa đã chọn
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {loading ? (
-                <div className="flex items-center justify-center py-20">
-                    <Loader2 className="w-8 h-8 text-apple-blue animate-spin" />
-                </div>
-            ) : (
-                <div className="bg-apple-card border border-apple-border rounded-2xl overflow-x-auto shadow-sm">
-                    <table className="w-full text-left border-collapse">
-                        <thead className="bg-apple-bg border-b border-apple-border">
-                            <tr>
-                                <th className="px-6 py-4 w-10">
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedUsers.length === filteredProfiles.length && filteredProfiles.length > 0}
-                                        onChange={toggleSelectAll}
-                                        className="w-4 h-4 rounded border-apple-border text-apple-blue focus:ring-apple-blue/20"
-                                    />
-                                </th>
-                                <th
-                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary cursor-pointer hover:text-apple-blue transition-colors group"
-                                    onClick={() => requestSort('displayName')}
-                                >
-                                    <div className="flex items-center gap-1">
-                                        Người dùng
-                                        <ChevronDown className={`w-3 h-3 transition-transform ${sortConfig.key === 'displayName' ? (sortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                    </div>
-                                </th>
-                                <th
-                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary cursor-pointer hover:text-apple-blue transition-colors group"
-                                    onClick={() => requestSort('user_name')}
-                                >
-                                    <div className="flex items-center gap-1">
-                                        Username
-                                        <ChevronDown className={`w-3 h-3 transition-transform ${sortConfig.key === 'user_name' ? (sortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                    </div>
-                                </th>
-                                <th className="px-6 py-4 text-xs font-semibold text-apple-text-secondary">Thông tin chung</th>
-                                <th
-                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary cursor-pointer hover:text-apple-blue transition-colors group"
-                                    onClick={() => requestSort('specialty')}
-                                >
-                                    <div className="flex items-center gap-1">
-                                        Chuyên ngành
-                                        <ChevronDown className={`w-3 h-3 transition-transform ${sortConfig.key === 'specialty' ? (sortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                    </div>
-                                </th>
-                                <th
-                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary cursor-pointer hover:text-apple-blue transition-colors group"
-                                    onClick={() => requestSort('rank')}
-                                >
-                                    <div className="flex items-center gap-1">
-                                        Hạng
-                                        <ChevronDown className={`w-3 h-3 transition-transform ${sortConfig.key === 'rank' ? (sortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                    </div>
-                                </th>
-                                <th
-                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary cursor-pointer hover:text-apple-blue transition-colors group"
-                                    onClick={() => requestSort('created_at')}
-                                >
-                                    <div className="flex items-center gap-1">
-                                        Ngày tham gia
-                                        <ChevronDown className={`w-3 h-3 transition-transform ${sortConfig.key === 'created_at' ? (sortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                    </div>
-                                </th>
-                                <th className="px-6 py-4 text-xs font-semibold text-apple-text-secondary text-center">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-apple-border">
-                            {filteredProfiles.map((item) => (
-                                <tr key={item.id} className={`hover:bg-apple-bg/50 transition-colors ${selectedUsers.includes(item.id) ? 'bg-apple-blue/5' : ''}`}>
-                                    <td className="px-6 py-4">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedUsers.includes(item.id)}
-                                            onChange={() => toggleSelectUser(item.id)}
-                                            className="w-4 h-4 rounded border-apple-border text-apple-blue focus:ring-apple-blue/20"
-                                        />
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full overflow-hidden bg-apple-bg border border-apple-border flex-shrink-0">
-                                                {item.avata ? (
-                                                    <img src={item.avata} alt="" className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-apple-blue/10 text-apple-blue">
-                                                        <User className="w-5 h-5" />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-bold text-apple-text">{item.display_name || 'N/A'}</span>
-                                                <span className="text-[10px] text-apple-text-secondary font-medium">{item.email}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="text-xs font-medium text-apple-text-secondary">@{item.user_name || 'n/a'}</span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col gap-1">
-                                            <div className="flex items-center gap-1 text-[10px] text-apple-text-secondary font-medium">
-                                                <Phone className="w-2.5 h-2.5" /> {item.phone || 'N/A'}
-                                            </div>
-                                            <div className="flex items-center gap-1 text-[10px] text-apple-text-secondary font-medium">
-                                                <Briefcase className="w-2.5 h-2.5" /> {item.job_title || 'N/A'}
-                                            </div>
-                                            <div className="text-[10px] text-apple-text-secondary font-medium italic">
-                                                Giới tính: {item.gender || 'N/A'}
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-xs font-bold text-apple-text">{item.preferences?.specialty || 'Chưa chọn'}</div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="px-2 py-1 text-[10px] font-bold rounded-lg bg-apple-blue/10 text-apple-blue border border-apple-blue/20">
-                                            {item.preferences?.rank || 'N/A'}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-xs text-apple-text-secondary font-medium">
-                                            {format(new Date(item.created_at), 'dd/MM/yyyy')}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <button
-                                            onClick={() => deleteUser(item.id)}
-                                            className="p-2 text-apple-text-secondary hover:text-red-500 hover:bg-red-500/5 rounded-lg transition-all"
-                                            title="Xóa tài khoản"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-        </div>
-    )
-}
-
-function AdminPracticeManager() {
-    const [loading, setLoading] = useState(true)
-    const [stats, setStats] = useState<any[]>([])
-    const [searchQuery, setSearchQuery] = useState('')
-    const [selectedHang, setSelectedHang] = useState('Tất cả')
-    const [selectedChuyenNganh, setSelectedChuyenNganh] = useState('Tất cả')
-    const [practiceSortConfig, setPracticeSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' | null }>({ key: 'updatedAt', direction: 'desc' })
-
-    const requestPracticeSort = (key: string) => {
-        let direction: 'asc' | 'desc' | null = 'desc'
-        if (practiceSortConfig.key === key && practiceSortConfig.direction === 'desc') {
-            direction = 'asc'
-        } else if (practiceSortConfig.key === key && practiceSortConfig.direction === 'asc') {
-            direction = null
-        }
-        setPracticeSortConfig({ key, direction })
-    }
-
-    useEffect(() => {
-        fetchPracticeStats()
-    }, [])
-
-    async function fetchPracticeStats() {
-        setLoading(true)
-        try {
-            // Fetch all profiles and practice stats
-            const [profilesRes, statsRes] = await Promise.all([
-                supabase.from('profiles').select('id, email, preferences, display_name, user_name'),
-                supabase.from('user_practice_stats').select('user_id, updated_at, history')
-            ])
-
-            if (profilesRes.error) throw profilesRes.error
-            if (statsRes.error) throw statsRes.error
-
-            const profiles = profilesRes.data || []
-            const practiceData = statsRes.data || []
-
-            // Merge data
-            const merged = profiles.map(profile => {
-                const userStats = practiceData.find(s => s.user_id === profile.id)
-                const history = (userStats?.history as any) || {}
-
-                return {
-                    id: profile.id,
-                    email: profile.email,
-                    displayName: profile.display_name || profile.user_name || 'Chưa đặt tên',
-                    preferences: profile.preferences as any,
-                    totalPracticed: Object.keys(history).length,
-                    updatedAt: userStats?.updated_at || null,
-                    // For filtering
-                    hang: (profile.preferences as any)?.rank || 'Chưa chọn',
-                    chuyenNganh: (profile.preferences as any)?.specialty || 'Chưa chọn'
-                }
-            }).sort((a, b) => {
-                const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0
-                const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0
-                return dateB - dateA
-            })
-
-            setStats(merged)
-        } catch (error) {
-            console.error('Error fetching practice stats:', error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    async function deletePracticeData(userId: string) {
-        if (!confirm('Bạn có chắc chắn muốn xóa tất cả lịch sử ôn tập của người dùng này không? Hành động này không thể hoàn tác.')) return
-
-        try {
-            const { error } = await supabase
-                .from('user_practice_stats')
-                .delete()
-                .eq('user_id', userId)
-
-            if (error) throw error
-
-            // Update local state
-            setStats(prev => prev.map(s => s.id === userId ? { ...s, totalPracticed: 0, updatedAt: null } : s))
-            alert('Đã xóa dữ liệu ôn tập thành công!')
-        } catch (error) {
-            console.error('Error deleting practice data:', error)
-            alert('Có lỗi xảy ra khi xóa dữ liệu.')
-        }
-    }
-
-    const filteredStats = stats.filter(s => {
-        const emailMatch = !searchQuery || s.email.toLowerCase().includes(searchQuery.toLowerCase()) || s.displayName?.toLowerCase().includes(searchQuery.toLowerCase())
-        const hangMatch = selectedHang === 'Tất cả' || s.hang === selectedHang
-        const chuyenNganhMatch = selectedChuyenNganh === 'Tất cả' || s.chuyenNganh === selectedChuyenNganh
-        return emailMatch && hangMatch && chuyenNganhMatch
-    }).sort((a, b) => {
-        if (!practiceSortConfig.direction) return 0
-        const key = practiceSortConfig.key
-        const isAsc = practiceSortConfig.direction === 'asc'
-
-        let valA: any
-        let valB: any
-
-        if (key === 'displayName') {
-            valA = a.displayName.toLowerCase()
-            valB = b.displayName.toLowerCase()
-        } else if (key === 'updatedAt') {
-            valA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0
-            valB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0
-        } else {
-            valA = a[key]
-            valB = b[key]
-        }
-
-        if (valA < valB) return isAsc ? -1 : 1
-        if (valA > valB) return isAsc ? 1 : -1
-        return 0
-    })
-
-    return (
-        <div className="space-y-6">
-            <div className="bg-apple-card border border-apple-border rounded-2xl p-4 md:p-6 shadow-sm space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-secondary" />
-                        <input
-                            type="text"
-                            placeholder="Tìm kiếm user..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-apple-bg border border-apple-border rounded-xl text-sm font-medium text-apple-text outline-none focus:border-apple-blue/30 transition-colors"
-                        />
-                    </div>
-                    <select
-                        value={selectedHang}
-                        onChange={(e) => setSelectedHang(e.target.value)}
-                        className="px-4 py-2 bg-apple-bg border border-apple-border rounded-xl text-sm font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-colors"
-                    >
-                        <option value="Tất cả">Tất cả Hạng</option>
-                        {HANG_OPTIONS.map(hang => <option key={hang} value={hang}>{hang}</option>)}
-                    </select>
-                    <select
-                        value={selectedChuyenNganh}
-                        onChange={(e) => setSelectedChuyenNganh(e.target.value)}
-                        className="px-4 py-2 bg-apple-bg border border-apple-border rounded-xl text-sm font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-colors"
-                    >
-                        <option value="Tất cả">Tất cả Chuyên ngành</option>
-                        {CHUYEN_NGANH_OPTIONS.map(cn => <option key={cn} value={cn}>{cn}</option>)}
-                    </select>
-                    <div className="flex items-center justify-end">
-                        <span className="text-xs font-bold text-apple-text-secondary">
-                            Tổng số: {filteredStats.length} user
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            {loading ? (
-                <div className="flex items-center justify-center py-20">
-                    <Loader2 className="w-8 h-8 text-apple-blue animate-spin" />
-                </div>
-            ) : (
-                <div className="bg-apple-card border border-apple-border rounded-2xl overflow-x-auto shadow-sm">
-                    <table className="w-full text-left border-collapse">
-                        <thead className="bg-apple-bg border-b border-apple-border">
-                            <tr>
-                                <th
-                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary cursor-pointer hover:text-apple-blue transition-colors group"
-                                    onClick={() => requestPracticeSort('displayName')}
-                                >
-                                    <div className="flex items-center gap-1">
-                                        User (Tên & Email)
-                                        <ChevronDown className={`w-3 h-3 transition-transform ${practiceSortConfig.key === 'displayName' ? (practiceSortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                    </div>
-                                </th>
-                                <th className="px-6 py-4 text-xs font-semibold text-apple-text-secondary">Hạng quan tâm</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-apple-text-secondary">Chuyên ngành</th>
-                                <th
-                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary text-center cursor-pointer hover:text-apple-blue transition-colors group"
-                                    onClick={() => requestPracticeSort('totalPracticed')}
-                                >
-                                    <div className="flex items-center justify-center gap-1">
-                                        Số câu đã ôn
-                                        <ChevronDown className={`w-3 h-3 transition-transform ${practiceSortConfig.key === 'totalPracticed' ? (practiceSortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                    </div>
-                                </th>
-                                <th
-                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary cursor-pointer hover:text-apple-blue transition-colors group"
-                                    onClick={() => requestPracticeSort('updatedAt')}
-                                >
-                                    <div className="flex items-center gap-1">
-                                        Hoạt động cuối
-                                        <ChevronDown className={`w-3 h-3 transition-transform ${practiceSortConfig.key === 'updatedAt' ? (practiceSortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                    </div>
-                                </th>
-                                <th className="px-6 py-4 text-xs font-semibold text-apple-text-secondary text-center w-20">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-apple-border">
-                            {filteredStats.map((item) => (
-                                <tr key={item.id} className="hover:bg-apple-bg/50 transition-colors">
-                                    <td className="px-6 py-4">
-                                        <div className="text-sm font-bold text-apple-text">{item.displayName}</div>
-                                        <div className="text-[10px] text-apple-text-secondary font-medium">{item.email}</div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="px-2 py-1 text-[10px] font-bold rounded-lg bg-apple-blue/10 text-apple-blue border border-apple-blue/20">
-                                            {item.hang}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-xs font-bold text-apple-text">{item.chuyenNganh}</div>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-600 rounded-full text-xs font-black border border-emerald-500/20">
-                                            <Target className="w-3 h-3" />
-                                            {item.totalPracticed}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center gap-2 text-xs text-apple-text-secondary font-medium">
-                                            <Users className="w-3 h-3 text-apple-blue" />
-                                            {item.updatedAt
-                                                ? format(new Date(item.updatedAt), 'dd/MM/yyyy HH:mm:ss')
-                                                : 'Chưa bắt đầu'}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <button
-                                            onClick={() => deletePracticeData(item.id)}
-                                            className="p-2 text-apple-text-secondary hover:text-red-500 hover:bg-red-500/5 rounded-lg transition-all"
-                                            title="Xóa dữ liệu ôn tập"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                            {filteredStats.length === 0 && (
-                                <tr>
-                                    <td colSpan={6} className="px-6 py-20 text-center">
-                                        <div className="flex flex-col items-center gap-2 text-apple-text-secondary">
-                                            <Database className="w-8 h-8 opacity-20" />
-                                            <p className="font-medium">Không tìm thấy dữ liệu ôn tập nào</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-        </div>
-    )
-}
-
-function AdminExamManager() {
-    const [loading, setLoading] = useState(true)
-    const [stats, setStats] = useState<any[]>([])
-    const [searchQuery, setSearchQuery] = useState('')
-    const [selectedHang, setSelectedHang] = useState('Tất cả')
-    const [selectedChuyenNganh, setSelectedChuyenNganh] = useState('Tất cả')
-    const [sortBy, setSortBy] = useState('newest')
-    const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' | null }>({ key: 'lastExam', direction: 'desc' })
-
-    const requestSort = (key: string) => {
-        let direction: 'asc' | 'desc' | null = 'desc'
-        if (sortConfig.key === key && sortConfig.direction === 'desc') {
-            direction = 'asc'
-        } else if (sortConfig.key === key && sortConfig.direction === 'asc') {
-            direction = null
-        }
-        setSortConfig({ key, direction })
-
-        // Sync dropdown if possible
-        if (key === 'lastExam' && direction === 'desc') setSortBy('newest')
-        else if (key === 'lastExam' && direction === 'asc') setSortBy('oldest')
-        else if (key === 'max' && direction === 'desc') setSortBy('max_score')
-        else if (key === 'max' && direction === 'asc') setSortBy('min_score')
-        else if (key === 'total' && direction === 'desc') setSortBy('most_exams')
-        else if (key === 'total' && direction === 'asc') setSortBy('least_exams')
-        else if (key === 'passRate' && direction === 'desc') setSortBy('most_passed')
-        else if (key === 'passRate' && direction === 'asc') setSortBy('most_failed')
-    }
-
-    useEffect(() => {
-        fetchExamStats()
-    }, [])
-
-    async function fetchExamStats() {
-        setLoading(true)
-        try {
-            const [profilesRes, examsRes] = await Promise.all([
-                supabase.from('profiles').select('id, email, display_name, user_name'),
-                supabase.from('exam_results').select('*')
-            ])
-
-            if (profilesRes.error) throw profilesRes.error
-            if (examsRes.error) throw examsRes.error
-
-            const profiles = profilesRes.data || []
-            const exams = examsRes.data || []
-
-            // Group exams by user
-            const grouped = profiles.map(profile => {
-                const userExams = exams.filter(e => e.user_id === profile.id)
-                if (userExams.length === 0) return {
-                    id: profile.id,
-                    email: profile.email,
-                    displayName: profile.display_name || profile.user_name || 'Chưa đặt tên',
-                    total: 0,
-                    max: 0,
-                    min: 0,
-                    passCount: 0,
-                    lastExam: null,
-                    hang: 'N/A',
-                    chuyenNganh: 'N/A'
-                }
-
-                const scores = userExams.map(e => e.score || 0)
-                const latest = [...userExams].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
-
-                return {
-                    id: profile.id,
-                    email: profile.email,
-                    displayName: profile.display_name || profile.user_name || 'Chưa đặt tên',
-                    total: userExams.length,
-                    max: Math.max(...scores),
-                    min: Math.min(...scores),
-                    passCount: userExams.filter(e => e.passed).length,
-                    lastExam: latest.created_at,
-                    hang: latest.hang || 'N/A',
-                    chuyenNganh: latest.chuyen_nganh || 'N/A'
-                }
-            })
-
-            setStats(grouped)
-        } catch (error) {
-            console.error('Error fetching exam stats:', error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const filteredStats = stats.filter(s => {
-        const emailMatch = !searchQuery || s.email.toLowerCase().includes(searchQuery.toLowerCase()) || s.displayName?.toLowerCase().includes(searchQuery.toLowerCase())
-        const hangMatch = selectedHang === 'Tất cả' || s.hang === selectedHang
-        const chuyenNganhMatch = selectedChuyenNganh === 'Tất cả' || s.chuyenNganh === selectedChuyenNganh
-        return emailMatch && hangMatch && chuyenNganhMatch
-    }).sort((a, b) => {
-        if (sortConfig.direction) {
-            const key = sortConfig.key
-            const isAsc = sortConfig.direction === 'asc'
-
-            let valA: any
-            let valB: any
-
-            if (key === 'displayName') {
-                valA = a.displayName.toLowerCase()
-                valB = b.displayName.toLowerCase()
-            } else if (key === 'lastExam') {
-                valA = a.lastExam ? new Date(a.lastExam).getTime() : 0
-                valB = b.lastExam ? new Date(b.lastExam).getTime() : 0
-            } else if (key === 'passRate') {
-                valA = a.total > 0 ? a.passCount / a.total : 0
-                valB = b.total > 0 ? b.passCount / b.total : 0
-            } else {
-                valA = a[key]
-                valB = b[key]
-            }
-
-            if (valA < valB) return isAsc ? -1 : 1
-            if (valA > valB) return isAsc ? 1 : -1
-            return 0
-        }
-
-        switch (sortBy) {
-            case 'newest':
-                return (b.lastExam ? new Date(b.lastExam).getTime() : 0) - (a.lastExam ? new Date(a.lastExam).getTime() : 0)
-            case 'oldest':
-                const dateA = a.lastExam ? new Date(a.lastExam).getTime() : Infinity
-                const dateB = b.lastExam ? new Date(b.lastExam).getTime() : Infinity
-                return dateA - dateB
-            case 'max_score':
-                return b.max - a.max
-            case 'min_score':
-                return a.min - b.min
-            case 'most_exams':
-                return b.total - a.total
-            case 'least_exams':
-                return a.total - b.total
-            case 'most_passed':
-                return (b.total > 0 ? b.passCount / b.total : 0) - (a.total > 0 ? a.passCount / a.total : 0)
-            case 'most_failed':
-                return (a.total > 0 ? a.passCount / a.total : 0) - (b.total > 0 ? b.passCount / b.total : 0)
-            default:
-                return 0
-        }
-    })
-
-    return (
-        <div className="space-y-6">
-            <div className="bg-apple-card border border-apple-border rounded-2xl p-4 md:p-6 shadow-sm space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-secondary" />
-                        <input
-                            type="text"
-                            placeholder="Tìm kiếm user..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-apple-bg border border-apple-border rounded-xl text-sm font-medium text-apple-text outline-none focus:border-apple-blue/30 transition-colors"
-                        />
-                    </div>
-                    <select
-                        value={selectedHang}
-                        onChange={(e) => setSelectedHang(e.target.value)}
-                        className="px-4 py-2 bg-apple-bg border border-apple-border rounded-xl text-sm font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-colors"
-                    >
-                        <option value="Tất cả">Tất cả Hạng</option>
-                        {HANG_OPTIONS.map(hang => <option key={hang} value={hang}>{hang}</option>)}
-                    </select>
-                    <select
-                        value={selectedChuyenNganh}
-                        onChange={(e) => setSelectedChuyenNganh(e.target.value)}
-                        className="px-4 py-2 bg-apple-bg border border-apple-border rounded-xl text-sm font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-colors"
-                    >
-                        <option value="Tất cả">Tất cả Chuyên ngành</option>
-                        {CHUYEN_NGANH_OPTIONS.map(cn => <option key={cn} value={cn}>{cn}</option>)}
-                    </select>
-                    <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                        className="px-4 py-2 bg-apple-bg border border-apple-border rounded-xl text-sm font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-colors"
-                    >
-                        <option value="newest">Mới nhất</option>
-                        <option value="oldest">Cũ nhất</option>
-                        <option value="max_score">Điểm cao nhất</option>
-                        <option value="min_score">Điểm thấp nhất</option>
-                        <option value="most_exams">Thi nhiều nhất</option>
-                        <option value="least_exams">Thi ít nhất</option>
-                        <option value="most_passed">Đậu nhiều nhất</option>
-                        <option value="most_failed">Rớt nhiều nhất</option>
-                    </select>
-                    <div className="flex items-center justify-end">
-                        <span className="text-xs font-bold text-apple-text-secondary">
-                            Tổng: {filteredStats.length} user
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            {loading ? (
-                <div className="flex items-center justify-center py-20">
-                    <Loader2 className="w-8 h-8 text-apple-blue animate-spin" />
-                </div>
-            ) : (
-                <div className="bg-apple-card border border-apple-border rounded-2xl overflow-x-auto shadow-sm">
-                    <table className="w-full text-left border-collapse">
-                        <thead className="bg-apple-bg border-b border-apple-border">
-                            <tr>
-                                <th
-                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary cursor-pointer hover:text-apple-blue transition-colors group"
-                                    onClick={() => requestSort('displayName')}
-                                >
-                                    <div className="flex items-center gap-1">
-                                        User (Tên & Email)
-                                        <ChevronDown className={`w-3 h-3 transition-transform ${sortConfig.key === 'displayName' ? (sortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                    </div>
-                                </th>
-                                <th className="px-6 py-4 text-xs font-semibold text-apple-text-secondary">Hạng</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-apple-text-secondary">Chuyên ngành</th>
-                                <th
-                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary text-center cursor-pointer hover:text-apple-blue transition-colors group"
-                                    onClick={() => requestSort('total')}
-                                >
-                                    <div className="flex items-center justify-center gap-1">
-                                        Lượt thi
-                                        <ChevronDown className={`w-3 h-3 transition-transform ${sortConfig.key === 'total' ? (sortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                    </div>
-                                </th>
-                                <th
-                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary text-center cursor-pointer hover:text-apple-blue transition-colors group"
-                                    onClick={() => requestSort('max')}
-                                >
-                                    <div className="flex items-center justify-center gap-1">
-                                        Cao nhất
-                                        <ChevronDown className={`w-3 h-3 transition-transform ${sortConfig.key === 'max' ? (sortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                    </div>
-                                </th>
-                                <th
-                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary text-center cursor-pointer hover:text-apple-blue transition-colors group"
-                                    onClick={() => requestSort('min')}
-                                >
-                                    <div className="flex items-center justify-center gap-1">
-                                        Thấp nhất
-                                        <ChevronDown className={`w-3 h-3 transition-transform ${sortConfig.key === 'min' ? (sortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                    </div>
-                                </th>
-                                <th
-                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary text-center cursor-pointer hover:text-apple-blue transition-colors group"
-                                    onClick={() => requestSort('passRate')}
-                                >
-                                    <div className="flex items-center justify-center gap-1">
-                                        Tỷ lệ đậu
-                                        <ChevronDown className={`w-3 h-3 transition-transform ${sortConfig.key === 'passRate' ? (sortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                    </div>
-                                </th>
-                                <th
-                                    className="px-6 py-4 text-xs font-semibold text-apple-text-secondary cursor-pointer hover:text-apple-blue transition-colors group"
-                                    onClick={() => requestSort('lastExam')}
-                                >
-                                    <div className="flex items-center gap-1">
-                                        Lần thi cuối
-                                        <ChevronDown className={`w-3 h-3 transition-transform ${sortConfig.key === 'lastExam' ? (sortConfig.direction === 'asc' ? 'rotate-180 text-apple-blue' : 'text-apple-blue') : 'opacity-0 group-hover:opacity-50'}`} />
-                                    </div>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-apple-border">
-                            {filteredStats.map((item) => (
-                                <tr key={item.id} className="hover:bg-apple-bg/50 transition-colors">
-                                    <td className="px-6 py-4">
-                                        <div className="text-sm font-bold text-apple-text">{item.displayName}</div>
-                                        <div className="text-[10px] text-apple-text-secondary font-medium mt-0.5">
-                                            {item.email}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 text-[10px] font-bold rounded-lg ${item.hang !== 'N/A'
-                                            ? 'bg-apple-blue/10 text-apple-blue border border-apple-blue/20'
-                                            : 'bg-apple-text-secondary/10 text-apple-text-secondary border border-apple-border'
-                                            }`}>
-                                            {item.hang}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <p className="text-xs text-apple-text-secondary line-clamp-1 max-w-[150px]" title={item.chuyenNganh}>
-                                            {item.chuyenNganh}
-                                        </p>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <div className="flex items-center justify-center gap-2 text-sm font-bold text-apple-text">
-                                            <FileText className="w-4 h-4 text-apple-blue" />
-                                            {item.total} lượt
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-600 rounded-lg text-xs font-black border border-emerald-500/20">
-                                            {item.max}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <span className="px-2.5 py-1 bg-red-500/10 text-red-600 rounded-lg text-xs font-black border border-red-500/20">
-                                            {item.min}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <div className="text-sm font-black text-apple-text">
-                                            {item.total > 0 ? Math.round((item.passCount / item.total) * 100) : 0}%
-                                        </div>
-                                        <div className="text-[10px] text-apple-text-secondary font-bold">
-                                            ({item.passCount}/{item.total})
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center gap-2 text-xs text-apple-text-secondary font-medium">
-                                            <TrendingUp className="w-3 h-3 text-apple-blue" />
-                                            {item.lastExam
-                                                ? format(new Date(item.lastExam), 'dd/MM/yyyy HH:mm:ss')
-                                                : 'Chưa thi'}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                            {filteredStats.length === 0 && (
-                                <tr>
-                                    <td colSpan={8} className="px-6 py-20 text-center">
-                                        <div className="flex flex-col items-center gap-2 text-apple-text-secondary">
-                                            <BarChart3 className="w-8 h-8 opacity-20" />
-                                            <p className="font-medium">Không tìm thấy dữ liệu thi thử nào</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-        </div>
     )
 }
