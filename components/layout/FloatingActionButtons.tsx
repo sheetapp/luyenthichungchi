@@ -1,10 +1,27 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { MessageCircle, Heart, Phone, Headphones, X } from 'lucide-react'
+import { supabase } from '@/lib/supabase/client'
 
 export function FloatingActionButtons() {
     const [isOpen, setIsOpen] = useState(false)
+    const [user, setUser] = useState<any>(null)
+
+    useEffect(() => {
+        const getUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            setUser(user)
+        }
+        getUser()
+
+        // Listen for auth state changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [])
 
     return (
         <>
@@ -72,6 +89,20 @@ export function FloatingActionButtons() {
             {/* PC Floating Widget */}
             <div className="hidden md:flex fixed right-6 top-1/2 -translate-y-1/2 z-50 items-end flex-col gap-4">
 
+                {/* Donate Button - Always visible when user is logged in */}
+                {user && (
+                    <a
+                        href="/buy-me-coffee"
+                        className="group relative w-14 h-14 bg-gradient-to-br from-pink-500 to-red-500 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all duration-300"
+                        title="Donate"
+                    >
+                        <Heart className="w-6 h-6 fill-current" />
+                        <span className="absolute right-16 bg-gradient-to-br from-pink-500 to-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            Donate
+                        </span>
+                    </a>
+                )}
+
                 {/* Expanded State */}
                 {isOpen && (
                     <div className="flex flex-col gap-3 bg-white/80 backdrop-blur-md p-2 rounded-2xl shadow-2xl border border-white/20 animate-in slide-in-from-right-5 fade-in duration-300 origin-right">
@@ -118,15 +149,6 @@ export function FloatingActionButtons() {
                                 alt="Zalo"
                                 className="w-8 h-8"
                             />
-                        </a>
-
-                        {/* Donate */}
-                        <a
-                            href="/buy-me-coffee"
-                            className="group relative w-12 h-12 bg-gradient-to-br from-pink-500 to-red-500 text-white rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110"
-                            title="Donate"
-                        >
-                            <Heart className="w-5 h-5 fill-current" />
                         </a>
 
                         {/* Close Toggle */}

@@ -1,0 +1,493 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase/client'
+import { Search, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Database as DatabaseIcon, ArrowUp, CheckCircle2 } from 'lucide-react'
+import { removeVietnameseTones } from '@/lib/utils/vietnamese'
+import { useSidebar } from '@/contexts/SidebarContext'
+
+const HANG_OPTIONS = ['Tất cả', 'Hạng I', 'Hạng II', 'Hạng III']
+
+const CHUYEN_NGANH_OPTIONS = [
+    'Tất cả',
+    'Thiết kế cơ - điện công trình - Hệ thống điện',
+    'Giám sát công tác lắp đặt thiết bị công trình',
+    'Giám sát công tác xây dựng công trình',
+    'Khảo sát địa chất công trình',
+    'Khảo sát địa hình',
+    'Quản lý dự án đầu tư xây dựng',
+    'Thiết kế cơ - điện công trình - Hệ thống cấp - thoát nước công trình',
+    'Thiết kế cơ - điện công trình - Hệ thống thông gió - cấp thoát nhiệt',
+    'Thiết kế quy hoạch xây dựng',
+    'Thiết kế xây dựng công trình - Công trình Cầu - Hầm',
+    'Thiết kế xây dựng công trình - Công trình Khai thác mỏ',
+    'Thiết kế xây dựng công trình - Công trình đường sắt',
+    'Thiết kế xây dựng công trình - Kết cấu công trình',
+    'TK XD công trình - Công trình Thủy lợi, đê điều',
+    'TK XD công trình - Công trình Xử lý chất thải rắn',
+    'TK XD công trình - Công trình đường bộ',
+    'TK XD công trình - Công trình đường thủy nội địa - Hàng hải',
+    'TKXD công trình - Công trình Cấp nước-thoát nước-hạng I',
+    'Định giá Xây dựng',
+]
+
+const PHAN_THI_OPTIONS = [
+    'Tất cả',
+    'Câu hỏi Pháp luật chung',
+    'Câu hỏi Pháp luật riêng',
+    'Câu hỏi Chuyên môn'
+]
+
+interface Question {
+    id: number
+    cau_hoi: string
+    dap_an_a: string
+    dap_an_b: string
+    dap_an_c: string
+    dap_an_d: string
+    dap_an_dung: string
+    hang: string
+    phan_thi: string
+    chuyen_nganh: string
+}
+
+export default function DatabasePage() {
+    const { collapsed } = useSidebar()
+    const [questions, setQuestions] = useState<Question[]>([])
+    const [allQuestions, setAllQuestions] = useState<Question[]>([])
+    const [loading, setLoading] = useState(true)
+    const [totalCount, setTotalCount] = useState(0)
+    const [expandedId, setExpandedId] = useState<number | null>(null)
+    const [showScrollTop, setShowScrollTop] = useState(false)
+    const [showStickyHeader, setShowStickyHeader] = useState(false)
+
+    // Filters
+    const [selectedHang, setSelectedHang] = useState('Tất cả')
+    const [selectedChuyenNganh, setSelectedChuyenNganh] = useState('Tất cả')
+    const [selectedPhanThi, setSelectedPhanThi] = useState('Tất cả')
+    const [searchQuery, setSearchQuery] = useState('')
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1)
+    const itemsPerPage = 20
+
+    useEffect(() => {
+        loadQuestions()
+    }, [selectedHang, selectedChuyenNganh, selectedPhanThi, currentPage, searchQuery])
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setShowScrollTop(window.scrollY > 400)
+            setShowStickyHeader(window.scrollY > 200)
+        }
+        window.addEventListener('scroll', handleScroll)
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    async function loadQuestions() {
+        setLoading(true)
+
+        try {
+            let query = supabase
+                .from('questions')
+                .select('*', { count: 'exact' })
+
+            // Apply filters
+            if (selectedHang !== 'Tất cả') {
+                query = query.eq('hang', selectedHang)
+            }
+            if (selectedChuyenNganh !== 'Tất cả') {
+                query = query.eq('chuyen_nganh', selectedChuyenNganh)
+            }
+            if (selectedPhanThi !== 'Tất cả') {
+                query = query.eq('phan_thi', selectedPhanThi)
+            }
+
+            const { data, error, count } = await query.order('id', { ascending: true })
+
+            if (error) {
+                console.error('❌ Supabase Error:', error)
+            }
+
+            if (data) {
+                // Vietnamese unaccented search (client-side)
+                let filteredData = data
+                if (searchQuery.trim()) {
+                    const searchNormalized = removeVietnameseTones(searchQuery.trim().toLowerCase())
+                    filteredData = data.filter(q =>
+                        removeVietnameseTones(q.cau_hoi.toLowerCase()).includes(searchNormalized)
+                    )
+                }
+
+                setAllQuestions(filteredData)
+                setTotalCount(filteredData.length)
+
+                // Pagination
+                const from = (currentPage - 1) * itemsPerPage
+                const to = from + itemsPerPage
+                setQuestions(filteredData.slice(from, to))
+            } else {
+                setQuestions([])
+                setAllQuestions([])
+                setTotalCount(0)
+            }
+        } catch (err) {
+            console.error('💥 Exception:', err)
+        }
+
+        setLoading(false)
+    }
+
+    const totalPages = Math.ceil(totalCount / itemsPerPage)
+
+    const getAnswerLabel = (answer: string) => {
+        const labels: { [key: string]: string } = { a: 'A', b: 'B', c: 'C', d: 'D' }
+        return labels[answer.toLowerCase()] || answer
+    }
+
+    return (
+        <div className="min-h-screen bg-slate-50 py-6">
+            {/* Sticky Filter Header */}
+            {showStickyHeader && (
+                <div className={`fixed top-0 right-0 bg-white shadow-lg z-40 py-3 px-6 border-b border-slate-200 transition-all duration-300 ${collapsed ? 'left-0 md:left-20' : 'left-0 md:left-72'
+                    }`}>
+                    <div className="flex items-center justify-between gap-4 flex-wrap">
+                        <div className="flex items-center gap-3 flex-wrap">
+                            <span className="text-sm font-bold text-slate-700">Đang xem:</span>
+                            {selectedHang !== 'Tất cả' && (
+                                <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-lg">
+                                    {selectedHang}
+                                </span>
+                            )}
+                            {selectedChuyenNganh !== 'Tất cả' && (
+                                <span className="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-lg">
+                                    {selectedChuyenNganh}
+                                </span>
+                            )}
+                            {selectedPhanThi !== 'Tất cả' && (
+                                <span className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-bold rounded-lg">
+                                    {selectedPhanThi}
+                                </span>
+                            )}
+                            {selectedHang === 'Tất cả' && selectedChuyenNganh === 'Tất cả' && selectedPhanThi === 'Tất cả' && (
+                                <span className="text-sm text-slate-500 italic">Tất cả câu hỏi</span>
+                            )}
+                        </div>
+
+                        {/* Search in Sticky Header */}
+                        <div className="relative w-full md:w-80">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <input
+                                type="text"
+                                placeholder="Tìm kiếm..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        setCurrentPage(1)
+                                    }
+                                }}
+                                className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="max-w-[1600px] mx-auto py-8">
+                {/* Header Section - Apple Style */}
+                <div className="mb-8 px-4">
+                    <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+                        {/* Title & Stats Card */}
+                        <div className="flex items-center gap-5">
+                            <div className="w-16 h-16 bg-apple-blue/10 text-apple-blue rounded-[22px] flex items-center justify-center shadow-inner">
+                                <DatabaseIcon size={32} />
+                            </div>
+                            <div>
+                                <h1 className="text-3xl md:text-4xl font-black text-apple-text tracking-tight mb-1">Cơ sở dữ liệu</h1>
+                                <div className="flex items-center gap-3">
+                                    <span className="px-2.5 py-1 bg-apple-blue/10 text-apple-blue text-[11px] font-bold rounded-lg uppercase tracking-wider ring-1 ring-apple-blue/20">
+                                        Tổng: {totalCount} câu hỏi
+                                    </span>
+                                    <span className="text-[11px] font-bold text-apple-text-secondary uppercase tracking-widest opacity-50">
+                                        QĐ 163/QĐ-BXD ngày 18/2/2025 của Bộ Xây dựng
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Advanced Search Bar */}
+                        <div className="relative w-full lg:w-[450px] group">
+                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-apple-text-secondary group-focus-within:text-apple-blue transition-colors" />
+                            <input
+                                type="text"
+                                placeholder="Tìm kiếm nội dung câu hỏi..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        setCurrentPage(1)
+                                    }
+                                }}
+                                className="w-full pl-14 pr-6 py-4 bg-apple-card border border-apple-border/50 rounded-2xl text-[15px] font-medium text-apple-text placeholder:text-apple-text-secondary/50 focus:outline-none focus:ring-4 focus:ring-apple-blue/10 focus:border-apple-blue transition-all shadow-apple-shadow"
+                            />
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 px-2 py-1 bg-apple-bg border border-apple-border rounded-lg text-[9px] font-black text-apple-text-secondary/40 uppercase tracking-tighter">Enter</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Filters Section - Apple Style Cards */}
+                <div className="bg-apple-card/50 backdrop-blur-xl rounded-3xl p-6 border border-apple-border/50 shadow-apple-shadow mb-8 mx-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* Filter Item */}
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 px-1">
+                                <div className="w-1.5 h-1.5 bg-apple-blue rounded-full" />
+                                <label className="text-[11px] font-black text-apple-text-secondary uppercase tracking-[0.2em]">Hạng sát hạch</label>
+                            </div>
+                            <div className="relative group">
+                                <select
+                                    value={selectedHang}
+                                    onChange={(e) => {
+                                        setSelectedHang(e.target.value)
+                                        setCurrentPage(1)
+                                    }}
+                                    className="w-full appearance-none px-5 py-3.5 bg-apple-bg border border-apple-border rounded-2xl text-[14px] font-bold text-apple-text cursor-pointer focus:outline-none focus:ring-4 focus:ring-apple-blue/5 focus:border-apple-blue/30 transition-all"
+                                >
+                                    {HANG_OPTIONS.map(option => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-secondary pointer-events-none group-focus-within:rotate-180 transition-transform" />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 px-1">
+                                <div className="w-1.5 h-1.5 bg-[#AF52DE] rounded-full" />
+                                <label className="text-[11px] font-black text-apple-text-secondary uppercase tracking-[0.2em]">Chuyên ngành</label>
+                            </div>
+                            <div className="relative group">
+                                <select
+                                    value={selectedChuyenNganh}
+                                    onChange={(e) => {
+                                        setSelectedChuyenNganh(e.target.value)
+                                        setCurrentPage(1)
+                                    }}
+                                    className="w-full appearance-none px-5 py-3.5 bg-apple-bg border border-apple-border rounded-2xl text-[14px] font-bold text-apple-text cursor-pointer focus:outline-none focus:ring-4 focus:ring-apple-blue/5 focus:border-apple-blue/30 transition-all"
+                                >
+                                    {CHUYEN_NGANH_OPTIONS.map(option => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-secondary pointer-events-none group-focus-within:rotate-180 transition-transform" />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 px-1">
+                                <div className="w-1.5 h-1.5 bg-[#FF9500] rounded-full" />
+                                <label className="text-[11px] font-black text-apple-text-secondary uppercase tracking-[0.2em]">Phần thi</label>
+                            </div>
+                            <div className="relative group">
+                                <select
+                                    value={selectedPhanThi}
+                                    onChange={(e) => {
+                                        setSelectedPhanThi(e.target.value)
+                                        setCurrentPage(1)
+                                    }}
+                                    className="w-full appearance-none px-5 py-3.5 bg-apple-bg border border-apple-border rounded-2xl text-[14px] font-bold text-apple-text cursor-pointer focus:outline-none focus:ring-4 focus:ring-apple-blue/5 focus:border-apple-blue/30 transition-all"
+                                >
+                                    {PHAN_THI_OPTIONS.map(option => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-secondary pointer-events-none group-focus-within:rotate-180 transition-transform" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Questions List */}
+                {loading ? (
+                    <div className="space-y-6 px-4">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="h-48 bg-apple-card/50 backdrop-blur animate-pulse rounded-[32px] border border-apple-border/50" />
+                        ))}
+                    </div>
+                ) : questions.length > 0 ? (
+                    <div className="space-y-6 px-4">
+                        {questions.map((q, index) => {
+                            const isExpanded = expandedId === q.id
+                            const correctAnswerLetter = getAnswerLabel(q.dap_an_dung)
+
+                            // Get full answer content based on correct answer letter
+                            const answerMap: { [key: string]: string } = {
+                                'A': q.dap_an_a,
+                                'B': q.dap_an_b,
+                                'C': q.dap_an_c,
+                                'D': q.dap_an_d
+                            }
+                            const correctAnswerContent = answerMap[correctAnswerLetter] || ''
+
+                            return (
+                                <div key={q.id} className="bg-apple-card rounded-[32px] border border-apple-border/50 shadow-apple-shadow hover:shadow-apple-shadow-lg transition-all duration-500 overflow-hidden group">
+                                    {/* Question Preview Header */}
+                                    <div
+                                        onClick={() => setExpandedId(isExpanded ? null : q.id)}
+                                        className="p-6 md:p-8 cursor-pointer hover:bg-apple-bg/50 transition-colors"
+                                    >
+                                        <div className="flex items-start justify-between gap-6">
+                                            <div className="flex-1 space-y-4">
+                                                {/* Meta Info Badges */}
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <span className="px-3 py-1.5 bg-apple-blue font-black text-white text-[10px] rounded-xl uppercase tracking-tighter">
+                                                        #{(currentPage - 1) * itemsPerPage + index + 1}
+                                                    </span>
+                                                    <span className="px-3 py-1.5 bg-emerald-500/10 text-emerald-600 font-bold text-[10px] rounded-xl uppercase tracking-tight border border-emerald-500/20">
+                                                        {q.hang}
+                                                    </span>
+                                                    <span className="px-3 py-1.5 bg-purple-500/10 text-purple-600 font-bold text-[10px] rounded-xl uppercase tracking-tight border border-purple-500/20">
+                                                        {q.phan_thi}
+                                                    </span>
+                                                    {q.chuyen_nganh && (
+                                                        <span className="px-3 py-1.5 bg-orange-500/10 text-orange-600 font-bold text-[10px] rounded-xl uppercase tracking-tight border border-orange-500/20">
+                                                            {q.chuyen_nganh}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* Question Text */}
+                                                <p className="text-[17px] md:text-[19px] font-bold text-apple-text leading-tight group-hover:text-apple-blue transition-colors">
+                                                    {q.cau_hoi}
+                                                </p>
+
+                                                {/* Inline Correct Answer Summary */}
+                                                <div className="flex items-start gap-3 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl group/ans">
+                                                    <div className="w-6 h-6 bg-emerald-500 text-white rounded-lg flex items-center justify-center text-[11px] font-black shrink-0">
+                                                        {correctAnswerLetter}
+                                                    </div>
+                                                    <p className="text-[14px] font-bold text-emerald-700 leading-snug">
+                                                        {correctAnswerContent}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Action Icon */}
+                                            <div className="shrink-0 mt-1">
+                                                <div className={`w-10 h-10 rounded-full bg-apple-bg border border-apple-border flex items-center justify-center transition-all duration-500 ${isExpanded ? 'bg-apple-blue border-apple-blue text-white rotate-180' : 'text-apple-text-secondary'}`}>
+                                                    <ChevronDown className="w-5 h-5" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Expandable Details Section */}
+                                    {isExpanded && (
+                                        <div className="border-t border-apple-border/30 bg-apple-bg/30 animate-in slide-in-from-top-4 duration-500">
+                                            <div className="p-6 md:p-8 space-y-6">
+                                                <div className="flex items-center gap-3">
+                                                    <h3 className="text-[11px] font-black text-apple-text-secondary uppercase tracking-[0.2em]">Các phương án trả lời</h3>
+                                                    <div className="flex-1 h-[1px] bg-apple-border/30" />
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {[
+                                                        { label: 'A', value: q.dap_an_a },
+                                                        { label: 'B', value: q.dap_an_b },
+                                                        { label: 'C', value: q.dap_an_c },
+                                                        { label: 'D', value: q.dap_an_d },
+                                                    ].map(answer => {
+                                                        const isCorrect = answer.label === correctAnswerLetter
+                                                        return (
+                                                            <div
+                                                                key={answer.label}
+                                                                className={`p-5 rounded-[22px] border-2 transition-all duration-300 flex items-start gap-4 ${isCorrect
+                                                                    ? 'bg-emerald-500/5 border-emerald-500 shadow-sm'
+                                                                    : 'bg-white border-apple-border/50'
+                                                                    }`}
+                                                            >
+                                                                <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 transition-colors ${isCorrect
+                                                                    ? 'bg-emerald-500 text-white'
+                                                                    : 'bg-apple-bg text-apple-text-secondary border border-apple-border'
+                                                                    }`}>
+                                                                    {answer.label}
+                                                                </span>
+                                                                <p className={`text-[14px] leading-relaxed ${isCorrect ? 'text-emerald-900 font-bold' : 'text-apple-text-secondary font-medium'
+                                                                    }`}>
+                                                                    {answer.value}
+                                                                </p>
+                                                            </div>
+                                                        )
+                                                    })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )
+                        })}
+                    </div>
+                ) : (
+                    <div className="text-center py-20 bg-apple-card rounded-[32px] border-2 border-dashed border-apple-border mx-4 shadow-inner">
+                        <DatabaseIcon className="w-16 h-16 text-apple-text-secondary/20 mx-auto mb-4" />
+                        <p className="text-apple-text-secondary font-bold text-lg">Không tìm thấy câu hỏi nào</p>
+                    </div>
+                )}
+
+                {/* Pagination Section - Apple Style */}
+                {totalPages > 1 && (
+                    <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-6 px-4 pb-12">
+                        <div className="flex items-center gap-3">
+                            <div className="w-1.5 h-1.5 bg-apple-blue rounded-full animate-pulse" />
+                            <p className="text-[13px] text-apple-text-secondary font-bold">
+                                Hiển thị <span className="text-apple-text">{(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, totalCount)}</span> trong tổng số <span className="text-apple-blue font-black">{totalCount}</span> câu hỏi
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-5">
+                            <button
+                                onClick={() => {
+                                    setCurrentPage(p => Math.max(1, p - 1))
+                                    scrollToTop()
+                                }}
+                                disabled={currentPage === 1}
+                                className="flex items-center gap-2 px-6 py-3 bg-apple-card text-apple-text font-black text-[13px] rounded-2xl border border-apple-border shadow-sm hover:bg-apple-bg transition-all disabled:opacity-20 disabled:cursor-not-allowed uppercase tracking-wider group"
+                            >
+                                <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                                Trước
+                            </button>
+                            <div className="px-5 py-3 bg-apple-blue text-white font-black text-[14px] rounded-2xl shadow-apple-shadow">
+                                {currentPage} <span className="opacity-50 text-[10px] mx-1">/</span> {totalPages}
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setCurrentPage(p => Math.min(totalPages, p + 1))
+                                    scrollToTop()
+                                }}
+                                disabled={currentPage === totalPages}
+                                className="flex items-center gap-2 px-6 py-3 bg-apple-card text-apple-text font-black text-[13px] rounded-2xl border border-apple-border shadow-sm hover:bg-apple-bg transition-all disabled:opacity-20 disabled:cursor-not-allowed uppercase tracking-wider group"
+                            >
+                                Sau
+                                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Scroll to Top - Apple Style FAB */}
+                {showScrollTop && (
+                    <button
+                        onClick={scrollToTop}
+                        className="fixed right-8 bottom-28 md:bottom-12 w-14 h-14 bg-apple-blue text-white rounded-full shadow-apple-shadow hover:scale-110 active:scale-95 transition-all z-50 flex items-center justify-center ring-4 ring-apple-blue/10"
+                        aria-label="Scroll to top"
+                    >
+                        <ArrowUp size={24} />
+                    </button>
+                )}
+            </div>
+        </div>
+    )
+}

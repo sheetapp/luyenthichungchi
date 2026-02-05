@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { AlertTriangle, Send, X, MessageSquare, Info } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { AlertTriangle, Send, X, MessageSquare, Info, ShieldCheck } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 
 interface ReportModalProps {
     isOpen: boolean
@@ -24,11 +25,20 @@ export function ReportModal({ isOpen, onClose, user, question }: ReportModalProp
     const [content, setContent] = useState('')
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState(false)
+    const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+    const turnstileRef = useRef<TurnstileInstance>(null)
 
     if (!isOpen) return null
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        // Validate CAPTCHA
+        if (!turnstileToken) {
+            alert('Vui lòng hoàn thành xác minh bảo mật!')
+            return
+        }
+
         if (!content.trim()) return
 
         setLoading(true)
@@ -52,6 +62,8 @@ export function ReportModal({ isOpen, onClose, user, question }: ReportModalProp
             setTimeout(() => {
                 setSuccess(false)
                 setContent('')
+                setTurnstileToken(null)
+                turnstileRef.current?.reset()
                 onClose()
             }, 2000)
         } catch (error) {
@@ -144,6 +156,31 @@ export function ReportModal({ isOpen, onClose, user, question }: ReportModalProp
                             />
                         </div>
 
+                        {/* Security Verification */}
+                        <div className="space-y-3">
+                            <div className="flex flex-col items-center gap-2">
+                                <div className="scale-90 origin-center min-h-[65px]">
+                                    <Turnstile
+                                        ref={turnstileRef}
+                                        siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
+                                        onSuccess={setTurnstileToken}
+                                        onExpire={() => setTurnstileToken(null)}
+                                        onError={() => setTurnstileToken(null)}
+                                        options={{
+                                            theme: 'light',
+                                            size: 'normal',
+                                        }}
+                                    />
+                                </div>
+                                {!turnstileToken && (
+                                    <p className="text-[10px] text-orange-500 font-semibold flex items-center gap-1 animate-pulse">
+                                        <ShieldCheck className="w-3 h-3" />
+                                        Vui lòng xác minh để bảo mật hệ thống
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
                         {/* Footer */}
                         <div className="flex gap-3 pt-2">
                             <button
@@ -155,7 +192,7 @@ export function ReportModal({ isOpen, onClose, user, question }: ReportModalProp
                             </button>
                             <button
                                 type="submit"
-                                disabled={loading || !content.trim()}
+                                disabled={loading || !content.trim() || !turnstileToken}
                                 className="flex-[1.5] py-3.5 px-6 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center justify-center gap-2"
                             >
                                 {loading ? (

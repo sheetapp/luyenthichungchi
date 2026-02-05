@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, BookOpen, FileText, Trophy, User, Coffee, LayoutGrid, Database, ChevronLeft, ChevronRight, LogOut, LogIn, UserCircle, HelpCircle } from 'lucide-react'
+import { Home, BookOpen, FileText, Trophy, User, Coffee, LayoutGrid, Database, ChevronLeft, ChevronRight, LogOut, LogIn, UserCircle, HelpCircle, MessageSquare, Shield } from 'lucide-react'
 import { useSidebar } from '@/contexts/SidebarContext'
 import { supabase } from '@/lib/supabase/client'
+import { isAdmin } from '@/constants/admin'
 
 const navItems = [
     { icon: HelpCircle, label: 'Giới thiệu', href: '/gioi-thieu', requireAuth: false },
@@ -13,7 +14,8 @@ const navItems = [
     { icon: BookOpen, label: 'Ôn tập', href: '/on-tap', requireAuth: true },
     { icon: FileText, label: 'Thi thử', href: '/thi-thu', requireAuth: true },
     { icon: Trophy, label: 'Xếp hạng', href: '/xep-hang', requireAuth: true },
-    { icon: Database, label: 'Cơ sở dữ liệu', href: '/database', requireAuth: true },
+    { icon: Database, label: 'Thư viện', href: '/database', requireAuth: true },
+    { icon: Shield, label: 'Quản trị', href: '/quan-tri', requireAuth: true },
 ]
 
 export function Sidebar() {
@@ -123,7 +125,11 @@ export function Sidebar() {
                 {!collapsed && (
                     <div className="px-4 mb-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Menu chính</div>
                 )}
-                {navItems.filter(item => item.href !== '/database' || user).map((item) => {
+                {navItems.filter(item => {
+                    if (item.href === '/database') return !!user
+                    if (item.href === '/quan-tri') return isAdmin(user?.email)
+                    return true
+                }).map((item) => {
                     const Icon = item.icon
                     const isActive = pathname === item.href
 
@@ -152,13 +158,25 @@ export function Sidebar() {
                 <div className="p-6 border-t border-slate-800">
                     {/* Auth Button */}
                     {user ? (
-                        <button
-                            onClick={handleLogout}
-                            className="w-full flex items-center gap-3 p-4 bg-red-500/10 text-red-400 rounded-2xl hover:bg-red-500/20 transition-all border border-red-500/20 mb-6 group"
-                        >
-                            <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                            <span className="text-xs font-bold uppercase tracking-wider">Đăng xuất</span>
-                        </button>
+                        <>
+                            {/* Feedback Button */}
+                            <Link
+                                href="/gop-y"
+                                className="w-full flex items-center gap-3 p-4 bg-blue-500/10 text-blue-400 rounded-2xl hover:bg-blue-500/20 transition-all border border-blue-500/20 mb-3 group"
+                            >
+                                <MessageSquare className="w-5 h-5" />
+                                <span className="text-xs font-bold uppercase tracking-wider">Góp ý</span>
+                            </Link>
+
+                            {/* Logout Button */}
+                            <button
+                                onClick={handleLogout}
+                                className="w-full flex items-center gap-3 p-4 bg-red-500/10 text-red-400 rounded-2xl hover:bg-red-500/20 transition-all border border-red-500/20 mb-6 group"
+                            >
+                                <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                                <span className="text-xs font-bold uppercase tracking-wider">Đăng xuất</span>
+                            </button>
+                        </>
                     ) : (
                         <Link
                             href="/login"

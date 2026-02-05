@@ -105,6 +105,7 @@ export function MobileHeader() {
 
                         {/* Menu Items */}
                         <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+                            <MenuItem href="/quan-tri" icon={Shield} label="Quản trị" onClick={() => setIsMenuOpen(false)} />
                             <MenuItem href="/gioi-thieu" icon={HelpCircle} label="Giới thiệu" onClick={() => setIsMenuOpen(false)} />
                             <MenuItem href="/chinh-sach-bao-mat" icon={Shield} label="Chính sách bảo mật" onClick={() => setIsMenuOpen(false)} />
                             <MenuItem href="/dieu-khoan-su-dung" icon={FileText} label="Điều khoản sử dụng" onClick={() => setIsMenuOpen(false)} />

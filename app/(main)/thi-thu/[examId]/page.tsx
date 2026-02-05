@@ -12,6 +12,7 @@ import { GuideModal } from '@/components/practice/GuideModal'
 import { ReportModal } from '@/components/practice/ReportModal'
 import { AlertTriangle, RotateCcw } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme/ThemeContext'
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 
 const EXAM_TIME = 30 * 60 // 30 minutes in seconds
 
@@ -62,6 +63,10 @@ export default function ExamSessionPage() {
     // Keyboard Navigation States
     const [kbArea, setKbArea] = useState<'sidebar' | 'main'>('sidebar')
     const [kbFocusIndex, setKbFocusIndex] = useState(0)
+
+    // Turnstile Bot Protection
+    const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+    const turnstileRef = useRef<TurnstileInstance>(null)
 
     const [isMobile, setIsMobile] = useState(false)
     const [isReportModalOpen, setIsReportModalOpen] = useState(false)
@@ -232,6 +237,13 @@ export default function ExamSessionPage() {
 
     const handleSubmit = async () => {
         if (isFinished) return
+
+        // Verify Turnstile token
+        if (!turnstileToken) {
+            alert('Vui lòng hoàn thành xác minh bảo mật trước khi nộp bài!')
+            return
+        }
+
         setIsFinished(true)
         if (timerRef.current) clearInterval(timerRef.current)
 
@@ -250,29 +262,46 @@ export default function ExamSessionPage() {
         const totalCorrect = lawCorrect + specialtyCorrect
         const passed = lawCorrect >= 7 && totalCorrect >= 21
 
-        // Save to Supabase
+        // Submit to API with Turnstile verification
         try {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (user) {
-                await supabase.from('exam_results').insert({
-                    user_id: user.id,
-                    hang: selectedHang,
-                    chuyen_nganh: examId,
-                    score: totalCorrect,
-                    law_correct: lawCorrect,
-                    specialist_correct: specialtyCorrect,
-                    total_questions: 30,
-                    time_taken: EXAM_TIME - timeLeft,
-                    passed: passed,
-                    answers: questions.map(q => ({
-                        q_id: q.id,
-                        choice: userAnswers[q.id],
-                        correct: userAnswers[q.id] === q.dap_an_dung
-                    }))
+            const response = await fetch('/api/exam/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    turnstileToken,
+                    examData: {
+                        hang: selectedHang,
+                        chuyen_nganh: examId,
+                        score: totalCorrect,
+                        general_score: lawCorrect,
+                        specialty_score: specialtyCorrect,
+                        time_taken: EXAM_TIME - timeLeft,
+                        passed,
+                        answers: questions.map(q => ({
+                            q_id: q.id,
+                            choice: userAnswers[q.id],
+                            correct: userAnswers[q.id] === q.dap_an_dung
+                        }))
+                    }
                 })
+            })
+
+            const result = await response.json()
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to submit exam')
             }
-        } catch (error) {
-            console.error('Error saving exam result:', error)
+
+            // Success - exam result saved
+            console.log('Exam submitted successfully')
+
+        } catch (error: any) {
+            console.error('Error submitting exam:', error)
+            alert(error.message || 'Có lỗi xảy ra khi nộp bài. Vui lòng thử lại!')
+            setIsFinished(false)
+            // Reset Turnstile for retry
+            turnstileRef.current?.reset()
+            setTurnstileToken(null)
         }
     }
 
@@ -451,7 +480,7 @@ export default function ExamSessionPage() {
                             <div className="inline-flex p-5 bg-white/20 backdrop-blur-md rounded-full mb-4 shadow-inner">
                                 {passed ? <CheckCircle2 className="w-12 h-12" /> : <XCircle className="w-12 h-12" />}
                             </div>
-                            <h1 className="text-5xl font-bold tracking-tight mb-2 uppercase">
+                            <h1 className="text-5xl font-bold tracking-tight mb-2 uppercase text-white">
                                 {passed ? 'ĐẠT' : 'KHÔNG ĐẠT'}
                             </h1>
                             <p className="text-white/90 text-xl font-medium max-w-md mx-auto leading-relaxed">
@@ -1260,6 +1289,17 @@ export default function ExamSessionPage() {
                             </div>
                         </div>
 
+                        {/* Turnstile CAPTCHA */}
+                        <div className="mb-6">
+                            <Turnstile
+                                ref={turnstileRef}
+                                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
+                                onSuccess={setTurnstileToken}
+                                onError={() => setTurnstileToken(null)}
+                                onExpire={() => setTurnstileToken(null)}
+                            />
+                        </div>
+
                         <div className="grid grid-cols-2 gap-3">
                             <button
                                 onClick={() => setShowSubmitDialog(false)}
@@ -1269,7 +1309,8 @@ export default function ExamSessionPage() {
                             </button>
                             <button
                                 onClick={confirmSubmit}
-                                className="px-6 py-3.5 bg-[#34C759] text-white font-semibold rounded-[12px] hover:bg-[#28A745] transition-all shadow-lg shadow-green-500/10 active:scale-95"
+                                disabled={!turnstileToken}
+                                className="px-6 py-3.5 bg-[#34C759] text-white font-semibold rounded-[12px] hover:bg-[#28A745] transition-all shadow-lg shadow-green-500/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Nộp bài
                             </button>

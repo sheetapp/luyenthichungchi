@@ -1,0 +1,1434 @@
+'use client'
+
+import { useState, useEffect, Suspense, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { supabase } from '@/lib/supabase/client'
+import { AuthWall } from '@/components/auth/AuthWall'
+import {
+    ChevronLeft, ChevronRight, ChevronDown, Search,
+    BookOpen, Target, CheckCircle, TrendingUp, RotateCcw
+} from 'lucide-react'
+import { removeVietnameseTones } from '@/lib/utils/vietnamese'
+import { useAppStore } from '@/lib/store/useAppStore'
+import { ReportModal } from '@/components/practice/ReportModal'
+import { GuideModal } from '@/components/practice/GuideModal'
+import { ThemeToggle } from '@/components/theme/ThemeContext'
+import { AlertTriangle, HelpCircle, Trash2, BookOpen as BookOpenIcon, Info } from 'lucide-react'
+import { AppleDialog } from '@/components/ui/AppleDialog'
+
+interface Question {
+    id: number
+    stt: number
+    hang: string
+    chuyen_nganh: string
+    phan_thi: string
+    cau_hoi: string
+    dap_an_a: string
+    dap_an_b: string
+    dap_an_c: string
+    dap_an_d: string
+    dap_an_dung: string
+}
+
+interface PracticeHistory {
+    [questionId: string]: {
+        attempts: number
+        wrongAttempts: number
+        lastAnswer: string
+        isCorrect: boolean
+    }
+}
+
+import { HANG_OPTIONS as HANG_TABS, PHAN_THI_OPTIONS, CHUYEN_NGANH_OPTIONS as RAW_CHUYEN_NGANH_OPTIONS } from '@/constants/categories'
+
+const CHUYEN_NGANH_OPTIONS = ['Tất cả', ...RAW_CHUYEN_NGANH_OPTIONS]
+
+function OnTapContent() {
+    const searchParams = useSearchParams()
+    const reviewMode = searchParams.get('mode') === 'exam_review'
+    const resultId = searchParams.get('resultId')
+
+    const [user, setUser] = useState<any>(null)
+    const [authLoading, setAuthLoading] = useState(true)
+
+    const [selectedHang, setSelectedHang] = useState('Hạng I')
+    const [selectedChuyenNganh, setSelectedChuyenNganh] = useState(CHUYEN_NGANH_OPTIONS[1])
+    const [selectedPhanThi, setSelectedPhanThi] = useState('Tất cả')
+    const [searchQuery, setSearchQuery] = useState('')
+
+    const [allQuestions, setAllQuestions] = useState<Question[]>([])
+    const [questions, setQuestions] = useState<Question[]>([])
+    const [currentIndex, setCurrentIndex] = useState(0)
+    const [selectedAnswer, setSelectedAnswer] = useState<string>('')
+    const [feedback, setFeedback] = useState<{ isCorrect: boolean; message: string } | null>(null)
+    const [loading, setLoading] = useState(false)
+    const [practiceHistory, setPracticeHistory] = useState<PracticeHistory>({})
+    const [phanThiCounts, setPhanThiCounts] = useState<Record<string, number>>({})
+    const [isShuffled, setIsShuffled] = useState(false)
+
+    // Keyboard Navigation States
+    const [kbArea, setKbArea] = useState<'sidebar' | 'main'>('sidebar')
+    const [kbFocusIndex, setKbFocusIndex] = useState(0)
+
+    // Report Modal State
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false)
+    const [isGuideOpen, setIsGuideOpen] = useState(false)
+    const [isHangSheetOpen, setIsHangSheetOpen] = useState(false)
+    const [practiceStep, setPracticeStep] = useState<'setup' | 'active'>('setup')
+    const [isMobile, setIsMobile] = useState(false)
+    const [isCategoryOpen, setIsCategoryOpen] = useState(true)
+    const [isPhanThiMenuOpen, setIsPhanThiMenuOpen] = useState(false)
+    const phanThiMenuRef = useRef<HTMLDivElement>(null)
+    const [categorySearchQuery, setCategorySearchQuery] = useState('')
+    const [showSticky, setShowSticky] = useState(false)
+    const [dialogConfig, setDialogConfig] = useState<{
+        isOpen: boolean
+        title: string
+        description: string
+        variant: 'danger' | 'info' | 'success' | 'warning'
+        onConfirm?: () => void
+    }>({
+        isOpen: false,
+        title: '',
+        description: '',
+        variant: 'info'
+    })
+
+    // Handle mobile detection
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768)
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
+
+    // Auto-select first tab on PC to avoid duplicate STT issue
+    useEffect(() => {
+        if (!isMobile && selectedPhanThi === 'Tất cả') {
+            setSelectedPhanThi(PHAN_THI_OPTIONS[0])
+        }
+    }, [isMobile])
+
+    // Sticky header on scroll
+    useEffect(() => {
+        const handleScroll = () => {
+            setShowSticky(window.scrollY > 100)
+        }
+        window.addEventListener('scroll', handleScroll)
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
+
+    // Check authentication and load preferences
+    useEffect(() => {
+        const checkAuth = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            setUser(user)
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('preferences')
+                    .eq('id', user.id)
+                    .single()
+
+                if (profile?.preferences) {
+                    if (profile.preferences.rank) setSelectedHang(profile.preferences.rank)
+                    if (profile.preferences.specialty) setSelectedChuyenNganh(profile.preferences.specialty)
+                }
+            }
+            setAuthLoading(false)
+        }
+        checkAuth()
+    }, [])
+
+    // Sync preferences back to profile and global store when changed
+    useEffect(() => {
+        if (!user || authLoading) return
+
+        const syncPrefs = async () => {
+            // Update Supabase
+            await supabase
+                .from('profiles')
+                .update({
+                    preferences: {
+                        rank: selectedHang,
+                        specialty: selectedChuyenNganh
+                    }
+                })
+                .eq('id', user.id)
+
+            // Update Global Store
+            useAppStore.getState().setSelectedHang(selectedHang)
+            useAppStore.getState().setSelectedCategory(selectedChuyenNganh)
+        }
+
+        syncPrefs()
+    }, [selectedHang, selectedChuyenNganh, user, authLoading])
+
+    // Fetch counts for all phan thi in current category
+    useEffect(() => {
+        async function fetchCounts() {
+            if (!selectedChuyenNganh || reviewMode) return
+
+            const { data, error } = await supabase
+                .from('questions')
+                .select('phan_thi')
+                .eq('hang', selectedHang)
+                .eq('chuyen_nganh', selectedChuyenNganh)
+
+            if (data && !error) {
+                const counts: Record<string, number> = {}
+                data.forEach((q: any) => {
+                    counts[q.phan_thi] = (counts[q.phan_thi] || 0) + 1
+                })
+                setPhanThiCounts(counts)
+            }
+        }
+        fetchCounts()
+    }, [selectedHang, selectedChuyenNganh, reviewMode])
+
+    // Fetch questions and practice history (Merge Supabase + LocalStorage)
+    useEffect(() => {
+        async function fetchData() {
+            setLoading(true)
+
+            if (reviewMode && resultId) {
+                // SPECIAL MODE: Review mistakes from a specific exam
+                try {
+                    const { data: resultData, error: resultError } = await supabase
+                        .from('exam_results')
+                        .select('answers, hang, chuyen_nganh')
+                        .eq('id', resultId)
+                        .single()
+
+                    if (resultError || !resultData) throw new Error('Không tìm thấy kết quả thi.')
+
+                    const mistakes = (resultData.answers as any[]).filter(a => a.correct === false)
+                    const qIds = mistakes.map(m => m.q_id)
+
+                    if (qIds.length === 0) {
+                        alert('Bài thi này không có câu hỏi sai nào!')
+                        return
+                    }
+
+                    // Fetch those questions
+                    const { data: wrongQs, error: qError } = await supabase
+                        .from('questions')
+                        .select('*')
+                        .in('id', qIds)
+
+                    if (qError || !wrongQs) throw qError
+
+                    // Sort to maintain consistency if needed
+                    setQuestions(wrongQs)
+                    setAllQuestions(wrongQs)
+
+                    // Update selectors to match the exam context (optional but helpful)
+                    if (resultData.hang) setSelectedHang(resultData.hang)
+                    if (resultData.chuyen_nganh) setSelectedChuyenNganh(resultData.chuyen_nganh)
+                } catch (error) {
+                    console.error('Error loading review session:', error)
+                    alert('Có lỗi xảy ra khi tải dữ liệu ôn tập.')
+                }
+            } else {
+                // NORMAL MODE: Practice by category
+                if (!selectedChuyenNganh) return
+
+                // 1. Fetch Questions
+                let query = supabase
+                    .from('questions')
+                    .select('*')
+                    .eq('hang', selectedHang)
+                    .eq('chuyen_nganh', selectedChuyenNganh)
+
+                if (selectedPhanThi !== 'Tất cả') {
+                    query = query.eq('phan_thi', selectedPhanThi)
+                }
+
+                const { data, error } = await query.order('stt', { ascending: true })
+
+                if (data && !error) {
+                    setAllQuestions(data)
+
+                    // Apply search filter (if any)
+                    let filteredData = data
+                    if (searchQuery.trim()) {
+                        const searchNormalized = removeVietnameseTones(searchQuery.trim().toLowerCase())
+                        filteredData = data.filter(q =>
+                            removeVietnameseTones(q.cau_hoi.toLowerCase()).includes(searchNormalized)
+                        )
+                    }
+                    setQuestions(filteredData)
+                }
+            }
+
+            // Common: Fetch Practice History (Always helpful)
+            let cloudHistory: PracticeHistory = {}
+            const { data: { user: currentUser } } = await supabase.auth.getUser()
+            if (currentUser) {
+                const { data: statsData, error: sError } = await supabase
+                    .from('user_practice_stats')
+                    .select('history')
+                    .eq('user_id', currentUser.id)
+                    .single()
+
+                if (!sError && statsData?.history) {
+                    cloudHistory = statsData.history as PracticeHistory
+                }
+            }
+
+            const storageKey = `practice_${selectedHang}_${selectedChuyenNganh}_${selectedPhanThi}`
+            const localSaved = localStorage.getItem(storageKey)
+            const localHistory: PracticeHistory = localSaved ? JSON.parse(localSaved) : {}
+            setPracticeHistory({ ...localHistory, ...cloudHistory })
+
+            setLoading(false)
+        }
+
+        fetchData()
+        setCurrentIndex(0)
+    }, [selectedHang, selectedChuyenNganh, selectedPhanThi, searchQuery, user, reviewMode, resultId])
+
+    // Handle Shuffling
+    useEffect(() => {
+        if (questions.length === 0) return
+
+        if (isShuffled) {
+            const shuffled = [...questions].sort(() => Math.random() - 0.5)
+            setQuestions(shuffled)
+            setCurrentIndex(0)
+        } else {
+            // Re-apply original sorting (already handled by the fetch effect normally, 
+            // but we need to re-fetch/re-filter from allQuestions to restore order)
+            let filteredData = allQuestions
+            if (searchQuery.trim()) {
+                const searchNormalized = removeVietnameseTones(searchQuery.trim().toLowerCase())
+                filteredData = allQuestions.filter(q =>
+                    removeVietnameseTones(q.cau_hoi.toLowerCase()).includes(searchNormalized)
+                )
+            }
+            setQuestions(filteredData)
+            setCurrentIndex(0)
+        }
+    }, [isShuffled])
+
+    // Close dropdown on click outside
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (phanThiMenuRef.current && !phanThiMenuRef.current.contains(event.target as Node)) {
+                setIsPhanThiMenuOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
+
+    // Standardized Keyboard Navigation Logic
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Disable when typing in search or other inputs
+            if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') {
+                return
+            }
+
+            // Report Modal Toggle: 'r' key
+            if (e.key.toLowerCase() === 'r' && !isReportModalOpen) {
+                e.preventDefault()
+                setIsReportModalOpen(true)
+                return
+            }
+
+            // Navigation Keys handling with Prevent Default
+            if (['Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Enter'].includes(e.key)) {
+                e.preventDefault()
+
+                // Area Toggling with Tab
+                if (e.key === 'Tab') {
+                    setKbArea(prev => {
+                        const newArea = prev === 'sidebar' ? 'main' : 'sidebar'
+                        if (newArea === 'sidebar') {
+                            setKbFocusIndex(currentIndex)
+                        } else {
+                            setKbFocusIndex(0)
+                        }
+                        return newArea
+                    })
+                    return
+                }
+
+                if (kbArea === 'sidebar') {
+                    const rowCount = 6
+                    switch (e.key) {
+                        case 'ArrowRight':
+                            if (kbFocusIndex < questions.length - 1) setKbFocusIndex(prev => prev + 1)
+                            break
+                        case 'ArrowLeft':
+                            if (kbFocusIndex > 0) setKbFocusIndex(prev => prev - 1)
+                            break
+                        case 'ArrowDown':
+                            if (kbFocusIndex + rowCount < questions.length) setKbFocusIndex(prev => prev + rowCount)
+                            break
+                        case 'ArrowUp':
+                            if (kbFocusIndex - rowCount >= 0) setKbFocusIndex(prev => prev - rowCount)
+                            break
+                        case ' ':
+                        case 'Enter':
+                            jumpToQuestion(kbFocusIndex)
+                            setKbArea('main')
+                            setKbFocusIndex(0)
+                            break
+                    }
+                } else { // kbArea === 'main'
+                    switch (e.key) {
+                        case 'ArrowUp':
+                            if (kbFocusIndex > 0) setKbFocusIndex(prev => prev - 1)
+                            break
+                        case 'ArrowDown':
+                            if (kbFocusIndex < 3) setKbFocusIndex(prev => prev + 1)
+                            break
+                        case 'ArrowRight':
+                            handleNext()
+                            setKbFocusIndex(0)
+                            break
+                        case 'ArrowLeft':
+                            handlePrevious()
+                            setKbFocusIndex(0)
+                            break
+                        case ' ':
+                        case 'Enter':
+                            const options = ['a', 'b', 'c', 'd']
+                            handleAnswerSelect(options[kbFocusIndex])
+                            break
+                    }
+                }
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [kbArea, kbFocusIndex, questions, currentIndex, feedback, isReportModalOpen])
+
+    // Sync state when current question changes or history is updated
+    useEffect(() => {
+        const q = questions[currentIndex]
+        if (!q) return
+
+        const history = practiceHistory[q.id]
+        if (history && history.attempts > 0) {
+            // Only update if different to avoid redundant re-renders during active answering
+            if (selectedAnswer !== history.lastAnswer) {
+                setSelectedAnswer(history.lastAnswer)
+                setFeedback({
+                    isCorrect: history.isCorrect,
+                    message: history.isCorrect ? 'Đã trả lời đúng!' : 'Đã trả lời sai!'
+                })
+            }
+        } else {
+            // Reset if no history exists for this question (prevents carrying over previous question's state)
+            if (selectedAnswer !== '') {
+                setSelectedAnswer('')
+                setFeedback(null)
+            }
+        }
+    }, [currentIndex, questions, practiceHistory])
+
+    // Sync practice history to Supabase (Debounced)
+    useEffect(() => {
+        if (!user || Object.keys(practiceHistory).length === 0) return
+
+        const syncTimeout = setTimeout(async () => {
+            try {
+                const { error } = await supabase
+                    .from('user_practice_stats')
+                    .upsert({
+                        user_id: user.id,
+                        history: practiceHistory,
+                        updated_at: new Date().toISOString()
+                    }, {
+                        onConflict: 'user_id'
+                    })
+
+                if (error) console.error('Error syncing practice history:', error.message)
+            } catch (err) {
+                console.error('Failed to sync history:', err)
+            }
+        }, 3000) // 3s debounce
+
+        return () => clearTimeout(syncTimeout)
+    }, [practiceHistory, user])
+
+    // LocalStorage Backup
+    useEffect(() => {
+        if (Object.keys(practiceHistory).length > 0 && selectedChuyenNganh) {
+            const storageKey = `practice_${selectedHang}_${selectedChuyenNganh}_${selectedPhanThi}`
+            localStorage.setItem(storageKey, JSON.stringify(practiceHistory))
+        }
+    }, [practiceHistory, selectedHang, selectedChuyenNganh, selectedPhanThi])
+
+    const currentQuestion = questions[currentIndex]
+
+    // Handle answer selection
+    function handleAnswerSelect(answer: string) {
+        if (!currentQuestion) return
+
+        setSelectedAnswer(answer)
+        const isCorrect = answer === currentQuestion.dap_an_dung
+
+        setPracticeHistory(prev => {
+            const existing = prev[currentQuestion.id] || { attempts: 0, wrongAttempts: 0, lastAnswer: '', isCorrect: false }
+            return {
+                ...prev,
+                [currentQuestion.id]: {
+                    attempts: existing.attempts + 1,
+                    wrongAttempts: isCorrect ? existing.wrongAttempts : existing.wrongAttempts + 1,
+                    lastAnswer: answer,
+                    isCorrect
+                }
+            }
+        })
+
+        setFeedback({
+            isCorrect,
+            message: isCorrect ? 'Đã trả lời đúng!' : 'Đã trả lời sai!'
+        })
+    }
+
+    function handleNext() {
+        if (currentIndex < questions.length - 1) {
+            setCurrentIndex(prev => prev + 1)
+        }
+    }
+
+    function handlePrevious() {
+        if (currentIndex > 0) {
+            setCurrentIndex(prev => prev - 1)
+        }
+    }
+
+    function jumpToQuestion(index: number) {
+        setCurrentIndex(index)
+        setKbFocusIndex(index)
+    }
+
+    const handleClearHistory = () => {
+        setDialogConfig({
+            isOpen: true,
+            title: 'Xóa lịch sử ôn tập',
+            description: `Bạn có chắc chắn muốn xóa lịch sử ôn tập của chuyên ngành "${selectedChuyenNganh}"? Hành động này không thể hoàn tác.`,
+            variant: 'danger',
+            onConfirm: async () => {
+                try {
+                    setLoading(true)
+                    setDialogConfig(prev => ({ ...prev, isOpen: false }))
+
+                    // 1. Identify question IDs to remove
+                    const qIdsToRemove = questions.map(q => q.id.toString())
+
+                    // 2. Create new history object excluding these IDs
+                    const newHistory = { ...practiceHistory }
+                    qIdsToRemove.forEach(id => {
+                        delete newHistory[id]
+                    })
+
+                    // 3. Update State
+                    setPracticeHistory(newHistory)
+                    setSelectedAnswer('')
+                    setFeedback(null)
+
+                    // 4. Update LocalStorage
+                    const storageKey = `practice_${selectedHang}_${selectedChuyenNganh}_${selectedPhanThi}`
+                    localStorage.removeItem(storageKey)
+
+                    // 5. Update Supabase
+                    if (user) {
+                        const { error } = await supabase
+                            .from('user_practice_stats')
+                            .upsert({
+                                user_id: user.id,
+                                history: newHistory,
+                                updated_at: new Date().toISOString()
+                            }, {
+                                onConflict: 'user_id'
+                            })
+
+                        if (error) throw error
+                    }
+
+                    setDialogConfig({
+                        isOpen: true,
+                        title: 'Thành công',
+                        description: 'Đã xóa lịch sử ôn tập thành công!',
+                        variant: 'success'
+                    })
+                } catch (error: any) {
+                    console.error('Error clearing history:', error)
+                    setDialogConfig({
+                        isOpen: true,
+                        title: 'Lỗi',
+                        description: 'Có lỗi xảy ra khi xóa lịch sử: ' + (error.message || 'Lỗi không xác định'),
+                        variant: 'danger'
+                    })
+                } finally {
+                    setLoading(false)
+                }
+            }
+        })
+    }
+
+    function getQuestionButtonClass(index: number, question: Question) {
+        const baseClass = "w-10 h-10 rounded-xl font-semibold transition-all text-xs flex items-center justify-center relative active:scale-90 border"
+        const isKbFocused = kbArea === 'sidebar' && kbFocusIndex === index
+        const focusRing = isKbFocused ? "ring-[3px] ring-apple-blue/30 z-10 scale-110" : ""
+
+        if (index === currentIndex) {
+            return `${baseClass} bg-[#0A84FF] border-[#0A84FF] text-white shadow-apple-shadow scale-105 z-10 ${focusRing}`
+        }
+
+        const history = practiceHistory[question.id]
+        if (!history || history.attempts === 0) {
+            return `${baseClass} bg-transparent border-apple-border text-apple-text-secondary hover:border-apple-text/30 cursor-pointer ${focusRing}`
+        }
+
+        if (history.wrongAttempts > 2) {
+            return `${baseClass} bg-red-muted border-red-soft text-red-text cursor-pointer ${focusRing}`
+        }
+
+        if (history.isCorrect) {
+            return `${baseClass} bg-emerald-muted border-emerald-soft text-emerald-text cursor-pointer ${focusRing}`
+        } else {
+            return `${baseClass} bg-red-muted border-red-soft text-red-text cursor-pointer ${focusRing}`
+        }
+    }
+
+    const stats = {
+        done: Object.keys(practiceHistory).filter(id => practiceHistory[id].attempts > 0).length,
+        notDone: questions.length - Object.keys(practiceHistory).filter(id => practiceHistory[id].attempts > 0).length,
+        correct: Object.keys(practiceHistory).filter(id => practiceHistory[id].isCorrect).length,
+        wrong: Object.keys(practiceHistory).filter(id => !practiceHistory[id].isCorrect && practiceHistory[id].attempts > 0).length
+    }
+
+    // Show loading while checking auth
+    if (authLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            </div>
+        )
+    }
+
+    // Show landing page if not authenticated
+    if (!user) {
+        return (
+            <AuthWall
+                title="Hệ thống ôn tập"
+                description="Luyện tập với bộ câu hỏi sát hạch chứng chỉ hành nghề xây dựng được cập nhật mới nhất. Theo dõi tiến độ và củng cố kiến thức hiệu quả. Truy cập miễn phí hơn 1000+ câu hỏi ôn tập."
+                features={[
+                    { icon: BookOpen, text: "1.000+ Câu hỏi" },
+                    { icon: Target, text: "Phân loại chuyên ngành" },
+                    { icon: CheckCircle, text: "Giải thích chi tiết" },
+                    { icon: TrendingUp, text: "Theo dõi tiến độ" }
+                ]}
+                redirectPath="/on-tap"
+            />
+        )
+    }
+
+    // Show practice content for authenticated users
+
+    return (
+        <div className={`bg-apple-bg flex flex-col font-sans transition-colors duration-300 ${!isMobile ? 'md:h-[calc(100vh-70px)] md:pb-1 overflow-hidden' : 'min-h-screen py-4 md:py-6 space-y-4 md:space-y-6'}`}>
+            {/* Sticky Header */}
+            {showSticky && (
+                <div className="fixed top-0 left-0 right-0 bg-apple-card/80 backdrop-blur-xl z-[60] py-3 px-4 md:px-6 border-b border-apple-border shadow-sm">
+                    <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center gap-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setIsGuideOpen(true)}
+                                    className="md:hidden flex items-center justify-center w-9 h-9 bg-apple-card border border-apple-border rounded-xl text-apple-blue shadow-sm active:scale-90 transition-all"
+                                    title="Xem hướng dẫn"
+                                >
+                                    <HelpCircle className="w-4.5 h-4.5" />
+                                </button>
+                                <ThemeToggle />
+                            </div>
+                            <div className="md:hidden flex p-1 bg-apple-border rounded-[10px]">
+                                {HANG_TABS.map(hang => (
+                                    <button
+                                        key={hang}
+                                        onClick={() => setSelectedHang(hang)}
+                                        className={`px-3 py-1.5 rounded-[8px] text-[11px] font-semibold transition-all ${selectedHang === hang
+                                            ? 'bg-apple-card text-apple-blue shadow-sm'
+                                            : 'text-apple-text-secondary'
+                                            }`}
+                                    >
+                                        {hang}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* PC Hạng Tabs */}
+                        <div className="hidden md:flex p-1 bg-apple-border rounded-[12px]">
+                            {HANG_TABS.map(hang => (
+                                <button
+                                    key={hang}
+                                    onClick={() => setSelectedHang(hang)}
+                                    className={`px-6 py-2 rounded-[10px] text-sm font-semibold transition-all ${selectedHang === hang
+                                        ? 'bg-apple-card text-apple-blue shadow-sm'
+                                        : 'text-apple-text-secondary hover:text-apple-text'
+                                        }`}
+                                >
+                                    {hang}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Search */}
+                        <div className="flex-1 relative">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-apple-text-secondary w-4 h-4" />
+                            <input
+                                type="text"
+                                placeholder="Tìm kiếm chuyên ngành ôn tập..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 bg-apple-card/50 border border-apple-border rounded-[10px] outline-none focus:ring-2 focus:ring-apple-blue/20 shadow-sm text-sm"
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Header */}
+            <div className="flex-shrink-0 px-4 md:px-6 flex flex-col md:flex-row md:items-start justify-between gap-4 md:gap-6">
+                <div className="space-y-1">
+                    <div className="flex items-center justify-between md:justify-start gap-4">
+                        <div className="flex items-center gap-2">
+                            {practiceStep === 'active' && (
+                                <button
+                                    onClick={() => setPracticeStep('setup')}
+                                    className="md:hidden p-2 -ml-2 text-apple-text hover:bg-apple-border/30 rounded-full transition-all"
+                                >
+                                    <ChevronLeft className="w-6 h-6" />
+                                </button>
+                            )}
+                            <h1 className="text-2xl md:text-3xl font-bold text-apple-text tracking-tight mb-0 md:mb-2">
+                                {practiceStep === 'setup' ? 'Hệ thống ôn tập' : 'Đang ôn tập'}
+                            </h1>
+                        </div>
+                        <div className="flex items-center gap-2 md:hidden">
+                            <button
+                                onClick={() => setIsShuffled(!isShuffled)}
+                                className={`p-2.5 rounded-full transition-all border ${isShuffled ? 'bg-orange-500 border-orange-500 text-white' : 'bg-apple-card border-apple-border text-apple-text'}`}
+                                title="Trộn câu hỏi"
+                            >
+                                <RotateCcw className={`w-4 h-4 ${isShuffled ? 'animate-spin-slow' : ''}`} />
+                            </button>
+                            <button
+                                onClick={() => setIsGuideOpen(true)}
+                                className="p-2.5 bg-apple-card border border-apple-border text-apple-text rounded-full transition-all"
+                                title="Hướng dẫn"
+                            >
+                                <HelpCircle className="w-4 h-4" />
+                            </button>
+                            {practiceStep === 'active' && (
+                                <button
+                                    onClick={() => setIsReportModalOpen(true)}
+                                    className="p-2.5 bg-apple-card border border-apple-border text-[#FF9500] rounded-full transition-all"
+                                    title="Phản hồi"
+                                >
+                                    <AlertTriangle className="w-4 h-4" />
+                                </button>
+                            )}
+                            <ThemeToggle />
+                        </div>
+                    </div>
+                    {(practiceStep === 'setup' || !isMobile) && (
+                        <div className="hidden md:flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mt-2">
+                            <p className="text-apple-text-secondary text-xs md:text-sm font-normal">Lựa chọn hạng và lĩnh vực để bắt đầu học</p>
+                            <button
+                                onClick={() => setIsGuideOpen(true)}
+                                className="w-fit flex items-center gap-2 px-3 py-1.5 bg-apple-blue/5 text-apple-blue rounded-[10px] text-[11px] font-bold border border-apple-blue/10 hover:bg-apple-blue/10 transition-all active:scale-95"
+                            >
+                                <HelpCircle className="w-3.5 h-3.5" />
+                                Xem hướng dẫn
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Desktop Buttons */}
+                <div className="hidden md:flex items-center gap-3 justify-between md:justify-end">
+                    <div className="hidden md:block">
+                        <ThemeToggle />
+                    </div>
+                    <button
+                        onClick={handleClearHistory}
+                        className="hidden md:flex flex-1 md:flex-none items-center justify-center gap-2 px-4 md:px-6 py-2.5 md:py-3 rounded-[10px] text-xs md:text-sm font-bold transition-all border bg-apple-card text-red-500 border-apple-border hover:bg-red-50 shadow-sm active:scale-97"
+                        title="Xóa lịch sử ôn tập"
+                    >
+                        <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                        <span>Xóa lịch sử</span>
+                    </button>
+                    <button
+                        onClick={() => setIsShuffled(!isShuffled)}
+                        className={`flex-1 md:flex-none flex items-center justify-center gap-2 md:gap-2.5 px-4 md:px-6 py-2.5 md:py-3 rounded-[10px] text-xs md:text-sm font-bold transition-all border ${isShuffled
+                            ? 'bg-[#FF9500] border-[#FF9500] text-white shadow-lg shadow-orange-500/20 active:scale-97'
+                            : 'bg-apple-card text-apple-text border-apple-border hover:bg-apple-bg shadow-sm'
+                            }`}
+                    >
+                        <RotateCcw className={`w-3.5 h-3.5 md:w-4 md:h-4 ${isShuffled ? 'animate-spin-slow' : ''}`} />
+                        <span>Trộn câu hỏi</span>
+                        {isShuffled && <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />}
+                    </button>
+                </div>
+            </div>
+
+            {/* Step 1: Selection View (Config) */}
+            {(practiceStep === 'setup' || !isMobile) && (
+                <>
+                    {/* Top Controls - Responsive Selection */}
+                    <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4 flex-shrink-0 px-4 md:px-6">
+                        {/* Desktop Hạng Tabs */}
+                        <div className="hidden md:flex p-1 bg-apple-bg rounded-xl border border-apple-border shadow-sm w-fit overflow-x-auto no-scrollbar">
+                            {HANG_TABS.map(hang => (
+                                <button
+                                    key={hang}
+                                    onClick={() => setSelectedHang(hang)}
+                                    className={`px-4 md:px-6 py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedHang === hang
+                                        ? 'bg-apple-card text-apple-blue shadow-md'
+                                        : 'text-apple-text-secondary hover:text-apple-text'
+                                        }`}
+                                >
+                                    {hang}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Mobile Hạng Selection Trigger */}
+                        <button
+                            onClick={() => setIsHangSheetOpen(true)}
+                            className="md:hidden w-full flex items-center justify-between px-4 py-4 bg-apple-card border border-apple-border rounded-xl shadow-sm text-sm font-bold text-apple-text active:scale-98 transition-all"
+                        >
+                            <div className="flex flex-col items-start gap-1">
+                                <span className="text-[10px] text-apple-text-secondary font-medium uppercase tracking-wider">HẠNG ĐANG CHỌN</span>
+                                <span className="text-apple-blue text-lg">{selectedHang}</span>
+                            </div>
+                            <div className="p-2 bg-apple-blue/5 rounded-full">
+                                <ChevronRight className="w-5 h-5 text-apple-blue" />
+                            </div>
+                        </button>
+
+                        {/* Desktop Specialty Select */}
+                        <div className="hidden md:flex items-center gap-3 flex-1 max-w-xl">
+                            <span className="text-sm font-bold text-apple-text-secondary whitespace-nowrap">Hạng mục tham gia:</span>
+                            <div className="relative flex-1">
+                                <select
+                                    value={selectedChuyenNganh}
+                                    onChange={(e) => setSelectedChuyenNganh(e.target.value)}
+                                    className="w-full appearance-none pl-4 pr-10 py-2.5 bg-apple-card border border-apple-border rounded-[10px] outline-none focus:ring-2 focus:ring-apple-blue/20 shadow-sm transition-all text-sm font-bold truncate cursor-pointer"
+                                >
+                                    {CHUYEN_NGANH_OPTIONS.map((option) => (
+                                        <option key={option} value={option} className="bg-apple-card text-apple-text whitespace-normal">
+                                            {option}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-apple-text-secondary px-2 bg-apple-card">
+                                    <ChevronDown className="w-4 h-4" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Desktop Search */}
+                        <div className="hidden md:block relative w-full md:w-[320px] lg:w-[400px] md:ml-auto">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-secondary" />
+                            <input
+                                type="text"
+                                placeholder="Tìm kiếm nội dung..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2.5 bg-apple-card border border-apple-border rounded-xl text-sm font-bold text-apple-text placeholder:text-apple-text-secondary focus:outline-none focus:ring-2 focus:ring-apple-blue/10 shadow-sm transition-all"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Mobile Category Dropdown (Step 1 Selection) */}
+                    <div className="md:hidden px-4">
+                        <button
+                            onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                            className="w-full flex items-center justify-between py-2"
+                        >
+                            <h2 className="text-[11px] font-bold text-apple-text-secondary uppercase tracking-widest leading-none">LĨNH VỰC ÔN TẬP</h2>
+                            <ChevronDown className={`w-4 h-4 text-apple-text-secondary transition-transform duration-300 ${isCategoryOpen ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {isCategoryOpen && (
+                            <div className="mt-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                                {/* Quick Search for Categories */}
+                                <div className="relative mb-4">
+                                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-secondary" />
+                                    <input
+                                        type="text"
+                                        placeholder="Tìm nhanh lĩnh vực..."
+                                        value={categorySearchQuery}
+                                        onChange={(e) => setCategorySearchQuery(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-2.5 bg-apple-bg border border-apple-border rounded-xl text-sm font-bold text-apple-text placeholder:text-apple-text-secondary focus:outline-none focus:ring-2 focus:ring-apple-blue/10 shadow-sm transition-all"
+                                    />
+                                </div>
+
+                                <div className="space-y-3">
+                                    {CHUYEN_NGANH_OPTIONS
+                                        .filter(opt => opt !== 'Tất cả')
+                                        .filter(opt =>
+                                            removeVietnameseTones(opt.toLowerCase())
+                                                .includes(removeVietnameseTones(categorySearchQuery.toLowerCase()))
+                                        )
+                                        .map((option) => {
+                                            const isActive = selectedChuyenNganh === option
+                                            return (
+                                                <button
+                                                    key={option}
+                                                    onClick={() => {
+                                                        setSelectedChuyenNganh(option)
+                                                        setPracticeStep('active')
+                                                    }}
+                                                    className={`w-full flex items-center justify-between p-5 rounded-2xl border transition-all active:scale-[0.98] ${isActive
+                                                        ? 'bg-apple-blue/5 border-apple-blue/40 shadow-sm ring-1 ring-apple-blue/20'
+                                                        : 'bg-apple-card border-apple-border shadow-sm'
+                                                        }`}
+                                                >
+                                                    <div className="flex-1 text-left">
+                                                        <span className={`text-base font-bold leading-tight ${isActive ? 'text-apple-blue' : 'text-apple-text'}`}>
+                                                            {option}
+                                                        </span>
+                                                    </div>
+                                                    {isActive ? (
+                                                        <div className="w-6 h-6 bg-apple-blue rounded-full flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                                            <CheckCircle className="w-4 h-4 text-white" />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="w-6 h-6 rounded-full border border-apple-border flex items-center justify-center">
+                                                            <ChevronRight className="w-4 h-4 text-apple-text-secondary/40" />
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            )
+                                        })}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </>
+            )}
+
+            {/* Step 2: Practice View (Visible in Active mode or Desktop) */}
+            {(practiceStep === 'active' || !isMobile) && (
+                <>
+                    {/* Tabs - Hidden on mobile quiz view */}
+                    <div className={`px-4 md:px-6 border-b border-apple-border flex-shrink-0 overflow-x-auto no-scrollbar ${isMobile && practiceStep === 'active' ? 'hidden' : 'flex'}`}>
+                        {PHAN_THI_OPTIONS.map((phan, index) => {
+                            const count = phanThiCounts[phan] || 0
+                            const isActive = selectedPhanThi === phan
+                            return (
+                                <button
+                                    key={phan}
+                                    onClick={() => setSelectedPhanThi(phan)}
+                                    className={`px-4 md:px-6 py-4 text-xs md:text-sm font-semibold transition-all relative flex items-center gap-2 whitespace-nowrap ${isActive ? 'text-apple-blue' : 'text-apple-text-secondary hover:text-apple-text'
+                                        }`}
+                                >
+                                    <span>{phan.replace('Câu hỏi ', '')}</span>
+                                    {count > 0 && (
+                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${isActive ? 'bg-apple-blue text-white' : 'bg-apple-bg border border-apple-border text-apple-text-secondary'
+                                            }`}>
+                                            {count}
+                                        </span>
+                                    )}
+                                    {isActive && (
+                                        <div className="absolute bottom-0 left-4 md:left-6 right-4 md:right-6 h-[2.5px] bg-apple-blue rounded-t-full shadow-[0_-2px_8px_rgba(0,122,255,0.4)]" />
+                                    )}
+                                </button>
+                            )
+                        })}
+                    </div>
+
+                    {/* Navigation & Statistics - Hidden on mobile quiz view */}
+                    <div className={`mx-6 bg-apple-card/80 backdrop-blur-[20px] rounded-2xl p-6 border border-apple-border shadow-apple-shadow flex-shrink-0 ${isMobile && practiceStep === 'active' ? 'hidden' : 'block'}`}>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-shrink-0">
+                            <button
+                                onClick={() => {
+                                    const firstActiveIndex = questions.findIndex(q => {
+                                        const history = practiceHistory[q.id]
+                                        return history && history.attempts > 0
+                                    })
+                                    if (firstActiveIndex !== -1) jumpToQuestion(firstActiveIndex)
+                                }}
+                                className="bg-apple-card rounded-2xl p-4 border border-apple-border hover:border-apple-text/10 transition-all text-left group shadow-sm"
+                            >
+                                <div className="text-apple-text-secondary text-[10px] font-semibold mb-1 group-hover:text-apple-text">Đã làm</div>
+                                <div className="flex items-end justify-between">
+                                    <div className="text-2xl font-bold text-apple-text tracking-tight">{stats.done}</div>
+                                    <div className="text-[10px] text-apple-text-secondary opacity-60 mb-1 font-medium">{Math.round((stats.done / questions.length) * 100) || 0}%</div>
+                                </div>
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    const firstNotDoneIndex = questions.findIndex(q => {
+                                        const history = practiceHistory[q.id]
+                                        return !history || history.attempts === 0
+                                    })
+                                    if (firstNotDoneIndex !== -1) jumpToQuestion(firstNotDoneIndex)
+                                }}
+                                className="bg-apple-card rounded-2xl p-4 border border-apple-border hover:border-apple-text/10 transition-all text-left group shadow-sm"
+                            >
+                                <div className="text-apple-text-secondary text-[10px] font-semibold mb-1 group-hover:text-apple-text">Chưa làm</div>
+                                <div className="text-2xl font-bold text-apple-text">{stats.notDone}</div>
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    const firstCorrectIndex = questions.findIndex(q => {
+                                        const history = practiceHistory[q.id]
+                                        return history && history.isCorrect
+                                    })
+                                    if (firstCorrectIndex !== -1) jumpToQuestion(firstCorrectIndex)
+                                }}
+                                className="bg-emerald-muted rounded-2xl p-4 border border-emerald-soft hover:bg-emerald-muted/80 transition-all text-left group shadow-sm"
+                            >
+                                <div className="text-emerald-text text-[10px] font-bold mb-1">Trả lời đúng</div>
+                                <div className="text-2xl font-bold text-emerald-text">{stats.correct}</div>
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    const firstWrongIndex = questions.findIndex(q => {
+                                        const history = practiceHistory[q.id]
+                                        return history && !history.isCorrect && history.attempts > 0
+                                    })
+                                    if (firstWrongIndex !== -1) jumpToQuestion(firstWrongIndex)
+                                }}
+                                className="bg-red-muted rounded-2xl p-4 border border-red-soft hover:bg-red-muted/80 transition-all text-left group shadow-sm"
+                            >
+                                <div className="text-red-text text-[10px] font-bold mb-1">Trả lời sai</div>
+                                <div className="text-2xl font-bold text-red-text">{stats.wrong}</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Main Content Layout - Redesigned with Navigation Pillar */}
+                    <div className="flex-1 flex flex-col md:flex-row gap-4 md:gap-4 px-4 md:px-6 pb-6 overflow-hidden mt-2">
+                        {/* 1. Left Sidebar (Question List) */}
+                        <div className={`hidden md:flex w-[320px] bg-apple-card/80 backdrop-blur-[20px] rounded-2xl p-5 shadow-apple-shadow border border-apple-border flex-col overflow-hidden`}>
+                            <h3 className="font-semibold text-apple-text mb-4 flex items-center justify-between flex-shrink-0">
+                                <span className="text-[10px] text-apple-text-secondary font-semibold">Danh sách câu hỏi</span>
+                                <span className="text-[10px] font-semibold text-apple-text-secondary bg-apple-bg px-2 py-0.5 rounded-full ring-1 ring-apple-border">{questions.length}</span>
+                            </h3>
+
+                            {loading ? (
+                                <div className="text-center py-10 flex-1 flex items-center justify-center">
+                                    <div className="w-8 h-8 border-4 border-apple-blue border-t-transparent rounded-full animate-spin" />
+                                </div>
+                            ) : (
+                                <div className="overflow-y-auto overflow-x-hidden flex-1 pr-4 custom-scrollbar">
+                                    <div className="grid grid-cols-6 gap-2">
+                                        {questions.map((q, index) => (
+                                            <button
+                                                key={q.id}
+                                                onClick={() => jumpToQuestion(index)}
+                                                className={getQuestionButtonClass(index, q)}
+                                                title={`Câu ${q.stt || index + 1}`}
+                                                onMouseEnter={() => {
+                                                    if (kbArea !== 'sidebar') setKbArea('sidebar')
+                                                    setKbFocusIndex(index)
+                                                }}
+                                            >
+                                                {q.stt || index + 1}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* 2. Central Navigation Pillar (Apple Style - Top Aligned) */}
+                        {!isMobile && (
+                            <div className="hidden md:flex flex-col items-center justify-start gap-4 px-1 py-8">
+                                <button
+                                    onClick={handlePrevious}
+                                    disabled={currentIndex === 0}
+                                    className="w-12 h-12 flex items-center justify-center bg-apple-card border border-apple-border text-apple-text rounded-2xl hover:bg-apple-bg hover:border-apple-text/20 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-sm active:scale-90 group"
+                                    title="Câu trước"
+                                >
+                                    <ChevronLeft className="w-6 h-6 group-hover:-translate-x-0.5 transition-transform" />
+                                </button>
+
+                                {/* Shuffle Button - Apple Style */}
+                                <div className="flex flex-col items-center justify-center gap-4 py-4">
+                                    <button
+                                        onClick={() => setIsShuffled(!isShuffled)}
+                                        className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all shadow-lg active:scale-90 group relative ${isShuffled
+                                            ? 'bg-[#FF9500] text-white shadow-orange-500/20'
+                                            : 'bg-apple-card border border-apple-border text-apple-text hover:bg-apple-bg'
+                                            }`}
+                                        title="Trộn câu hỏi"
+                                    >
+                                        <RotateCcw className={`w-5 h-5 ${isShuffled ? 'animate-spin-slow' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+                                        {isShuffled && (
+                                            <span className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full border-2 border-[#FF9500] animate-pulse" />
+                                        )}
+                                    </button>
+                                </div>
+
+                                <button
+                                    onClick={handleNext}
+                                    disabled={currentIndex === questions.length - 1}
+                                    className="w-12 h-12 flex items-center justify-center bg-apple-blue text-white rounded-2xl hover:bg-[#0062CC] disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-500/20 active:scale-90 group"
+                                    title="Câu tiếp"
+                                >
+                                    <ChevronRight className="w-6 h-6 group-hover:translate-x-0.5 transition-transform" />
+                                </button>
+                            </div>
+                        )}
+
+                        {/* 3. Main Question Content */}
+                        <div className={`flex-1 bg-apple-card rounded-2xl shadow-apple-shadow border border-apple-border flex flex-col overflow-hidden ${isMobile && practiceStep === 'active' ? 'p-0 border-none bg-transparent shadow-none' : ''}`}>
+                            {loading ? (
+                                <div className="text-center py-20 flex-1 flex items-center justify-center">
+                                    <div>
+                                        <div className="w-12 h-12 border-4 border-apple-blue border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                                        <p className="text-apple-text-secondary font-medium">Đang tải câu hỏi...</p>
+                                    </div>
+                                </div>
+                            ) : currentQuestion ? (
+                                <div className={`overflow-y-auto flex-1 custom-scrollbar ${isMobile && practiceStep === 'active' ? 'p-0' : 'pl-8 pr-10 py-8'}`}>
+                                    <div className="space-y-6">
+                                        <div className="flex flex-col md:flex-row items-start gap-3 md:gap-4 pb-6 border-b border-apple-border">
+                                            {/* Badge and Mobile Metadata Row */}
+                                            <div className="flex items-center gap-2 w-full md:w-auto h-8 px-1">
+                                                <span className="h-7 px-3 flex items-center bg-apple-blue/10 text-apple-blue font-bold rounded-lg text-[10px] md:text-[11px] flex-shrink-0 ring-1 ring-apple-blue/20">
+                                                    Câu {currentQuestion.stt || currentIndex + 1}
+                                                </span>
+                                                {/* Mobile Metadata: Visible only on mobile when in active practice */}
+                                                <div className="flex md:hidden items-center gap-2 flex-1 overflow-visible">
+                                                    {/* Custom Dropdown for Exam Part (Phần thi) */}
+                                                    <div className="relative flex-shrink-0" ref={phanThiMenuRef}>
+                                                        <button
+                                                            onClick={() => setIsPhanThiMenuOpen(!isPhanThiMenuOpen)}
+                                                            className={`
+                                                                h-7 flex items-center gap-1.5 px-3 bg-apple-blue/5 text-apple-blue font-bold rounded-lg text-[10px] ring-1 ring-apple-blue/10 
+                                                                transition-all active:scale-95 whitespace-nowrap
+                                                                ${isPhanThiMenuOpen ? 'ring-apple-blue/30 bg-apple-blue/10' : ''}
+                                                            `}
+                                                        >
+                                                            {selectedPhanThi === 'Tất cả' ? 'Tất cả' : selectedPhanThi.replace('Câu hỏi ', '')}
+                                                            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isPhanThiMenuOpen ? 'rotate-180' : ''}`} />
+                                                        </button>
+
+                                                        {/* Custom Dropdown Menu */}
+                                                        {isPhanThiMenuOpen && (
+                                                            <div className="absolute top-full left-0 mt-2 w-40 bg-apple-card/95 backdrop-blur-xl border border-apple-border rounded-xl shadow-2xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                                                <div className="p-1">
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setSelectedPhanThi('Tất cả')
+                                                                            setCurrentIndex(0)
+                                                                            setIsPhanThiMenuOpen(false)
+                                                                        }}
+                                                                        className={`w-full text-left px-3 py-2 rounded-lg text-[11px] font-medium transition-colors ${selectedPhanThi === 'Tất cả' ? 'bg-apple-blue text-white' : 'text-apple-text hover:bg-apple-blue/10'}`}
+                                                                    >
+                                                                        Tất cả
+                                                                    </button>
+                                                                    {PHAN_THI_OPTIONS.map(opt => (
+                                                                        <button
+                                                                            key={opt}
+                                                                            onClick={() => {
+                                                                                setSelectedPhanThi(opt)
+                                                                                setCurrentIndex(0)
+                                                                                setIsPhanThiMenuOpen(false)
+                                                                            }}
+                                                                            className={`w-full text-left px-3 py-2 rounded-lg text-[11px] font-medium transition-colors ${selectedPhanThi === opt ? 'bg-apple-blue text-white' : 'text-apple-text hover:bg-apple-blue/10'}`}
+                                                                        >
+                                                                            {opt.replace('Câu hỏi ', '')}
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <span className="h-7 px-3 flex items-center bg-apple-text/5 text-apple-text/60 font-bold rounded-lg text-[10px] ring-1 ring-apple-text/10 truncate max-w-[150px]">
+                                                        {selectedChuyenNganh}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex-1 w-full">
+                                                <div className="flex items-start justify-between gap-4 mb-3">
+                                                    <p className="text-apple-text text-base md:text-xl font-semibold leading-relaxed tracking-tight">
+                                                        {currentQuestion.cau_hoi}
+                                                    </p>
+                                                    <button
+                                                        onClick={() => setIsReportModalOpen(true)}
+                                                        className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-[#FF9500]/10 text-[#FF9500] rounded-[8px] text-[10px] font-bold tracking-widest border border-[#FF9500]/20 hover:bg-[#FF9500]/20 transition-all flex-shrink-0"
+                                                        title="Báo cáo sai sót (Phím R)"
+                                                    >
+                                                        <AlertTriangle className="w-3 h-3" />
+                                                        Phản hồi
+                                                    </button>
+                                                </div>
+                                                {/* Desktop Metadata: Original layout preserved */}
+                                                <div className={`hidden md:flex items-center gap-2 text-apple-text-secondary text-sm`}>
+                                                    <span className="font-medium opacity-60">Bộ đề:</span>
+                                                    <span className="font-medium text-apple-text/80 italic">{selectedChuyenNganh}</span>
+                                                    <span className="mx-1">•</span>
+                                                    <span className="font-medium">{currentIndex + 1} / {questions.length}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3 pb-32 md:pb-0">
+                                            {['a', 'b', 'c', 'd'].map((option) => {
+                                                const optionText = currentQuestion[`dap_an_${option}` as keyof Question] as string
+                                                const isSelected = selectedAnswer === option
+                                                const isCorrect = option === currentQuestion.dap_an_dung
+                                                const showCorrect = feedback && isCorrect
+                                                const showWrong = feedback && isSelected && !isCorrect
+
+                                                const isKbFocused = kbArea === 'main' && kbFocusIndex === ['a', 'b', 'c', 'd'].indexOf(option)
+
+                                                return (
+                                                    <button
+                                                        key={option}
+                                                        onClick={() => handleAnswerSelect(option)}
+                                                        onMouseEnter={() => {
+                                                            setKbArea('main')
+                                                            setKbFocusIndex(['a', 'b', 'c', 'd'].indexOf(option))
+                                                        }}
+                                                        className={`w-full flex items-start gap-4 p-4 md:p-5 rounded-2xl border transition-all relative text-left group shadow-sm active:scale-[0.99] ${isKbFocused ? 'ring-[3px] ring-apple-blue/30 border-apple-blue' : ''} ${showCorrect
+                                                            ? 'border-emerald-soft bg-emerald-muted/50'
+                                                            : showWrong
+                                                                ? 'border-red-soft bg-red-muted/50'
+                                                                : isSelected
+                                                                    ? 'border-apple-blue bg-apple-blue/5 shadow-sm'
+                                                                    : 'border-apple-border bg-apple-card hover:bg-apple-bg'
+                                                            }`}
+                                                    >
+                                                        <div className={`
+                                                    w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 border-2 transition-all
+                                                    ${showCorrect
+                                                                ? 'bg-emerald-text border-emerald-text text-white shadow-lg shadow-emerald-500/30'
+                                                                : showWrong
+                                                                    ? 'bg-red-text border-red-text text-white'
+                                                                    : isSelected
+                                                                        ? 'bg-apple-blue border-apple-blue text-white shadow-lg shadow-blue-500/30 font-black'
+                                                                        : 'bg-transparent border-apple-blue text-apple-blue'
+                                                            }
+                                                `}>
+                                                            {option.toUpperCase()}
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <p className={`text-sm md:text-[15px] leading-relaxed mt-1 ${isSelected || showCorrect || showWrong ? 'text-apple-text font-bold' : 'text-apple-text-secondary group-hover:text-apple-text font-medium'}`}>
+                                                                {optionText}
+                                                            </p>
+                                                        </div>
+                                                        {(showCorrect || (isSelected && isCorrect)) && <CheckCircle className="w-5 h-5 text-emerald-text shrink-0 mt-1" />}
+                                                    </button>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-center py-20 flex-1 flex items-center justify-center">
+                                    <p className="text-slate-500 font-medium">Không có câu hỏi nào</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                </>
+            )}
+
+            {/* Modal Components */}
+            {currentQuestion && (
+                <ReportModal
+                    isOpen={isReportModalOpen}
+                    onClose={() => setIsReportModalOpen(false)}
+                    user={user}
+                    question={{
+                        id: currentQuestion.id,
+                        stt: currentQuestion.stt || currentIndex + 1,
+                        hang: currentQuestion.hang,
+                        phan_thi: currentQuestion.phan_thi,
+                        cau_hoi: currentQuestion.cau_hoi
+                    }}
+                />
+            )}
+
+            <GuideModal
+                isOpen={isGuideOpen}
+                onClose={() => setIsGuideOpen(false)}
+            />
+
+            {/* Mobile Persistent Navigation & Grid (Image 0, 1, 4 Reference) */}
+            {(practiceStep === 'active' && currentQuestion) && (
+                <div className="md:hidden fixed bottom-[68px] left-0 right-0 z-[60] flex flex-col pointer-events-none px-2 pb-safe">
+                    {/* Navigation Pill `[ < 1/65 > ]` */}
+                    <div className="pb-4 pt-2 flex justify-center">
+                        <div className="inline-flex items-center gap-6 px-6 py-2.5 bg-apple-blue rounded-full shadow-2xl pointer-events-auto border border-white/20">
+                            <button
+                                onClick={handlePrevious}
+                                disabled={currentIndex === 0}
+                                className="text-white disabled:opacity-30 active:scale-75 transition-all"
+                            >
+                                <ChevronLeft className="w-6 h-6" />
+                            </button>
+                            <span className="text-white font-bold text-sm tracking-widest min-w-[60px] text-center">
+                                {currentIndex + 1} / {questions.length}
+                            </span>
+                            <button
+                                onClick={handleNext}
+                                disabled={currentIndex === questions.length - 1}
+                                className="text-white disabled:opacity-30 active:scale-75 transition-all"
+                            >
+                                <ChevronRight className="w-6 h-6" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Question Grid - Persistent at the bottom - Softened background */}
+                    <div className="bg-apple-card/90 backdrop-blur-[20px] rounded-3xl p-4 pb-6 pointer-events-auto shadow-apple-shadow border-t border-apple-border">
+                        <div className="flex items-center justify-between mb-3 px-2">
+                            <div className="flex items-center gap-3">
+                                <label className="flex items-center gap-2 text-apple-text/90 text-[10px] font-bold uppercase tracking-wider">
+                                    <div
+                                        onClick={() => setIsShuffled(!isShuffled)}
+                                        className={`w-8 h-4.5 rounded-full relative transition-colors pointer-events-auto cursor-pointer ${isShuffled ? 'bg-apple-blue' : 'bg-apple-text/10'}`}
+                                    >
+                                        <div className={`absolute top-0.5 w-3.5 h-3.5 bg-white rounded-full shadow-sm transition-all ${isShuffled ? 'left-4' : 'left-0.5'}`} />
+                                    </div>
+                                    Ôn thi
+                                </label>
+                            </div>
+                            <div className="text-[10px] text-apple-text/40 font-medium">BỘ ĐỀ: {selectedChuyenNganh.toUpperCase()}</div>
+                        </div>
+                        <div className="overflow-x-auto no-scrollbar pb-1">
+                            <div className="flex gap-2 min-w-max px-1">
+                                {questions.map((q, index) => {
+                                    const history = practiceHistory[q.id]
+                                    const isDone = history && history.attempts > 0
+                                    const isCurrent = index === currentIndex
+
+                                    return (
+                                        <button
+                                            key={q.id}
+                                            onClick={() => jumpToQuestion(index)}
+                                            className={`
+                                                w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs shrink-0 transition-all border
+                                                ${isCurrent
+                                                    ? 'bg-apple-blue border-apple-blue text-white scale-110 shadow-lg'
+                                                    : isDone
+                                                        ? 'bg-apple-blue/10 border-apple-blue/20 text-apple-blue'
+                                                        : 'bg-apple-bg border-apple-border text-apple-text/40'
+                                                }
+                                            `}
+
+                                        >
+                                            {index + 1}
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Hạng Bottom Sheet */}
+            {isHangSheetOpen && (
+                <div className="fixed inset-0 z-[100] md:hidden">
+                    <div
+                        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+                        onClick={() => setIsHangSheetOpen(false)}
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-apple-bg rounded-t-[32px] p-6 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-300">
+                        <div className="w-12 h-1.5 bg-apple-border rounded-full mx-auto mb-6" />
+                        <h3 className="text-xl font-bold text-apple-text mb-6 text-center">Chọn hạng sát hạch</h3>
+                        <div className="space-y-3">
+                            {HANG_TABS.map((hang) => {
+                                const isActive = selectedHang === hang
+                                return (
+                                    <button
+                                        key={hang}
+                                        onClick={() => {
+                                            setSelectedHang(hang)
+                                            setIsHangSheetOpen(false)
+                                        }}
+                                        className={`w-full flex items-center justify-between p-5 rounded-2xl border transition-all active:scale-[0.98] ${isActive
+                                            ? 'bg-apple-blue border-apple-blue text-white shadow-lg shadow-blue-500/20'
+                                            : 'bg-apple-card border-apple-border text-apple-text'
+                                            }`}
+                                    >
+                                        <span className="font-bold">{hang}</span>
+                                        {isActive && <CheckCircle className="w-5 h-5 text-white" />}
+                                    </button>
+                                )
+                            })}
+                            <button
+                                onClick={() => setIsHangSheetOpen(false)}
+                                className="w-full mt-4 p-5 rounded-2xl bg-apple-text text-apple-bg font-bold active:scale-[0.98] transition-all"
+                            >
+                                Đóng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            <style jsx global>{`
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 5px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: rgba(0, 0, 0, 0.1);
+                    border-radius: 10px;
+                }
+                .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: rgba(255, 255, 255, 0.1);
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: rgba(0, 0, 0, 0.2);
+                }
+                .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: rgba(255, 255, 255, 0.2);
+                }
+            `}</style>
+            <AppleDialog
+                isOpen={dialogConfig.isOpen}
+                onClose={() => setDialogConfig(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={dialogConfig.onConfirm}
+                title={dialogConfig.title}
+                description={dialogConfig.description}
+                variant={dialogConfig.variant}
+                isLoading={loading}
+            />
+        </div>
+    )
+}
+
+export default function OnTapPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-apple-bg flex items-center justify-center">
+                <div className="text-center space-y-4">
+                    <div className="w-12 h-12 border-4 border-apple-blue border-t-transparent rounded-full animate-spin mx-auto" />
+                    <p className="text-apple-text-secondary font-bold animate-pulse tracking-widest text-xs">Đang tải dữ liệu ôn tập...</p>
+                </div>
+            </div>
+        }>
+            <OnTapContent />
+        </Suspense>
+    )
+}
+

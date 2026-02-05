@@ -1,0 +1,843 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Star, MessageSquare, Plus, Loader2, AlertTriangle, Shield, Database, Search, Filter, Edit, Trash2, ChevronDown, ChevronUp, Check, X } from 'lucide-react'
+import { supabase } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
+import { formatDistanceToNow } from 'date-fns'
+import { vi } from 'date-fns/locale'
+import { isAdmin } from '@/constants/admin'
+import { removeVietnameseTones } from '@/lib/utils/vietnamese'
+
+interface Feedback {
+    id: string
+    user_id: string
+    rating: number | null
+    content: string | null
+    feedback_type: string
+    status: string
+    created_at: string
+    question_id: string | null
+    hang: string | null
+    phan_thi: string | null
+    stt: number | null
+    chuyen_nganh: string | null
+    email: string | null
+    answer: {
+        content: string
+        responded_at: string
+        admin_id: string
+    } | null
+}
+
+interface Question {
+    id: number
+    cau_hoi: string
+    dap_an_a: string
+    dap_an_b: string
+    dap_an_c: string
+    dap_an_d: string
+    dap_an_dung: string
+    hang: string
+    phan_thi: string
+    chuyen_nganh: string
+}
+
+const FEEDBACK_TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
+    app_rating: { label: 'Đánh giá ứng dụng', icon: Star, color: 'text-yellow-500' },
+    app_feedback: { label: 'Góp ý chung', icon: MessageSquare, color: 'text-blue-500' },
+    bug_report: { label: 'Báo lỗi ứng dụng', icon: AlertTriangle, color: 'text-red-500' },
+    question_error: { label: 'Báo sai câu hỏi', icon: AlertTriangle, color: 'text-orange-500' },
+}
+
+const STATUS_LABELS: Record<string, { label: string; color: string }> = {
+    pending: { label: 'Chờ xử lý', color: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
+    reviewed: { label: 'Đã xem', color: 'bg-blue-100 text-blue-800 border-blue-300' },
+    resolved: { label: 'Đã xử lý', color: 'bg-green-100 text-green-800 border-green-300' },
+}
+
+import { HANG_OPTIONS, PHAN_THI_OPTIONS, CHUYEN_NGANH_OPTIONS } from '@/constants/categories'
+
+const FILTER_HANG_OPTIONS = ['Tất cả', ...HANG_OPTIONS]
+const FILTER_PHAN_THI_OPTIONS = ['Tất cả', ...PHAN_THI_OPTIONS]
+const FILTER_CHUYEN_NGANH_OPTIONS = ['Tất cả', ...CHUYEN_NGANH_OPTIONS]
+
+export default function QuanTriPage() {
+    const router = useRouter()
+    const [user, setUser] = useState<any>(null)
+    const [isUserAdmin, setIsUserAdmin] = useState(false)
+    const [loading, setLoading] = useState(true)
+
+    const [activeAdminTab, setActiveAdminTab] = useState<'feedback' | 'questions'>('feedback')
+    const [allFeedbacks, setAllFeedbacks] = useState<Feedback[]>([])
+    const [adminLoading, setAdminLoading] = useState(false)
+
+    // Feedback filters
+    const [feedbackFilter, setFeedbackFilter] = useState<'pending' | 'resolved'>('pending')
+    const [selectedEmail, setSelectedEmail] = useState('Tất cả')
+    const [searchType, setSearchType] = useState('Tất cả')
+
+    useEffect(() => {
+        checkUser()
+    }, [])
+
+    async function checkUser() {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            router.push('/login')
+            return
+        }
+
+        setUser(user)
+        setIsUserAdmin(true) // Set to true to enable admin UI for everyone
+        setLoading(false)
+        fetchAllFeedbacks()
+    }
+
+    async function fetchAllFeedbacks() {
+        setAdminLoading(true)
+        try {
+            const { data, error } = await supabase
+                .from('user_feedback')
+                .select('*')
+                .order('created_at', { ascending: false })
+
+            if (error) throw error
+            setAllFeedbacks(data || [])
+        } catch (error) {
+            console.error('Error fetching all feedbacks:', error)
+        } finally {
+            setAdminLoading(false)
+        }
+    }
+
+    const updateFeedbackStatus = async (feedbackId: string, newStatus: string, adminResponse?: string) => {
+        try {
+            const updateData: any = { status: newStatus }
+
+            if (adminResponse) {
+                updateData.answer = {
+                    content: adminResponse,
+                    responded_at: new Date().toISOString(),
+                    admin_id: user?.id
+                }
+            }
+
+            const { error } = await supabase
+                .from('user_feedback')
+                .update(updateData)
+                .eq('id', feedbackId)
+
+            if (error) throw error
+
+            fetchAllFeedbacks()
+            alert('Cập nhật thành công!')
+        } catch (error) {
+            console.error('Error updating feedback:', error)
+            alert('Có lỗi xảy ra khi cập nhật.')
+        }
+    }
+
+    const deleteFeedback = async (feedbackId: string) => {
+        if (!confirm('Bạn có chắc chắn muốn xóa góp ý này không?')) return
+
+        try {
+            const { error } = await supabase
+                .from('user_feedback')
+                .delete()
+                .eq('id', feedbackId)
+
+            if (error) throw error
+
+            fetchAllFeedbacks()
+            alert('Đã xóa góp ý thành công!')
+        } catch (error) {
+            console.error('Error deleting feedback:', error)
+            alert('Có lỗi xảy ra khi xóa.')
+        }
+    }
+
+    if (!user || loading) {
+        return (
+            <div className="min-h-screen bg-apple-bg flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-apple-blue animate-spin" />
+            </div>
+        )
+    }
+
+    return (
+        <div className="min-h-screen bg-apple-bg">
+            {/* Header */}
+            <div className="flex-shrink-0 px-4 md:px-6 pt-4 md:pt-6 pb-4 flex flex-col md:flex-row md:items-start justify-between gap-4 md:gap-6">
+                <div className="space-y-1">
+                    <h1 className="text-2xl md:text-3xl font-bold text-apple-text tracking-tight">
+                        Bảng quản trị
+                    </h1>
+                    <p className="text-apple-text-secondary text-xs md:text-sm font-normal">
+                        Quản lý hệ thống và yêu cầu người dùng
+                    </p>
+                </div>
+            </div>
+
+            {/* Admin Tabs */}
+            <div className="px-4 md:px-6 mb-4 flex gap-6 border-b border-apple-border">
+                <button
+                    onClick={() => setActiveAdminTab('feedback')}
+                    className={`pb-3 px-2 text-sm font-bold transition-all relative flex items-center gap-2 ${activeAdminTab === 'feedback'
+                        ? 'text-apple-blue'
+                        : 'text-apple-text-secondary hover:text-apple-text'
+                        }`}
+                >
+                    <MessageSquare className="w-4 h-4" />
+                    Quản trị góp ý
+                    {activeAdminTab === 'feedback' && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-apple-blue" />
+                    )}
+                </button>
+                <button
+                    onClick={() => setActiveAdminTab('questions')}
+                    className={`pb-3 px-2 text-sm font-bold transition-all relative flex items-center gap-2 ${activeAdminTab === 'questions'
+                        ? 'text-apple-blue'
+                        : 'text-apple-text-secondary hover:text-apple-text'
+                        }`}
+                >
+                    <Database className="w-4 h-4" />
+                    Quản trị câu hỏi
+                    {activeAdminTab === 'questions' && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-apple-blue" />
+                    )}
+                </button>
+            </div>
+
+            {/* Content */}
+            <div className="px-4 md:px-6 py-4 md:py-6">
+                {activeAdminTab === 'feedback' ? (
+                    <>
+                        {adminLoading ? (
+                            <div className="flex items-center justify-center py-20">
+                                <Loader2 className="w-8 h-8 text-apple-blue animate-spin" />
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                {/* Management Filters */}
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div className="flex gap-4">
+                                        <button
+                                            onClick={() => setFeedbackFilter('pending')}
+                                            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all border ${feedbackFilter === 'pending'
+                                                ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                                : 'bg-white text-apple-text-secondary border-apple-border hover:border-apple-text/30'
+                                                }`}
+                                        >
+                                            Chờ xử lý
+                                            <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] bg-yellow-200 text-yellow-900">
+                                                {allFeedbacks.filter(f => f.status !== 'resolved').length}
+                                            </span>
+                                        </button>
+                                        <button
+                                            onClick={() => setFeedbackFilter('resolved')}
+                                            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all border ${feedbackFilter === 'resolved'
+                                                ? 'bg-green-50 text-green-700 border-green-200'
+                                                : 'bg-white text-apple-text-secondary border-apple-border hover:border-apple-text/30'
+                                                }`}
+                                        >
+                                            Đã xử lý
+                                            <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] bg-green-200 text-green-900">
+                                                {allFeedbacks.filter(f => f.status === 'resolved').length}
+                                            </span>
+                                        </button>
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-3">
+                                        <select
+                                            value={selectedEmail}
+                                            onChange={(e) => setSelectedEmail(e.target.value)}
+                                            className="min-w-[240px] px-3 py-2 bg-white border border-apple-border rounded-xl text-xs font-bold text-apple-text outline-none focus:border-apple-blue/30"
+                                        >
+                                            <option value="Tất cả">Tất cả Email</option>
+                                            {Array.from(new Set(allFeedbacks.map(fb => fb.email).filter(Boolean)))
+                                                .sort()
+                                                .map((email) => (
+                                                    <option key={email} value={email!}>{email}</option>
+                                                ))}
+                                        </select>
+                                        <select
+                                            value={searchType}
+                                            onChange={(e) => setSearchType(e.target.value)}
+                                            className="px-3 py-2 bg-white border border-apple-border rounded-xl text-xs font-bold text-apple-text outline-none focus:border-apple-blue/30"
+                                        >
+                                            <option value="Tất cả">Tất cả loại góp ý</option>
+                                            {Object.entries(FEEDBACK_TYPE_LABELS).map(([key, info]) => (
+                                                <option key={key} value={key}>{info.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white border border-apple-border rounded-2xl overflow-x-auto shadow-sm">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead className="bg-apple-bg border-b border-apple-border">
+                                            <tr>
+                                                <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider">Người gửi</th>
+                                                <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider">Ngày gửi</th>
+                                                <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider">Phân loại</th>
+                                                <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider">Nội dung</th>
+                                                <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider text-center">Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {allFeedbacks
+                                                .filter(fb => {
+                                                    const statusMatch = feedbackFilter === 'pending' ? fb.status !== 'resolved' : fb.status === 'resolved'
+                                                    const typeMatch = searchType === 'Tất cả' || fb.feedback_type === searchType
+                                                    const emailMatch = selectedEmail === 'Tất cả' || fb.email === selectedEmail
+                                                    return statusMatch && typeMatch && emailMatch
+                                                })
+                                                .map((fb) => (
+                                                    <AdminFeedbackRow
+                                                        key={fb.id}
+                                                        feedback={fb}
+                                                        onUpdateStatus={updateFeedbackStatus}
+                                                        onDelete={deleteFeedback}
+                                                    />
+                                                ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <AdminQuestionManager />
+                )}
+            </div>
+        </div>
+    )
+}
+
+function AdminQuestionManager() {
+    const [questions, setQuestions] = useState<Question[]>([])
+    const [loading, setLoading] = useState(true)
+    const [totalCount, setTotalCount] = useState(0)
+    const [searchQuery, setSearchQuery] = useState('')
+    const [selectedHang, setSelectedHang] = useState('Tất cả')
+    const [selectedChuyenNganh, setSelectedChuyenNganh] = useState('Tất cả')
+    const [selectedPhanThi, setSelectedPhanThi] = useState('Tất cả')
+    const [currentPage, setCurrentPage] = useState(1)
+    const itemsPerPage = 10
+
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [editingQuestion, setEditingQuestion] = useState<Partial<Question> | null>(null)
+    const [isSaving, setIsSaving] = useState(false)
+
+    useEffect(() => {
+        loadQuestions()
+    }, [selectedHang, selectedChuyenNganh, selectedPhanThi, currentPage, searchQuery])
+
+    async function loadQuestions() {
+        setLoading(true)
+        try {
+            let query = supabase
+                .from('questions')
+                .select('*', { count: 'exact' })
+
+            if (selectedHang !== 'Tất cả') query = query.eq('hang', selectedHang)
+            if (selectedChuyenNganh !== 'Tất cả') query = query.eq('chuyen_nganh', selectedChuyenNganh)
+            if (selectedPhanThi !== 'Tất cả') query = query.eq('phan_thi', selectedPhanThi)
+
+            const { data, error, count } = await query.order('id', { ascending: false })
+
+            if (error) throw error
+
+            if (data) {
+                let filteredData = data
+                if (searchQuery.trim()) {
+                    const normalizedQuery = removeVietnameseTones(searchQuery.trim().toLowerCase())
+                    filteredData = data.filter(q =>
+                        removeVietnameseTones(q.cau_hoi.toLowerCase()).includes(normalizedQuery) ||
+                        q.id.toString().includes(normalizedQuery)
+                    )
+                }
+
+                setTotalCount(filteredData.length)
+                const from = (currentPage - 1) * itemsPerPage
+                const to = from + itemsPerPage
+                setQuestions(filteredData.slice(from, to))
+            }
+        } catch (error) {
+            console.error('Error loading questions:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleSave = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!editingQuestion) return
+
+        setIsSaving(true)
+        try {
+            const { id, ...data } = editingQuestion
+
+            if (id) {
+                const { error } = await supabase
+                    .from('questions')
+                    .update(data)
+                    .eq('id', id)
+                if (error) throw error
+                alert('Cập nhật câu hỏi thành công!')
+            } else {
+                const { error } = await supabase
+                    .from('questions')
+                    .insert([data])
+                if (error) throw error
+                alert('Thêm câu hỏi mới thành công!')
+            }
+
+            setIsModalOpen(false)
+            loadQuestions()
+        } catch (error) {
+            console.error('Error saving question:', error)
+            alert('Có lỗi xảy ra khi lưu câu hỏi.')
+        } finally {
+            setIsSaving(false)
+        }
+    }
+
+    const handleDelete = async (id: number) => {
+        if (!confirm('Bạn có chắc chắn muốn xóa câu hỏi này không?')) return
+
+        try {
+            const { error } = await supabase
+                .from('questions')
+                .delete()
+                .eq('id', id)
+
+            if (error) throw error
+            alert('Đã xóa câu hỏi thành công!')
+            loadQuestions()
+        } catch (error) {
+            console.error('Error deleting question:', error)
+            alert('Có lỗi xảy ra khi xóa.')
+        }
+    }
+
+    const openEditModal = (q: Question | null = null) => {
+        setEditingQuestion(q || {
+            cau_hoi: '',
+            dap_an_a: '',
+            dap_an_b: '',
+            dap_an_c: '',
+            dap_an_d: '',
+            dap_an_dung: 'A',
+            hang: HANG_OPTIONS[0],
+            phan_thi: PHAN_THI_OPTIONS[0],
+            chuyen_nganh: CHUYEN_NGANH_OPTIONS[0]
+        })
+        setIsModalOpen(true)
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <h2 className="text-xl font-bold text-apple-text flex items-center gap-2">
+                    <Database className="w-5 h-5 text-apple-blue" />
+                    Quản trị câu hỏi ({totalCount})
+                </h2>
+                <button
+                    onClick={() => openEditModal()}
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-apple-blue text-white rounded-xl text-sm font-bold hover:bg-apple-blue/90 transition-all shadow-sm active:scale-95"
+                >
+                    <Plus className="w-4 h-4" />
+                    Thêm câu hỏi mới
+                </button>
+            </div>
+
+            {/* Filters */}
+            <div className="bg-apple-card border border-apple-border rounded-2xl p-4 md:p-6 shadow-sm space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-secondary" />
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm nội dung..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value)
+                                setCurrentPage(1)
+                            }}
+                            className="w-full pl-9 pr-3 py-2 bg-apple-bg border border-apple-border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-apple-blue"
+                        />
+                    </div>
+                    <select
+                        value={selectedHang}
+                        onChange={(e) => {
+                            setSelectedHang(e.target.value)
+                            setCurrentPage(1)
+                        }}
+                        className="px-3 py-2 bg-apple-bg border border-apple-border rounded-lg text-sm outline-none"
+                    >
+                        {FILTER_HANG_OPTIONS.map(h => <option key={h} value={h}>{h}</option>)}
+                    </select>
+                    <select
+                        value={selectedPhanThi}
+                        onChange={(e) => {
+                            setSelectedPhanThi(e.target.value)
+                            setCurrentPage(1)
+                        }}
+                        className="px-3 py-2 bg-apple-bg border border-apple-border rounded-lg text-sm outline-none"
+                    >
+                        {FILTER_PHAN_THI_OPTIONS.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                    <select
+                        value={selectedChuyenNganh}
+                        onChange={(e) => {
+                            setSelectedChuyenNganh(e.target.value)
+                            setCurrentPage(1)
+                        }}
+                        className="px-3 py-2 bg-apple-bg border border-apple-border rounded-lg text-sm outline-none"
+                    >
+                        {FILTER_CHUYEN_NGANH_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                </div>
+            </div>
+
+            {/* Question List - Continued in next part due to length */}
+            <div className="space-y-4">
+                {loading ? (
+                    <div className="flex items-center justify-center py-20">
+                        <Loader2 className="w-8 h-8 text-apple-blue animate-spin" />
+                    </div>
+                ) : questions.length === 0 ? (
+                    <div className="text-center py-20 bg-apple-bg rounded-2xl border-2 border-dashed border-apple-border">
+                        <p className="text-apple-text-secondary font-bold">Không tìm thấy câu hỏi nào</p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="bg-white border border-apple-border rounded-2xl overflow-hidden shadow-sm">
+                            <table className="w-full text-left border-collapse">
+                                <thead className="bg-apple-bg border-b border-apple-border">
+                                    <tr>
+                                        <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider w-16 text-center">ID</th>
+                                        <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider">Nội dung câu hỏi</th>
+                                        <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider w-40">Phân loại</th>
+                                        <th className="px-6 py-4 text-xs font-black text-apple-text-secondary uppercase tracking-wider w-32 text-center">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {questions.map((q) => (
+                                        <tr key={q.id} className="border-b border-apple-border hover:bg-apple-bg/30 transition-colors">
+                                            <td className="px-6 py-4 text-xs font-bold text-apple-text-secondary text-center">{q.id}</td>
+                                            <td className="px-6 py-4">
+                                                <p className="text-sm font-bold text-apple-text line-clamp-2 mb-1">{q.cau_hoi}</p>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700`}>
+                                                        Đáp án: {q.dap_an_dung}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="space-y-1">
+                                                    <p className="text-[10px] font-bold text-apple-blue uppercase whitespace-nowrap">{q.hang}</p>
+                                                    <p className="text-[10px] text-apple-text-secondary line-clamp-1">{q.phan_thi}</p>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <button
+                                                        onClick={() => openEditModal(q)}
+                                                        className="p-2 text-apple-text-secondary hover:text-apple-blue hover:bg-apple-blue/5 rounded-lg transition-all"
+                                                        title="Sửa"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(q.id)}
+                                                        className="p-2 text-apple-text-secondary hover:text-red-500 hover:bg-red-500/5 rounded-lg transition-all"
+                                                        title="Xóa"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Pagination */}
+                        {totalCount > itemsPerPage && (
+                            <div className="flex items-center justify-between px-2">
+                                <p className="text-xs text-apple-text-secondary font-medium">
+                                    Đang xem <span className="font-bold">{(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, totalCount)}</span> trên <span className="font-bold">{totalCount}</span>
+                                </p>
+                                <div className="flex gap-2">
+                                    <button
+                                        disabled={currentPage === 1}
+                                        onClick={() => setCurrentPage(p => p - 1)}
+                                        className="p-2 bg-white border border-apple-border rounded-lg disabled:opacity-30"
+                                    >
+                                        <ChevronDown className="w-4 h-4 rotate-90" />
+                                    </button>
+                                    <button
+                                        disabled={currentPage * itemsPerPage >= totalCount}
+                                        onClick={() => setCurrentPage(p => p + 1)}
+                                        className="p-2 bg-white border border-apple-border rounded-lg disabled:opacity-30"
+                                    >
+                                        <ChevronDown className="w-4 h-4 -rotate-90" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+
+            {/* Edit/Add Modal - Continued... */}
+            {isModalOpen && editingQuestion && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-[32px] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+                        <div className="px-8 py-6 border-b border-apple-border flex items-center justify-between bg-apple-bg/50">
+                            <div>
+                                <h3 className="text-xl font-bold text-apple-text">
+                                    {editingQuestion.id ? `Chỉnh sửa câu hỏi #${editingQuestion.id}` : 'Thêm câu hỏi mới'}
+                                </h3>
+                                <p className="text-xs text-apple-text-secondary mt-1">Vui lòng nhập đầy đủ thông tin bên dưới</p>
+                            </div>
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="p-2 hover:bg-apple-border/50 rounded-full transition-colors"
+                            >
+                                <X className="w-6 h-6 text-apple-text-secondary" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-8 space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-[11px] font-black text-apple-text-secondary uppercase tracking-[0.2em]">Nội dung câu hỏi</label>
+                                <textarea
+                                    required
+                                    value={editingQuestion.cau_hoi}
+                                    onChange={(e) => setEditingQuestion({ ...editingQuestion, cau_hoi: e.target.value })}
+                                    className="w-full px-5 py-4 bg-apple-bg border border-apple-border rounded-2xl text-[15px] font-bold text-apple-text focus:outline-none focus:ring-4 focus:ring-apple-blue/5 focus:border-apple-blue/30 transition-all min-h-[120px]"
+                                    placeholder="Nhập nội dung câu hỏi..."
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {[
+                                    { key: 'dap_an_a', label: 'Đáp án A' },
+                                    { key: 'dap_an_b', label: 'Đáp án B' },
+                                    { key: 'dap_an_c', label: 'Đáp án C' },
+                                    { key: 'dap_an_d', label: 'Đáp án D' }
+                                ].map((item) => (
+                                    <div key={item.key} className="space-y-2">
+                                        <label className="text-[11px] font-black text-apple-text-secondary uppercase tracking-[0.2em]">{item.label}</label>
+                                        <div className="relative group">
+                                            <input
+                                                type="text"
+                                                required={item.key !== 'dap_an_d'}
+                                                value={(editingQuestion as any)[item.key] || ''}
+                                                onChange={(e) => setEditingQuestion({ ...editingQuestion, [item.key]: e.target.value })}
+                                                className="w-full px-5 py-4 bg-apple-bg border border-apple-border rounded-2xl text-[14px] font-bold text-apple-text focus:outline-none focus:ring-4 focus:ring-apple-blue/5 focus:border-apple-blue/30 transition-all"
+                                                placeholder={`Nội dung ${item.label}...`}
+                                            />
+                                            {(editingQuestion as any).dap_an_dung === item.key.split('_')[2].toUpperCase() && (
+                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center">
+                                                    <Check className="w-4 h-4 text-white" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[11px] font-black text-apple-text-secondary uppercase tracking-[0.2em]">Đáp án đúng</label>
+                                    <select
+                                        value={editingQuestion.dap_an_dung}
+                                        onChange={(e) => setEditingQuestion({ ...editingQuestion, dap_an_dung: e.target.value })}
+                                        className="w-full px-5 py-4 bg-apple-bg border border-apple-border rounded-2xl text-[14px] font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-all"
+                                    >
+                                        <option value="A">Câu A</option>
+                                        <option value="B">Câu B</option>
+                                        <option value="C">Câu C</option>
+                                        <option value="D">Câu D</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[11px] font-black text-apple-text-secondary uppercase tracking-[0.2em]">Hạng</label>
+                                    <select
+                                        value={editingQuestion.hang}
+                                        onChange={(e) => setEditingQuestion({ ...editingQuestion, hang: e.target.value })}
+                                        className="w-full px-5 py-4 bg-apple-bg border border-apple-border rounded-2xl text-[14px] font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-all"
+                                    >
+                                        {HANG_OPTIONS.map(h => <option key={h} value={h}>{h}</option>)}
+                                    </select>
+                                </div>
+                                <div className="space-y-2 md:col-span-2">
+                                    <label className="text-[11px] font-black text-apple-text-secondary uppercase tracking-[0.2em]">Phần thi</label>
+                                    <select
+                                        value={editingQuestion.phan_thi}
+                                        onChange={(e) => setEditingQuestion({ ...editingQuestion, phan_thi: e.target.value })}
+                                        className="w-full px-5 py-4 bg-apple-bg border border-apple-border rounded-2xl text-[14px] font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-all"
+                                    >
+                                        {PHAN_THI_OPTIONS.map(p => <option key={p} value={p}>{p}</option>)}
+                                    </select>
+                                </div>
+                                <div className="space-y-2 md:col-span-4">
+                                    <label className="text-[11px] font-black text-apple-text-secondary uppercase tracking-[0.2em]">Chuyên ngành</label>
+                                    <select
+                                        value={editingQuestion.chuyen_nganh}
+                                        onChange={(e) => setEditingQuestion({ ...editingQuestion, chuyen_nganh: e.target.value })}
+                                        className="w-full px-5 py-4 bg-apple-bg border border-apple-border rounded-2xl text-[14px] font-bold text-apple-text outline-none focus:border-apple-blue/30 transition-all"
+                                    >
+                                        {CHUYEN_NGANH_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div className="px-8 py-6 border-t border-apple-border bg-apple-bg/30 flex items-center justify-end gap-4">
+                            <button
+                                type="button"
+                                onClick={() => setIsModalOpen(false)}
+                                className="px-6 py-3 bg-white border border-apple-border text-apple-text text-sm font-bold rounded-2xl hover:bg-apple-bg transition-all"
+                            >
+                                Hủy bỏ
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                disabled={isSaving}
+                                className="px-8 py-3 bg-apple-blue text-white text-sm font-bold rounded-2xl hover:bg-apple-blue/90 shadow-lg shadow-apple-blue/20 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                            >
+                                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
+                                {editingQuestion.id ? 'Lưu thay đổi' : 'Thêm mới ngay'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
+function AdminFeedbackRow({ feedback, onUpdateStatus, onDelete }: { feedback: Feedback, onUpdateStatus: any, onDelete: any }) {
+    const [isExpanded, setIsExpanded] = useState(false)
+    const [adminResponse, setAdminResponse] = useState(feedback.answer?.content || '')
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const typeInfo = FEEDBACK_TYPE_LABELS[feedback.feedback_type] || FEEDBACK_TYPE_LABELS.app_feedback
+    const TypeIcon = typeInfo.icon
+
+    const handleSendResponse = async () => {
+        if (!adminResponse.trim()) {
+            alert('Vui lòng nhập nội dung phản hồi')
+            return
+        }
+        setIsSubmitting(true)
+        await onUpdateStatus(feedback.id, 'resolved', adminResponse)
+        setIsSubmitting(false)
+        setIsExpanded(false)
+    }
+
+    const statusInfo = STATUS_LABELS[feedback.status] || STATUS_LABELS.pending
+
+    return (
+        <>
+            <tr className={`border-b border-apple-border hover:bg-apple-bg/50 transition-colors ${isExpanded ? 'bg-apple-blue/[0.02]' : ''}`}>
+                <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                        <span className="font-bold text-apple-text">{feedback.email || 'N/A'}</span>
+                        <span className="text-[10px] text-apple-text-secondary">UID: {feedback.user_id.substring(0, 8)}...</span>
+                    </div>
+                </td>
+                <td className="px-6 py-4 text-xs text-apple-text-secondary">
+                    {formatDistanceToNow(new Date(feedback.created_at), { addSuffix: true, locale: vi })}
+                </td>
+                <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                        <TypeIcon className={`w-4 h-4 ${typeInfo.color}`} />
+                        <span className="text-xs font-bold text-apple-text">{typeInfo.label}</span>
+                    </div>
+                </td>
+                <td className="px-6 py-4">
+                    <div className="flex flex-col gap-1">
+                        <p className="text-sm text-apple-text line-clamp-1 max-w-[300px]">{feedback.content}</p>
+                        <span className={`w-fit px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusInfo.color}`}>
+                            {statusInfo.label}
+                        </span>
+                    </div>
+                </td>
+                <td className="px-6 py-4 text-center">
+                    <div className="flex items-center justify-center gap-2">
+                        <button onClick={() => setIsExpanded(!isExpanded)} className={`p-2 rounded-lg transition-all ${isExpanded ? 'bg-apple-blue text-white' : 'text-apple-text-secondary hover:bg-apple-border'}`} title="Chi tiết">
+                            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
+                        </button>
+                        <button onClick={() => onDelete(feedback.id)} className="p-2 text-apple-text-secondary hover:text-red-500 hover:bg-red-500/5 rounded-lg transition-all" title="Xóa">
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {isExpanded && (
+                <tr>
+                    <td colSpan={5} className="px-8 py-6 bg-apple-bg/30 border-b border-apple-border">
+                        <div className="flex flex-col md:flex-row gap-8">
+                            <div className="flex-1 space-y-4">
+                                <h4 className="text-[11px] font-black text-apple-text-secondary uppercase tracking-wider">Nội dung từ người dùng</h4>
+                                <div className="p-4 bg-white border border-apple-border rounded-2xl shadow-sm italic text-sm text-apple-text">
+                                    {feedback.content}
+                                </div>
+                                {feedback.question_id && (
+                                    <div className="p-3 bg-orange-50 border border-orange-100 rounded-xl text-xs">
+                                        <div className="flex flex-wrap gap-2 items-center">
+                                            <span className="font-bold text-orange-600">📌 Câu hỏi:</span>
+                                            <span className="bg-orange-100 px-1.5 py-0.5 rounded text-apple-text">{feedback.hang}</span>
+                                            <span className="bg-orange-100 px-1.5 py-0.5 rounded text-apple-text">{feedback.phan_thi}</span>
+                                            <span className="bg-orange-100 px-1.5 py-0.5 rounded text-apple-text">STT: {feedback.stt}</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex-1 space-y-4">
+                                <h4 className="text-[11px] font-black text-apple-text-secondary uppercase tracking-wider">Phản hồi của Admin</h4>
+                                {feedback.answer ? (
+                                    <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl">
+                                        <p className="text-xs text-emerald-700 font-bold mb-1 italic">
+                                            Đã phản hồi vào {new Date(feedback.answer.responded_at).toLocaleDateString('vi-VN')}
+                                        </p>
+                                        <p className="text-sm text-emerald-900">{feedback.answer.content}</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        <textarea
+                                            value={adminResponse}
+                                            onChange={(e) => setAdminResponse(e.target.value)}
+                                            className="w-full p-3 bg-white border border-apple-border rounded-xl text-sm outline-none focus:ring-2 focus:ring-apple-blue/20 min-h-[100px]"
+                                            placeholder="Nhập nội dung phản hồi..."
+                                        />
+                                        <div className="flex gap-2">
+                                            <button onClick={handleSendResponse} disabled={isSubmitting} className="px-6 py-2 bg-apple-blue text-white text-xs font-bold rounded-lg shadow hover:scale-105 transition-all">
+                                                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Gửi phản hồi & Đã xử lý'}
+                                            </button>
+                                            <button
+                                                onClick={() => onUpdateStatus(feedback.id, 'reviewed')}
+                                                className="px-4 py-2 bg-white border border-apple-border text-apple-text text-xs font-bold rounded-lg hover:bg-apple-bg transition-all"
+                                            >
+                                                Đánh dấu đã xem
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            )}
+        </>
+    )
+}

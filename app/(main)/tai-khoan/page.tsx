@@ -48,6 +48,7 @@ import { ShareModal } from '@/components/ShareModal'
 import { ShortcutModal } from '@/components/ShortcutModal'
 import { AppFeedbackModal } from '@/components/feedback/AppFeedbackModal'
 import { useAppStore } from '@/lib/store/useAppStore'
+import { getRandomMotivationalMessage, calculateStarRating } from '@/constants/motivationalMessages'
 
 type TabType = 'overview' | 'profile' | 'history' | 'wrong' | 'feedback' | 'settings'
 
@@ -99,6 +100,7 @@ export default function AccountPage() {
     const [showShareModal, setShowShareModal] = useState(false)
     const [showShortcutModal, setShowShortcutModal] = useState(false)
     const [showFeedbackModal, setShowFeedbackModal] = useState(false)
+    const [motivationalMessage, setMotivationalMessage] = useState('')
     const [agreed, setAgreed] = useState(false)
     const [isLoginLoading, setIsLoginLoading] = useState(false)
 
@@ -345,6 +347,10 @@ export default function AccountPage() {
 
                 setBadges({ stars, level, title })
                 setStats(prev => ({ ...prev, totalAnswered: answeredCount, avgScore: Math.round(currentAvg * 10) / 10 }))
+
+                // Generate random motivational message based on star rating
+                const message = getRandomMotivationalMessage(stars as 1 | 2 | 3 | 4 | 5)
+                setMotivationalMessage(message)
             }
             setLoading(false)
         }
@@ -517,12 +523,11 @@ export default function AccountPage() {
                             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl mb-4 shadow-lg shadow-blue-500/20">
                                 <Award className="w-8 h-8 text-white" />
                             </div>
-                            <h1 className="text-2xl font-bold text-slate-900 mb-2">
-                                Luyện thi <span className="text-blue-600">CCHN</span>
-                            </h1>
-                            <p className="text-slate-600">
-                                Chào mừng bạn quay trở lại!
-                            </p>
+                            <div className="space-y-2">
+                                <h2 className="text-2xl md:text-3xl font-bold text-apple-text tracking-tight">
+                                    {profile?.display_name || profile?.email || 'Người dùng'}
+                                </h2>
+                            </div>
                         </div>
 
                         {/* Divider */}
@@ -630,10 +635,6 @@ export default function AccountPage() {
                                 <h1 className="text-2xl md:text-3xl font-semibold text-apple-text tracking-tight animate-in fade-in slide-in-from-left duration-500">
                                     Chào {greeting}, {profile?.display_name || 'bạn'}
                                 </h1>
-                                <p className="text-xs md:text-sm text-apple-text-secondary font-medium flex items-center gap-2">
-                                    <Sparkles className="w-3.5 h-3.5 text-apple-blue animate-pulse" />
-                                    Bạn đã làm tốt, hãy tiếp tục phấn đấu hơn nữa.
-                                </p>
                             </div>
 
                             {/* Modern Mobile Logout Button - Apple Style */}
@@ -695,6 +696,20 @@ export default function AccountPage() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Motivational Message */}
+                        {motivationalMessage && (
+                            <div className="mt-4 px-4 py-3 bg-gradient-to-r from-apple-blue/5 via-purple-500/5 to-pink-500/5 rounded-2xl border border-apple-border/50 backdrop-blur-sm animate-in fade-in slide-in-from-bottom duration-700 delay-300">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-apple-blue to-purple-500 flex items-center justify-center shrink-0 shadow-lg shadow-apple-blue/20">
+                                        <Sparkles className="w-4 h-4 text-white" />
+                                    </div>
+                                    <p className="text-[13px] md:text-sm text-apple-text font-medium leading-relaxed flex-1">
+                                        {motivationalMessage}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, BookOpen, Heart, FileText, User, LayoutGrid } from 'lucide-react'
+import { Home, BookOpen, Heart, FileText, User, LayoutGrid, Shield } from 'lucide-react'
 
 const navItems = [
     { icon: Home, label: 'Trang chủ', href: '/gioi-thieu' },
