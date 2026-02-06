@@ -200,6 +200,17 @@ export default function MainHomePage() {
                     )}
                 </div>
             </div>
+            {/* BuildPublic Badge */}
+            <div className="flex justify-center py-8 pb-20 md:pb-8 opacity-80 hover:opacity-100 transition-opacity">
+                <a href="https://buildpublic.cc/p/he-thong-luyen-thi-chung-chi-hanh-nghe-xay-dung-ccxd?ref=buildpublic.cc" target="_blank" rel="noopener noreferrer">
+                    <img
+                        src="https://buildpublic.cc/badge/he-thong-luyen-thi-chung-chi-hanh-nghe-xay-dung-ccxd/light"
+                        alt="Hệ thống Luyện thi Chứng chỉ hành nghề Xây dựng CCXD - buildpublic.cc"
+                        width="170"
+                        height="50"
+                    />
+                </a>
+            </div>
         </div>
     )
 }
