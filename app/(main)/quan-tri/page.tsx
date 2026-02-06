@@ -9,6 +9,7 @@ import { vi } from 'date-fns/locale'
 import { isAdmin } from '@/constants/admin'
 import { removeVietnameseTones } from '@/lib/utils/vietnamese'
 import { HANG_OPTIONS, PHAN_THI_OPTIONS, CHUYEN_NGANH_OPTIONS } from '@/constants/categories'
+import RichTextEditor from '@/components/ui/RichTextEditor'
 
 const FILTER_HANG_OPTIONS = ['Tất cả', ...HANG_OPTIONS]
 const FILTER_PHAN_THI_OPTIONS = ['Tất cả', ...PHAN_THI_OPTIONS]
@@ -2598,14 +2599,15 @@ function AdminNewsManager() {
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-apple-text ml-1 text-apple-text-secondary italic">Nội dung chi tiết (HTML hỗ trợ)</label>
-                                    <textarea
-                                        value={formData.content}
-                                        onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                                        className="w-full px-4 py-3 bg-apple-bg border border-apple-border rounded-xl text-sm font-medium focus:border-apple-blue focus:ring-1 focus:ring-apple-blue/20 outline-none min-h-[300px] font-mono"
-                                        placeholder="<p>Nội dung bài viết...</p>"
-                                    />
-                                    <p className="text-[10px] text-apple-text-secondary italic">Mẹo: Bạn có thể yêu cầu AI viết bài dạng HTML để hiển thị đẹp mắt hơn.</p>
+                                    <label className="text-xs font-bold text-apple-text ml-1 text-apple-text-secondary italic">Nội dung chi tiết (Rich Text)</label>
+                                    <div className="min-h-[400px]">
+                                        <RichTextEditor
+                                            content={formData.content}
+                                            onChange={(newContent: string) => setFormData({ ...formData, content: newContent })}
+                                            placeholder="Nhập nội dung bài viết..."
+                                        />
+                                    </div>
+                                    <p className="text-[10px] text-apple-text-secondary italic mt-1">Mẹo: Bạn có thể copy nội dung từ Word hoặc trang web khác và dán vào đây.</p>
                                 </div>
                             </div>
 

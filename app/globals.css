@@ -1,4 +1,26 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@layer components {
+  .prose-apple {
+    --tw-prose-body: var(--apple-text);
+    --tw-prose-headings: var(--apple-text);
+    --tw-prose-lead: var(--apple-text-secondary);
+    --tw-prose-links: #007AFF;
+    --tw-prose-bold: var(--apple-text);
+    --tw-prose-counters: var(--apple-text-secondary);
+    --tw-prose-bullets: var(--apple-text-secondary);
+    --tw-prose-hr: var(--apple-border);
+    --tw-prose-quotes: var(--apple-text);
+    --tw-prose-quote-borders: #007AFF;
+    --tw-prose-captions: var(--apple-text-secondary);
+    --tw-prose-code: var(--apple-text);
+    --tw-prose-pre-code: var(--apple-text);
+    --tw-prose-pre-bg: var(--apple-input-bg);
+    --tw-prose-th-borders: var(--apple-border);
+    --tw-prose-td-borders: var(--apple-border);
+  }
+}
 
 :root {
   --apple-bg: #FFFFFF;

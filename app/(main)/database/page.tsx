@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
-import { Search, ChevronDown, Database as DatabaseIcon, ArrowUp, BookOpen, FileText, ExternalLink, X, Calendar } from 'lucide-react'
+import { Search, ChevronDown, Database as DatabaseIcon, ArrowUp, BookOpen, FileText, ExternalLink, X, Calendar, Download } from 'lucide-react'
 import { removeVietnameseTones } from '@/lib/utils/vietnamese'
 import { useSidebar } from '@/contexts/SidebarContext'
-import { LIBRARY_POSTS, Post } from '@/constants/library-data'
+import { Post } from '@/constants/library-data'
 
 const HANG_OPTIONS = ['Tất cả', 'Hạng I', 'Hạng II', 'Hạng III']
 
@@ -131,11 +131,7 @@ export default function DatabasePage() {
                 created_at: p.created_at
             }))
 
-            // Filter local posts
-            const filteredLocal = LIBRARY_POSTS.filter(p => p.category === localCategory)
-
-            // Merge
-            setPosts([...mappedDbPosts, ...filteredLocal])
+            setPosts(mappedDbPosts)
         } catch (err) {
             console.error('Exception loading posts:', err)
         }
@@ -516,7 +512,7 @@ export default function DatabasePage() {
                                                     >
                                                         <div className="flex items-center gap-3">
                                                             <div className="w-10 h-10 rounded-xl bg-apple-blue/10 text-apple-blue flex items-center justify-center group-hover:bg-apple-blue group-hover:text-white transition-colors">
-                                                                <FileText size={20} />
+                                                                <Download size={20} />
                                                             </div>
                                                             <div className="flex flex-col">
                                                                 <span className="text-sm font-bold text-apple-text line-clamp-1">{file.name}</span>
