@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { CHUYEN_NGANH_OPTIONS, HANG_OPTIONS } from '@/constants/categories'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://luyenthichungchixd.com' // Thay đổi bằng domain thật của bạn
+    const baseUrl = 'https://www.luyenthiccxd.com' // Thay đổi bằng domain thật của bạn
 
     // Các trang tĩnh
     const staticPages = [

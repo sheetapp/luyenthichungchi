@@ -24,14 +24,14 @@ export const metadata: Metadata = {
         address: false,
         telephone: false,
     },
-    metadataBase: new URL('https://luyenthichungchixd.com'),
+    metadataBase: new URL('https://www.luyenthiccxd.com/'),
     alternates: {
         canonical: '/',
     },
     openGraph: {
         title: 'Luyện thi Chứng chỉ hành nghề Xây dựng',
         description: 'Hệ thống ôn luyện thông minh, cập nhật theo QĐ 163/QĐ-BXD. Miễn phí 1000+ câu hỏi.',
-        url: 'https://luyenthichungchixd.com',
+        url: 'https://www.luyenthiccxd.com/',
         siteName: 'Luyện thi Chứng chỉ hành nghề Xây dựng',
         locale: 'vi_VN',
         type: 'website',
@@ -51,6 +51,11 @@ export const metadata: Metadata = {
             'max-image-preview': 'large',
             'max-snippet': -1,
         },
+    },
+    icons: {
+        icon: '/icon.png',
+        shortcut: '/icon.png',
+        apple: '/icon.png',
     },
 }
 

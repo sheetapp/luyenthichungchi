@@ -13,8 +13,8 @@ export default function HomePage() {
         '@type': 'EducationalOrganization',
         'name': 'Luyện thi Chứng chỉ hành nghề Xây dựng',
         'description': 'Nền tảng ôn luyện và thi thử chứng chỉ hành nghề xây dựng trực tuyến.',
-        'url': 'https://luyenthichungchixd.com',
-        'logo': 'https://luyenthichungchixd.com/logo.png', // Đảm bảo bạn có logo
+        'url': 'https://www.luyenthiccxd.com',
+        'logo': 'https://www.luyenthiccxd.com/logo.png', // Đảm bảo bạn có logo
         'sameAs': [
             'https://www.facebook.com/luyenthichungchixd', // Ví dụ
         ],

@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: ['/api/', '/admin/', '/quan-tri/'],
         },
-        sitemap: 'https://luyenthichungchixd.com/sitemap.xml', // Thay đổi bằng domain thật của bạn
+        sitemap: 'https://www.luyenthiccxd.com/sitemap.xml', // Thay đổi bằng domain thật của bạn
     }
 }
