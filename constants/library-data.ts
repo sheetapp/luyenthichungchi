@@ -4,10 +4,11 @@ export interface Post {
     slug: string
     content: string
     excerpt: string
-    category: 'huong-dan' | 'tai-lieu'
-    type: 'guide' | 'document'
+    category: 'huong-dan' | 'news' | 'tai-lieu'
+    type: 'guide' | 'document' | 'article'
     thumbnail_url: string | null
     created_at: string
+    attachments?: any
 }
 
 export const LIBRARY_POSTS: Post[] = [
@@ -129,12 +130,12 @@ export const LIBRARY_POSTS: Post[] = [
         `
     },
 
-    // --- TÀI LIỆU (Documents) ---
+    // --- TIN TỨC & TÀI LIỆU (News & Documents) ---
     {
         id: 'doc-1',
         title: 'Quyết định 163/QĐ-BXD',
         slug: 'quyet-dinh-163-qd-bxd',
-        category: 'tai-lieu',
+        category: 'news',
         type: 'document',
         thumbnail_url: null,
         excerpt: 'Quyết định công bố thủ tục hành chính được sửa đổi, bổ sung về cấp chứng chỉ hành nghề hoạt động xây dựng.',
@@ -148,7 +149,7 @@ export const LIBRARY_POSTS: Post[] = [
         id: 'doc-2',
         title: 'Nghị định 15/2021/NĐ-CP',
         slug: 'nghi-dinh-15-2021',
-        category: 'tai-lieu',
+        category: 'news',
         type: 'document',
         thumbnail_url: null,
         excerpt: 'Nghị định quy định chi tiết một số nội dung về quản lý dự án đầu tư xây dựng.',
@@ -161,7 +162,7 @@ export const LIBRARY_POSTS: Post[] = [
         id: 'doc-3',
         title: 'Luật Xây dựng 2014 (sửa đổi 2020)',
         slug: 'luat-xay-dung-2014',
-        category: 'tai-lieu',
+        category: 'news',
         type: 'document',
         thumbnail_url: null,
         excerpt: 'Văn bản hợp nhất Luật Xây dựng quy định về hoạt động đầu tư xây dựng.',

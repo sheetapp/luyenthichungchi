@@ -62,7 +62,7 @@ export default function LoginPage() {
                             <Award className="w-8 h-8 text-white" />
                         </div>
                         <h1 className="text-2xl font-bold text-slate-900 mb-2">
-                            Luyện thi <span className="text-blue-600">CCHN</span>
+                            Ôn tập và Luyện thi  <br></br><span className="text-blue-600">Chứng chỉ Xây dựng</span>
                         </h1>
                         <p className="text-slate-600">
                             Chào mừng bạn quay trở lại!
@@ -131,10 +131,10 @@ export default function LoginPage() {
                 {/* Extra Info */}
                 <div className="mt-8 text-center">
                     <p className="text-sm text-slate-600">
-                        QĐ 163/QĐ-BXD ngày 18/2/2025 của Bộ Xây dựng
+                        Quyết định số 163/QĐ-BXD ngày 18/2/2025 của Bộ Xây dựng
                     </p>
                     <p className="text-xs text-slate-500 mt-1">
-                        © 2026 Luyện thi Chứng chỉ hành nghề Xây dựng
+                        © 2026  -  Hệ thống Ôn tập và Luyện thi Chứng chỉ Hành nghề trong Xây dựng
                     </p>
                 </div>
             </div>

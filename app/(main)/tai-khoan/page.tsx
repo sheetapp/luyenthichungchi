@@ -535,7 +535,7 @@ export default function AccountPage() {
             <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-50 via-white to-blue-50">
                 <div className="w-full max-w-md">
                     {/* Card */}
-                    <div className="bg-white rounded-3xl p-10 shadow-xl border border-slate-100">
+                    <div className="bg-apple-card rounded-3xl p-10 shadow-xl border border-slate-100">
                         {/* Logo & Title */}
                         <div className="text-center mb-8">
                             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl mb-4 shadow-lg shadow-blue-500/20">
@@ -554,7 +554,7 @@ export default function AccountPage() {
                                 <div className="w-full border-t border-slate-200"></div>
                             </div>
                             <div className="relative flex justify-center text-sm">
-                                <span className="px-4 bg-white text-slate-500 font-medium">Đăng nhập với</span>
+                                <span className="px-4 bg-apple-card text-slate-500 font-medium">Đăng nhập với</span>
                             </div>
                         </div>
 
@@ -585,7 +585,7 @@ export default function AccountPage() {
                         <button
                             onClick={handleGoogleLogin}
                             disabled={isLoginLoading || !agreed}
-                            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-slate-200 rounded-xl font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-all disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed group shadow-sm hover:shadow-md"
+                            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-apple-card border-2 border-slate-200 rounded-xl font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-all disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed group shadow-sm hover:shadow-md"
                         >
                             {isLoginLoading ? (
                                 <>
@@ -865,8 +865,8 @@ export default function AccountPage() {
                                     <div className="animate-in fade-in duration-500 space-y-6">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <h2 className="text-2xl font-bold text-apple-text tracking-tight mb-1">Tổng quan</h2>
-                                                <p className="text-apple-text-secondary font-medium text-[11px] uppercase tracking-[0.15em]">Xem tóm tắt hoạt động của bạn</p>
+                                                <h2 className="text-2xl font-semibold text-apple-text tracking-tight mb-1">Tổng quan</h2>
+                                                <p className="text-apple-text-secondary font-medium text-sm">Xem tóm tắt hoạt động của bạn</p>
                                             </div>
                                             <div className="w-10 h-10 bg-apple-card text-apple-text rounded-2xl flex items-center justify-center shadow-apple-shadow border border-apple-border">
                                                 <Sparkles className="w-5 h-5 opacity-80" />
@@ -879,7 +879,7 @@ export default function AccountPage() {
                                                 <div className="w-8 h-8 bg-apple-blue/10 text-apple-blue rounded-xl flex items-center justify-center">
                                                     <TrendingUp className="w-4 h-4" />
                                                 </div>
-                                                <h4 className="text-[11px] font-bold text-apple-text-secondary uppercase tracking-[0.2em]">Tiến độ học tập</h4>
+                                                <h4 className="text-xs font-semibold text-apple-text-secondary uppercase tracking-wide">Tiến độ học tập</h4>
                                             </div>
 
                                             <div className="grid grid-cols-1 gap-6">
@@ -917,13 +917,13 @@ export default function AccountPage() {
                                                         <div className={`w-8 h-8 ${stat.bg} ${stat.color} rounded-xl flex items-center justify-center`}>
                                                             <stat.icon className="w-4 h-4" />
                                                         </div>
-                                                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-lg bg-apple-bg border border-apple-border text-apple-text-secondary">
-                                                            THỐNG KÊ
+                                                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-apple-bg border border-apple-border text-apple-text-secondary">
+                                                            Thống kê
                                                         </span>
                                                     </div>
                                                     <div>
                                                         <div className="text-xl font-bold text-apple-text leading-none mb-1">{stat.value}</div>
-                                                        <div className="text-[10px] font-medium text-apple-text-secondary">{stat.label}</div>
+                                                        <div className="text-xs font-medium text-apple-text-secondary">{stat.label}</div>
                                                     </div>
                                                 </div>
                                             ))}
@@ -931,19 +931,19 @@ export default function AccountPage() {
 
                                         {/* Summary Info Cards */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="p-6 bg-apple-bg/50 rounded-2xl border border-apple-border flex items-center justify-between group hover:bg-white transition-all">
+                                            <div className="p-6 bg-apple-bg/50 rounded-2xl border border-apple-border flex items-center justify-between group hover:bg-apple-card transition-all">
                                                 <div className="space-y-1">
-                                                    <p className="text-[10px] font-bold text-apple-text-secondary uppercase tracking-widest">Tiến độ tổng hợp</p>
-                                                    <p className="text-2xl font-black text-apple-text tracking-tight">{Math.round((stats.avgScore + stats.passRate) / 2)}%</p>
+                                                    <p className="text-xs font-medium text-apple-text-secondary uppercase tracking-wide">Tiến độ tổng hợp</p>
+                                                    <p className="text-2xl font-bold text-apple-text tracking-tight">{Math.round((stats.avgScore + stats.passRate) / 2)}%</p>
                                                 </div>
                                                 <div className="w-12 h-12 bg-apple-blue/5 rounded-2xl flex items-center justify-center text-apple-blue group-hover:scale-110 transition-transform">
                                                     <Target className="w-6 h-6" />
                                                 </div>
                                             </div>
-                                            <div className="p-6 bg-apple-bg/50 rounded-2xl border border-apple-border flex items-center justify-between group hover:bg-white transition-all">
+                                            <div className="p-6 bg-apple-bg/50 rounded-2xl border border-apple-border flex items-center justify-between group hover:bg-apple-card transition-all">
                                                 <div className="space-y-1">
-                                                    <p className="text-[10px] font-bold text-apple-text-secondary uppercase tracking-widest">Thứ hạng cộng đồng</p>
-                                                    <p className="text-2xl font-black text-apple-text tracking-tight">#{Math.floor(Math.random() * 100) + 1}</p>
+                                                    <p className="text-xs font-medium text-apple-text-secondary uppercase tracking-wide">Thứ hạng cộng đồng</p>
+                                                    <p className="text-2xl font-bold text-apple-text tracking-tight">#{Math.floor(Math.random() * 100) + 1}</p>
                                                 </div>
                                                 <div className="w-12 h-12 bg-orange-500/5 rounded-2xl flex items-center justify-center text-orange-500 group-hover:scale-110 transition-transform">
                                                     <Medal className="w-6 h-6" />
@@ -957,7 +957,7 @@ export default function AccountPage() {
                                                 <div className="w-8 h-8 bg-apple-blue/10 text-apple-blue rounded-xl flex items-center justify-center">
                                                     <BookOpen className="w-4 h-4" />
                                                 </div>
-                                                <h4 className="text-[11px] font-bold text-apple-text-secondary uppercase tracking-[0.2em]">Lịch sử Ôn tập chi tiết</h4>
+                                                <h4 className="text-xs font-semibold text-apple-text-secondary uppercase tracking-wide">Lịch sử Ôn tập chi tiết</h4>
                                             </div>
 
                                             {practiceSummary.length === 0 ? (
@@ -983,27 +983,27 @@ export default function AccountPage() {
                                                                     </div>
                                                                 </div>
                                                                 <div className="text-right shrink-0">
-                                                                    <div className="text-[15px] font-black text-apple-blue leading-none">{Math.round((item.learned / item.total) * 100)}%</div>
-                                                                    <div className="text-[9px] font-black text-apple-text-secondary opacity-30 uppercase tracking-tighter">Tiến độ</div>
+                                                                    <div className="text-[15px] font-bold text-apple-blue leading-none">{Math.round((item.learned / item.total) * 100)}%</div>
+                                                                    <div className="text-[10px] font-medium text-apple-text-secondary opacity-50 mt-1">Tiến độ</div>
                                                                 </div>
                                                             </div>
 
                                                             <div className="grid grid-cols-4 gap-3 mb-5">
-                                                                <div className="p-3 bg-apple-bg/30 rounded-xl border border-apple-border text-center group-hover:bg-white transition-colors">
-                                                                    <p className="text-[9px] font-black text-apple-text-secondary uppercase mb-1 opacity-50">Đã học</p>
-                                                                    <p className="text-[15px] font-black text-apple-text">{item.learned}</p>
+                                                                <div className="p-3 bg-apple-bg/30 rounded-xl border border-apple-border text-center group-hover:bg-apple-card transition-colors">
+                                                                    <p className="text-[10px] font-medium text-apple-text-secondary mb-1">Đã học</p>
+                                                                    <p className="text-sm font-bold text-apple-text">{item.learned}</p>
                                                                 </div>
-                                                                <div className="p-3 bg-apple-bg/30 rounded-xl border border-apple-border text-center group-hover:bg-white transition-colors">
-                                                                    <p className="text-[9px] font-black text-apple-text-secondary uppercase mb-1 opacity-50">Chưa học</p>
-                                                                    <p className="text-[15px] font-black text-apple-text">{item.notLearned}</p>
+                                                                <div className="p-3 bg-apple-bg/30 rounded-xl border border-apple-border text-center group-hover:bg-apple-card transition-colors">
+                                                                    <p className="text-[10px] font-medium text-apple-text-secondary mb-1">Chưa học</p>
+                                                                    <p className="text-sm font-bold text-apple-text">{item.notLearned}</p>
                                                                 </div>
                                                                 <div className="p-3 bg-emerald-50/30 rounded-xl border border-emerald-100 text-center group-hover:bg-emerald-50 transition-colors">
-                                                                    <p className="text-[9px] font-black text-emerald-600 uppercase mb-1 opacity-60">Số câu đúng</p>
-                                                                    <p className="text-[15px] font-black text-emerald-600">{item.correct}</p>
+                                                                    <p className="text-[10px] font-medium text-emerald-600 mb-1">Số câu đúng</p>
+                                                                    <p className="text-sm font-bold text-emerald-600">{item.correct}</p>
                                                                 </div>
                                                                 <div className="p-3 bg-red-50/30 rounded-xl border border-red-100 text-center group-hover:bg-red-50 transition-colors">
-                                                                    <p className="text-[9px] font-black text-red-600 uppercase mb-1 opacity-60">Số câu sai</p>
-                                                                    <p className="text-[15px] font-black text-red-600">{item.wrong}</p>
+                                                                    <p className="text-[10px] font-medium text-red-600 mb-1">Số câu sai</p>
+                                                                    <p className="text-sm font-bold text-red-600">{item.wrong}</p>
                                                                 </div>
                                                             </div>
 
@@ -1081,7 +1081,7 @@ export default function AccountPage() {
                                                             {isExpanded && (
                                                                 <div className="mt-4 pt-4 border-t border-apple-border grid grid-cols-1 md:grid-cols-3 gap-4 animate-in slide-in-from-top-2 duration-300">
                                                                     <div className="bg-apple-card p-4 rounded-xl border border-apple-border shadow-sm">
-                                                                        <p className="text-[9px] md:text-[10px] font-bold text-apple-text-secondary tracking-widest mb-2 uppercase">Cấu trúc điểm</p>
+                                                                        <p className="text-xs font-semibold text-apple-text-secondary mb-2">Cấu trúc điểm</p>
                                                                         <div className="flex flex-col gap-2">
                                                                             <div className="flex justify-between items-center text-xs">
                                                                                 <span className="text-apple-text-secondary font-medium">Pháp luật:</span>
@@ -1095,7 +1095,7 @@ export default function AccountPage() {
                                                                     </div>
 
                                                                     <div className="bg-apple-card p-4 rounded-xl border border-apple-border shadow-sm flex flex-col justify-center">
-                                                                        <p className="text-[9px] md:text-[10px] font-bold text-apple-text-secondary tracking-widest mb-1 uppercase">Thời gian</p>
+                                                                        <p className="text-xs font-semibold text-apple-text-secondary mb-1">Thời gian</p>
                                                                         <div className="flex items-center gap-2">
                                                                             <Clock className="w-4 h-4 text-orange-500" />
                                                                             <span className="text-base md:text-lg font-bold text-apple-text">
@@ -1107,7 +1107,7 @@ export default function AccountPage() {
                                                                     <div className="flex flex-col gap-2">
                                                                         <Link
                                                                             href={`/thi-thu/${encodeURIComponent(exam.chuyen_nganh)}?retake=${exam.id}&hang=${encodeURIComponent(exam.hang)}`}
-                                                                            className="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl py-2.5 font-bold text-[10px] md:text-xs uppercase transition-all shadow-sm active:scale-95"
+                                                                            className="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl py-2.5 font-semibold text-xs transition-all shadow-sm active:scale-95"
                                                                         >
                                                                             <RotateCcw className="w-3.5 h-3.5" />
                                                                             Thi lại
@@ -1118,7 +1118,7 @@ export default function AccountPage() {
                                                                                     if (!exam.is_public) handleShareResult(exam.id)
                                                                                 }}
                                                                                 disabled={sharingId === exam.id || exam.is_public}
-                                                                                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-[10px] md:text-xs transition-all active:scale-95 ${exam.is_public
+                                                                                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-xs transition-all active:scale-95 ${exam.is_public
                                                                                     ? 'bg-apple-blue/10 text-apple-blue border border-apple-blue/20'
                                                                                     : 'bg-apple-blue text-white hover:bg-blue-600 disabled:opacity-50 shadow-sm'
                                                                                     }`}
@@ -1145,8 +1145,8 @@ export default function AccountPage() {
                                                 <h2 className="text-lg md:text-xl font-bold text-apple-text mb-1">Cần củng cố</h2>
                                                 <p className="text-apple-text-secondary font-medium text-[10px] md:text-xs">Phân tích {wrongQuestions.length} câu hỏi bạn đã làm sai.</p>
                                             </div>
-                                            <div className="px-2.5 py-1 bg-red-500/10 text-red-500 rounded-lg font-bold text-[10px] tracking-tight border border-red-500/10">
-                                                {wrongQuestions.length} Câu
+                                            <div className="px-3 py-1 bg-red-500/10 text-red-500 rounded-lg font-semibold text-xs border border-red-500/10">
+                                                {wrongQuestions.length} câu
                                             </div>
                                         </div>
 
@@ -1165,7 +1165,7 @@ export default function AccountPage() {
                                                         <AlertTriangle className="w-32 h-32 text-white" />
                                                     </div>
                                                     <div className="relative z-10 flex items-center gap-4 md:gap-5">
-                                                        <div className="w-12 h-12 md:w-14 md:h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white shrink-0 border border-white/20">
+                                                        <div className="w-12 h-12 md:w-14 md:h-14 bg-apple-card/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white shrink-0 border border-white/20">
                                                             <Target className="w-7 h-7" />
                                                         </div>
                                                         <div className="space-y-0.5">
@@ -1175,7 +1175,7 @@ export default function AccountPage() {
                                                     </div>
                                                     <Link
                                                         href="/on-tap?mode=wrong"
-                                                        className="relative z-10 px-6 md:px-8 py-3 bg-white text-red-600 rounded-xl font-bold text-xs tracking-tight hover:bg-apple-bg transition-all active:scale-95"
+                                                        className="relative z-10 px-6 md:px-8 py-3 bg-apple-card text-red-600 rounded-xl font-bold text-xs tracking-tight hover:bg-apple-bg transition-all active:scale-95"
                                                     >
                                                         Học ngay
                                                     </Link>
@@ -1265,8 +1265,8 @@ export default function AccountPage() {
                                                         <item.icon className="w-4 h-4" />
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <div className="text-[10px] font-bold text-apple-text-secondary uppercase tracking-widest mb-0.5">{item.label}</div>
-                                                        <div className="text-xs font-bold text-apple-text truncate">{item.value}</div>
+                                                        <div className="text-[10px] font-semibold text-apple-text-secondary uppercase tracking-wide mb-0.5">{item.label}</div>
+                                                        <div className="text-xs font-semibold text-apple-text truncate">{item.value}</div>
                                                     </div>
                                                 </div>
                                             ))}
@@ -1284,6 +1284,7 @@ export default function AccountPage() {
                                             <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
                                                 {[
                                                     { id: 'display_name', label: 'Họ và tên đầy đủ', value: profile.display_name, icon: User, placeholder: 'Họ và tên...' },
+                                                    { id: 'gender', label: 'Giới tính', value: profile.gender, icon: UserCircle, type: 'select', options: ['Nam', 'Nữ', 'Khác'] },
                                                     { id: 'email', label: 'Email định danh', value: profile.email, icon: Mail, readOnly: true },
                                                     { id: 'phone', label: 'Số điện thoại', value: profile.phone, icon: Phone, placeholder: '09xx xxx xxx' },
                                                     { id: 'job_title', label: 'Nghề nghiệp / Chức danh', value: profile.job_title, icon: Briefcase, placeholder: 'Vị trí công tác...' },
@@ -1296,13 +1297,29 @@ export default function AccountPage() {
                                                         </label>
                                                         {isEditing && !field.readOnly ? (
                                                             <div className="relative group">
-                                                                <input
-                                                                    type="text"
-                                                                    value={(editForm as any)[field.id]}
-                                                                    onChange={(e) => setEditForm({ ...editForm, [field.id]: e.target.value })}
-                                                                    className="w-full px-4 py-2.5 bg-apple-bg border border-apple-border rounded-xl focus:ring-4 focus:ring-apple-blue/10 focus:border-apple-blue transition-all outline-none font-bold text-apple-text text-sm"
-                                                                    placeholder={field.placeholder}
-                                                                />
+                                                                {field.type === 'select' ? (
+                                                                    <div className="relative">
+                                                                        <select
+                                                                            value={(editForm as any)[field.id] || ''}
+                                                                            onChange={(e) => setEditForm({ ...editForm, [field.id]: e.target.value })}
+                                                                            className="w-full px-4 py-2.5 bg-apple-bg border border-apple-border rounded-xl focus:ring-4 focus:ring-apple-blue/10 focus:border-apple-blue transition-all outline-none font-bold text-apple-text text-sm appearance-none cursor-pointer"
+                                                                        >
+                                                                            <option value="">-- Chọn --</option>
+                                                                            {field.options?.map(opt => (
+                                                                                <option key={opt} value={opt}>{opt}</option>
+                                                                            ))}
+                                                                        </select>
+                                                                        <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-apple-text-secondary rotate-90 pointer-events-none" />
+                                                                    </div>
+                                                                ) : (
+                                                                    <input
+                                                                        type="text"
+                                                                        value={(editForm as any)[field.id]}
+                                                                        onChange={(e) => setEditForm({ ...editForm, [field.id]: e.target.value })}
+                                                                        className="w-full px-4 py-2.5 bg-apple-bg border border-apple-border rounded-xl focus:ring-4 focus:ring-apple-blue/10 focus:border-apple-blue transition-all outline-none font-bold text-apple-text text-sm"
+                                                                        placeholder={field.placeholder}
+                                                                    />
+                                                                )}
                                                             </div>
                                                         ) : (
                                                             <div className="px-4 py-2.5 bg-apple-bg border border-apple-border rounded-xl text-apple-text font-bold min-h-[42px] flex items-center text-sm shadow-sm">
@@ -1313,31 +1330,39 @@ export default function AccountPage() {
                                                 ))}
                                             </div>
 
-                                            {/* Achievements Sidebar - High-end Document Style */}
+                                            {/* Certificate Info Sidebar - Replaces Achievements */}
                                             <div className="space-y-6">
                                                 <div className="bg-apple-bg/30 p-6 rounded-2xl border border-apple-border shadow-sm">
                                                     <div className="flex items-center gap-3 mb-6">
                                                         <div className="w-8 h-8 bg-apple-blue text-white rounded-lg flex items-center justify-center shadow-lg shadow-apple-blue/20">
-                                                            <Award className="w-4 h-4" />
+                                                            <Briefcase className="w-4 h-4" />
                                                         </div>
-                                                        <h3 className="text-[10px] font-bold text-apple-text tracking-widest">Thành tựu</h3>
+                                                        <h3 className="text-xs font-semibold text-apple-text uppercase tracking-wide">Thông tin chứng chỉ</h3>
                                                     </div>
 
-                                                    <div className="space-y-3">
-                                                        {[
-                                                            { label: 'Bronze', color: 'text-orange-400', achieved: stats.totalExams >= 5 },
-                                                            { label: 'Silver', color: 'text-slate-400', achieved: stats.avgScore >= 60 },
-                                                            { label: 'Gold', color: 'text-yellow-400', achieved: stats.avgScore >= 80 },
-                                                            { label: 'Master', color: 'text-purple-400', achieved: badges.stars === 5 }
-                                                        ].map((medal, i) => (
-                                                            <div key={i} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${medal.achieved ? 'bg-apple-card border-apple-blue/30' : 'bg-transparent border-apple-border opacity-40'}`}>
-                                                                <div className="flex items-center gap-3">
-                                                                    <Medal className={`w-4 h-4 ${medal.color}`} />
-                                                                    <span className="text-[10px] font-black uppercase text-apple-text-secondary tracking-tight">{medal.label}</span>
-                                                                </div>
-                                                                {medal.achieved && <div className="w-1.5 h-1.5 bg-apple-blue rounded-full shadow-[0_0_8px_rgba(0,102,255,0.5)]" />}
+                                                    <div className="space-y-4">
+                                                        <div className="space-y-1.5">
+                                                            <p className="text-[10px] font-semibold text-apple-text-secondary uppercase tracking-wide">Hạng thi</p>
+                                                            <div className="p-3 bg-apple-card rounded-xl border border-apple-border text-sm font-bold text-apple-text shadow-sm flex items-center gap-2">
+                                                                <Target className="w-4 h-4 text-orange-500" />
+                                                                {preferences.rank || 'Chưa chọn'}
                                                             </div>
-                                                        ))}
+                                                        </div>
+
+                                                        <div className="space-y-1.5">
+                                                            <p className="text-[10px] font-semibold text-apple-text-secondary uppercase tracking-wide">Lĩnh vực hành nghề</p>
+                                                            <div className="p-3 bg-apple-card rounded-xl border border-apple-border text-sm font-bold text-apple-text shadow-sm flex items-start gap-2">
+                                                                <BookOpen className="w-4 h-4 text-apple-blue shrink-0 mt-0.5" />
+                                                                <span className="line-clamp-2">{preferences.specialty || 'Chưa chọn'}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <button
+                                                            onClick={() => setActiveTab('settings')}
+                                                            className="w-full py-2 mt-2 text-[10px] font-bold text-apple-blue hover:bg-apple-blue/5 rounded-lg transition-colors border border-transparent hover:border-apple-blue/10"
+                                                        >
+                                                            Thay đổi thông tin
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1349,8 +1374,8 @@ export default function AccountPage() {
                                     <div className="space-y-8 animate-in fade-in duration-500">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <h2 className="text-2xl font-bold text-apple-text tracking-tight mb-1">Cài đặt</h2>
-                                                <p className="text-apple-text-secondary font-medium text-[11px] uppercase tracking-[0.15em]">Cá nhân hóa ứng dụng của bạn</p>
+                                                <h2 className="text-2xl font-semibold text-apple-text tracking-tight mb-1">Cài đặt</h2>
+                                                <p className="text-apple-text-secondary font-medium text-sm">Cá nhân hóa ứng dụng của bạn</p>
                                             </div>
                                             <div className="w-10 h-10 bg-apple-card text-apple-text rounded-2xl flex items-center justify-center shadow-apple-shadow border border-apple-border">
                                                 <Settings className="w-5 h-5 opacity-80" />
@@ -1360,7 +1385,7 @@ export default function AccountPage() {
                                         <div className="grid gap-8">
                                             {/* Group: Study Configuration (macOS style grouped rows) */}
                                             <div className="space-y-3">
-                                                <h3 className="text-[11px] font-semibold text-apple-text-secondary uppercase tracking-[0.15em] px-1">Thiết lập Ôn tập</h3>
+                                                <h3 className="text-xs font-semibold text-apple-text-secondary uppercase tracking-wide px-1">Thiết lập Ôn tập</h3>
                                                 <div className="bg-apple-card rounded-2xl border border-apple-border overflow-hidden divide-y divide-apple-border shadow-apple-shadow">
                                                     {/* Rank Preference Row */}
                                                     <div className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1378,7 +1403,7 @@ export default function AccountPage() {
                                                                 <button
                                                                     key={rank}
                                                                     onClick={() => setPreferences({ ...preferences, rank })}
-                                                                    className={`px-4 py-2 rounded-xl font-bold text-[11px] uppercase tracking-wider transition-all border ${preferences.rank === rank
+                                                                    className={`px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wide transition-all border ${preferences.rank === rank
                                                                         ? 'bg-apple-text border-apple-text text-apple-bg shadow-md'
                                                                         : 'bg-apple-bg border-apple-border text-apple-text-secondary hover:border-apple-text-secondary active:scale-[0.98]'
                                                                         }`}
@@ -1440,7 +1465,7 @@ export default function AccountPage() {
 
                                             {/* Group: Personalization */}
                                             <div className="space-y-3">
-                                                <h3 className="text-[11px] font-semibold text-apple-text-secondary uppercase tracking-[0.15em] px-1">Cá nhân hóa</h3>
+                                                <h3 className="text-xs font-semibold text-apple-text-secondary uppercase tracking-wide px-1">Cá nhân hóa</h3>
                                                 <div className="bg-apple-card rounded-2xl border border-apple-border overflow-hidden divide-y divide-apple-border shadow-apple-shadow">
                                                     <div className="p-5 flex items-center justify-between">
                                                         <div className="flex items-center gap-4">
@@ -1456,7 +1481,7 @@ export default function AccountPage() {
                                                             onClick={() => setPreferences({ ...preferences, theme: preferences.theme === 'light' ? 'dark' : 'light' })}
                                                             className={`w-12 h-7 rounded-full relative transition-all duration-300 ${preferences.theme === 'light' ? 'bg-apple-border' : 'bg-apple-blue'}`}
                                                         >
-                                                            <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-all duration-300 ${preferences.theme === 'light' ? 'left-1' : 'left-6'}`} />
+                                                            <div className={`absolute top-1 w-5 h-5 bg-apple-card rounded-full shadow-md transition-all duration-300 ${preferences.theme === 'light' ? 'left-1' : 'left-6'}`} />
                                                         </button>
                                                     </div>
                                                 </div>
@@ -1468,7 +1493,7 @@ export default function AccountPage() {
                                             <button
                                                 onClick={handleSaveSettings}
                                                 disabled={isSavingProfile}
-                                                className="px-8 py-3.5 bg-apple-text text-apple-bg rounded-2xl font-bold text-[12px] uppercase tracking-wider shadow-xl hover:bg-apple-blue hover:text-white transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2.5"
+                                                className="px-8 py-3.5 bg-apple-text text-apple-bg rounded-2xl font-semibold text-xs uppercase tracking-wide shadow-xl hover:bg-apple-blue hover:text-white transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2.5"
                                             >
                                                 {isSavingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                                                 Lưu thiết lập

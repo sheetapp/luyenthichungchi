@@ -38,7 +38,7 @@ export function Footer() {
             <footer className={`hidden md:flex flex-row py-4 px-8 border-t border-white/5 bg-[#1d1d1f]/90 backdrop-blur-md text-[#a1a1a6] transition-all duration-300 items-center justify-between fixed bottom-0 right-0 z-40 ${collapsed ? 'left-20' : 'left-72'}`}>
                 {/* Copyright */}
                 <div className="text-[11px] font-medium flex-shrink-0">
-                    <span className="opacity-80">© {new Date().getFullYear()} Luyện thi CCHN.</span>
+                    <span className="opacity-80">© {new Date().getFullYear()} Luyện thi CCXD.</span>
                 </div>
 
                 {/* Navigation Links */}

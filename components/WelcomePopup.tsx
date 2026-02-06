@@ -19,7 +19,7 @@ export function WelcomePopup({ userName, onClose }: WelcomePopupProps) {
     const steps = [
         {
             icon: Sparkles,
-            title: 'Chào mừng đến với CCHN!',
+            title: 'Chào mừng đến với CCXD!',
             description: `Xin chào ${userName}! Chúng tôi rất vui khi bạn tham gia cùng chúng tôi.`,
             color: 'from-blue-500 to-indigo-500',
             bgColor: 'bg-blue-50',
@@ -102,10 +102,10 @@ export function WelcomePopup({ userName, onClose }: WelcomePopupProps) {
                             <div
                                 key={index}
                                 className={`h-2 rounded-full transition-all duration-300 ${index === currentStep
-                                        ? 'w-8 bg-blue-600'
-                                        : index < currentStep
-                                            ? 'w-2 bg-blue-400'
-                                            : 'w-2 bg-slate-200'
+                                    ? 'w-8 bg-blue-600'
+                                    : index < currentStep
+                                        ? 'w-2 bg-blue-400'
+                                        : 'w-2 bg-slate-200'
                                     }`}
                             />
                         ))}

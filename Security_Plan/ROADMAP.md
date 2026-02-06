@@ -25,5 +25,5 @@ This folder contains the technical plan and documentation for securing the **Luy
 ---
 
 ## 📄 Documents
-1. [Security Audit](file:///e:/2026/Webapp/15.%20S%C3%A1t%20hach%20CCHN/luyenthichungchixd/Security_Plan/AUDIT.md) - Analysis of risks and vulnerabilities.
-2. [Hardening SQL](file:///e:/2026/Webapp/15.%20S%C3%A1t%20hach%20CCHN/luyenthichungchixd/Security_Plan/hardening.sql) (Drafting) - Postgres implementation details.
+1. [Security Audit](file:///e:/2026/Webapp/15.%20S%C3%A1t%20hach%20CCXD/luyenthichungchixd/Security_Plan/AUDIT.md) - Analysis of risks and vulnerabilities.
+2. [Hardening SQL](file:///e:/2026/Webapp/15.%20S%C3%A1t%20hach%20CCXD/luyenthichungchixd/Security_Plan/hardening.sql) (Drafting) - Postgres implementation details.

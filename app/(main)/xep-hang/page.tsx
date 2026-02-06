@@ -21,6 +21,8 @@ type RankItem = {
     total_exams: number
     rank: number
     isCurrentUser?: boolean
+    preferred_rank?: string
+    preferred_specialty?: string
 }
 
 export default function XepHangPage() {
@@ -62,7 +64,9 @@ export default function XepHangPage() {
                 avg_score: p.stats?.avg_score || 0,
                 total_exams: p.stats?.total_exams || 0,
                 rank: index + 1,
-                isCurrentUser: p.id === currentUserId
+                isCurrentUser: p.id === currentUserId,
+                preferred_rank: p.preferences?.rank,
+                preferred_specialty: p.preferences?.specialty
             }))
 
             setRankings(formattedRankings)
@@ -99,9 +103,6 @@ export default function XepHangPage() {
                     </div>
 
                     <div className="flex items-center gap-3 justify-between md:justify-end">
-                        <div className="md:hidden">
-                            <ThemeToggle />
-                        </div>
                         {/* Filter Tabs */}
                         <div className="flex flex-1 md:flex-none bg-apple-card p-1 rounded-xl border border-apple-border shadow-sm overflow-x-auto no-scrollbar">
                             {[
@@ -120,9 +121,6 @@ export default function XepHangPage() {
                                     {tab.label}
                                 </button>
                             ))}
-                        </div>
-                        <div className="hidden md:block">
-                            <ThemeToggle />
                         </div>
                     </div>
                 </div>
@@ -148,13 +146,13 @@ export default function XepHangPage() {
                                     <div className="absolute -top-1.5 -left-1.5 w-6 h-6 bg-yellow-400 text-white rounded-lg flex items-center justify-center font-bold text-[10px] shadow-md ring-2 ring-apple-card">1</div>
                                 </div>
                                 <div className="flex-1 min-w-0 md:w-full">
-                                    <div className="text-[9px] md:text-[10px] font-bold text-apple-blue mb-0.5 md:mb-1 uppercase tracking-wider">Quán quân</div>
-                                    <h3 className="text-[15px] md:text-base font-bold text-apple-text truncate tracking-tight">{rankings[0]?.display_name}</h3>
+                                    <div className="text-[10px] md:text-xs font-semibold text-apple-blue mb-0.5 md:mb-1">Quán quân</div>
+                                    <h3 className="text-base md:text-lg font-bold text-apple-text truncate">{rankings[0]?.display_name}</h3>
                                     <div className="flex items-center md:justify-center gap-2 md:gap-3 mt-1.5 md:mt-2">
-                                        <div className="bg-apple-blue/5 px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold text-apple-blue border border-apple-blue/10">
+                                        <div className="bg-apple-blue/5 px-2.5 py-1 rounded-lg text-[10px] md:text-xs font-medium text-apple-blue border border-apple-blue/10">
                                             {rankings[0]?.avg_score}% Đạt
                                         </div>
-                                        <div className="text-[9px] md:text-[10px] text-apple-text-secondary font-bold">
+                                        <div className="text-[10px] md:text-xs text-apple-text-secondary font-medium">
                                             {rankings[0]?.total_exams} bài thi
                                         </div>
                                     </div>
@@ -178,13 +176,13 @@ export default function XepHangPage() {
                                     <div className="absolute -top-1.5 -left-1.5 w-6 h-6 bg-slate-400 text-white rounded-lg flex items-center justify-center font-bold text-[10px] shadow-md ring-2 ring-apple-card">2</div>
                                 </div>
                                 <div className="flex-1 min-w-0 md:w-full">
-                                    <div className="text-[9px] md:text-[10px] font-bold text-apple-text-secondary mb-0.5 md:mb-1 uppercase tracking-wider">Á quân I</div>
-                                    <h3 className="text-[15px] md:text-base font-bold text-apple-text truncate tracking-tight">{rankings[1]?.display_name}</h3>
+                                    <div className="text-[10px] md:text-xs font-semibold text-apple-text-secondary mb-0.5 md:mb-1">Á quân I</div>
+                                    <h3 className="text-base md:text-lg font-bold text-apple-text truncate">{rankings[1]?.display_name}</h3>
                                     <div className="flex items-center md:justify-center gap-2 md:gap-3 mt-1.5 md:mt-2">
-                                        <div className="bg-apple-bg px-2 py-0.5 rounded text-[9px] md:text-[10px] font-bold text-apple-text-secondary border border-apple-border">
+                                        <div className="bg-apple-bg px-2.5 py-1 rounded-lg text-[10px] md:text-xs font-medium text-apple-text-secondary border border-apple-border">
                                             {rankings[1]?.avg_score}% Đạt
                                         </div>
-                                        <div className="text-[9px] md:text-[10px] text-apple-text-secondary font-bold">
+                                        <div className="text-[10px] md:text-xs text-apple-text-secondary font-medium">
                                             {rankings[1]?.total_exams} bài thi
                                         </div>
                                     </div>
@@ -272,13 +270,17 @@ export default function XepHangPage() {
                                                         )}
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <div className="text-xs md:text-sm font-bold text-apple-text flex items-center gap-2 group-hover:text-apple-blue transition-colors truncate tracking-tight">
-                                                            {rk.display_name}
-                                                            {rk.isCurrentUser && (
-                                                                <span className="hidden sm:block px-1.5 py-0.5 bg-apple-blue text-[8px] text-white rounded font-bold tracking-wider">Tôi</span>
-                                                            )}
+                                                        <div className="min-w-0">
+                                                            <div className="text-sm font-semibold text-apple-text flex items-center gap-2 group-hover:text-apple-blue transition-colors truncate">
+                                                                {rk.display_name}
+                                                                {rk.isCurrentUser && (
+                                                                    <span className="hidden sm:block px-2 py-0.5 bg-apple-blue text-[10px] text-white rounded-md font-medium">Tôi</span>
+                                                                )}
+                                                            </div>
+                                                            <div className="text-xs text-apple-text-secondary mt-0.5 font-medium truncate max-w-[120px] md:max-w-[180px]">
+                                                                {rk.preferred_rank || 'Hạng III'} • {rk.preferred_specialty || 'Chưa chọn'}
+                                                            </div>
                                                         </div>
-                                                        <div className="text-[9px] md:text-[10px] font-bold text-apple-text-secondary mt-0.5 opacity-60">CCHN Xây dựng</div>
                                                     </div>
                                                 </div>
                                             </td>

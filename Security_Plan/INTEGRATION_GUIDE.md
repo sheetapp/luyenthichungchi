@@ -1,6 +1,6 @@
 # Hướng dẫn tích hợp Bảo mật & Chống Spam (Step-by-Step)
 
-Tài liệu này hướng dẫn chi tiết cách kích hoạt hệ thống bảo mật đa tầng cho dự án "Luyện thi CCHN XD".
+Tài liệu này hướng dẫn chi tiết cách kích hoạt hệ thống bảo mật đa tầng cho dự án "Luyện thi CCXD XD".
 
 ## 1. Đăng ký & Lấy khóa Cloudflare Turnstile
 
@@ -14,7 +14,7 @@ Tài liệu này hướng dẫn chi tiết cách kích hoạt hệ thống bảo
 1. Ở thanh menu bên trái, tìm và chọn mục **Turnstile**.
 2. Nhấn nút **Add Site**.
 3. Cấu hình các thông số sau:
-   - **Site Name**: `Luyện thi CCHN XD` (hoặc tên bất kỳ bạn muốn).
+   - **Site Name**: `Luyện thi CCXD XD` (hoặc tên bất kỳ bạn muốn).
    - **Domain**: Thêm `localhost` (để test máy ảo) và các domain thực tế của bạn (ví dụ: `luyenthindexd.com`, `ten-du-an.vercel.app`).
    - **Widget Mode**: Chọn **Managed** (Đây là chế độ thông minh nhất, chỉ hiện thử thách nếu phát hiện bot).
 4. Nhấn **Create**.

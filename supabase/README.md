@@ -9,7 +9,7 @@
 1. Go to https://supabase.com/dashboard
 2. Click "New Project"
 3. Fill in project details:
-   - **Name**: Luyện thi CCHN XD
+   - **Name**: Luyện thi CCXD XD
    - **Database Password**: (Save this password!)
    - **Region**: Choose closest to Vietnam (Singapore recommended)
 4. Wait for project to be provisioned

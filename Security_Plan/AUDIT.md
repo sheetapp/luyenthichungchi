@@ -12,4 +12,4 @@
 3.  **Insecure Postgres Functions**: Missing `search_path` on security definer functions.
 
 ## 🛡 Mitigation Strategy
-Refer to [ROADMAP.md](file:///e:/2026/Webapp/15.%20S%C3%A1t%20hach%20CCHN/luyenthichungchixd/Security_Plan/ROADMAP.md) for step-by-step resolution.
+Refer to [ROADMAP.md](file:///e:/2026/Webapp/15.%20S%C3%A1t%20hach%20CCXD/luyenthichungchixd/Security_Plan/ROADMAP.md) for step-by-step resolution.
